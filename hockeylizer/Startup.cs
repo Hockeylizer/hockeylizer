@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using hockeylizer.Data;
 using hockeylizer.Models;
 using hockeylizer.Services;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace hockeylizer
 {
@@ -46,6 +47,13 @@ namespace hockeylizer
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            services.Configure<FormOptions>(x =>
+            {
+                x.ValueLengthLimit = int.MaxValue;
+                x.MultipartBodyLengthLimit = int.MaxValue;
+                x.MultipartHeadersLengthLimit = int.MaxValue;
+            });
 
             services.AddMvc();
 
