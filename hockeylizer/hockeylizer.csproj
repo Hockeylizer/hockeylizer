@@ -11,6 +11,15 @@
   <PropertyGroup>
     <UserSecretsId>aspnet-hockeylizer-b8f5a940-87b9-4acf-a4a3-cab25b6fd203</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="bin\Debug\netcoreapp1.1\hockeylizer.deps.json" />
+    <Content Include="bin\Debug\netcoreapp1.1\hockeylizer.runtimeconfig.dev.json" />
+    <Content Include="bin\Debug\netcoreapp1.1\hockeylizer.runtimeconfig.json" />
+    <Content Include="bin\Release\netcoreapp1.1\hockeylizer.deps.json" />
+    <Content Include="bin\Release\netcoreapp1.1\hockeylizer.runtimeconfig.dev.json" />
+    <Content Include="bin\Release\netcoreapp1.1\hockeylizer.runtimeconfig.json" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EmguCV" Version="3.1.0.1" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0" />
@@ -34,6 +43,20 @@
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.0.0" />
     <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.0" />
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\Debug\netcoreapp1.1\hockeylizer.dll" />
+    <None Include="bin\Debug\netcoreapp1.1\hockeylizer.pdb" />
+    <None Include="bin\Debug\netcoreapp1.1\x64\cvextern.dll" />
+    <None Include="bin\Debug\netcoreapp1.1\x64\opencv_ffmpeg310_64.dll" />
+    <None Include="bin\Debug\netcoreapp1.1\x86\cvextern.dll" />
+    <None Include="bin\Debug\netcoreapp1.1\x86\opencv_ffmpeg310.dll" />
+    <None Include="bin\Release\netcoreapp1.1\hockeylizer.dll" />
+    <None Include="bin\Release\netcoreapp1.1\hockeylizer.pdb" />
+    <None Include="bin\Release\netcoreapp1.1\x64\cvextern.dll" />
+    <None Include="bin\Release\netcoreapp1.1\x64\opencv_ffmpeg310_64.dll" />
+    <None Include="bin\Release\netcoreapp1.1\x86\cvextern.dll" />
+    <None Include="bin\Release\netcoreapp1.1\x86\opencv_ffmpeg310.dll" />
   </ItemGroup>
 
 </Project>
