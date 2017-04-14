@@ -31,8 +31,13 @@ namespace hockeylizer.Controllers
 
             if (token == appkey)
             {
-                var player = new Player(name);
+                if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+                {
+                    response = new AddPlayerResult("Spelaren " + name + " kunde inte läggas till då namnet saknas.", false);
+                    return Json(response);
+                }
 
+                var player = new Player(name);
                 try
                 {
                     db.Players.Add(player);
@@ -78,11 +83,17 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> UploadVideo(int playerId, IFormFile video, string token)
+        public async Task<JsonResult> UploadVideo(int? playerId, IFormFile video, string token)
         {
             VideoResult vr;
             if (token == appkey)
             {
+                if (playerId == null)
+                {
+                    vr = new VideoResult("Spelaren kunde inte hittas då spelarens id inte var med i requesten.", false);
+                    return Json(vr);
+                }
+
                 var pl = db.Players.Find(playerId);
 
                 if (pl == null)
@@ -91,6 +102,12 @@ namespace hockeylizer.Controllers
                 }
                 else
                 {
+                    if (video == null || video.Length == 0)
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då videon saknas!", false);
+                        return Json(vr);
+                    }
+
                     // Logik för att ladda upp video
                     var v = await ImageHandler.UploadVideo(video, db, pl, "video");
 
