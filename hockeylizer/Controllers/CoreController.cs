@@ -160,6 +160,53 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<JsonResult> GetAllVideos(string token)
+        {
+            GetVideosResult response;
+            if (token == appkey)
+            {
+                response = new GetVideosResult(true, "Alla videor hämtades", new List<VideoVmSmall>());
+
+                foreach (PlayerVideo v in db.Videos.ToList())
+                {
+                    var videoPath = await ImageHandler.GetShareableVideoUrl(v);
+                    var videoInfo = new VideoVmSmall { VideoId = v.VideoId, VideoPath = videoPath };
+
+                    response.Videos.Add(videoInfo);
+                }
+            }
+            else
+            {
+                response = new GetVideosResult(false, "Token var inkorrekt", new List<VideoVmSmall>());
+            }
+
+            return Json(response);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public JsonResult GetFramesFromVideo(int videoId, string token)
+        {
+            GetFramesResult response;
+            if (token == appkey)
+            {
+                response = new GetFramesResult(true, "Alla frames hämtades", new List<string>());
+
+                for (var img = 0; img <= 15; img++)
+                {
+                    response.Images.Add(HttpContext.Request.Host + HttpContext.Request.Path);
+                }
+            }
+            else
+            {
+                response = new GetFramesResult(false, "Token var inkorrekt", new List<string>());
+            }
+
+            return Json(response);
+        }
+
         [HttpPost]
         [AllowAnonymous]
         public ActionResult AnalyzeVideo(int videoId, string token)

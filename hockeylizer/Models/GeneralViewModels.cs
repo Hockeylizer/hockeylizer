@@ -65,6 +65,54 @@ namespace hockeylizer.Models
         public List<PlayerVmSmall> Players { get; set; }
     }
 
+    public class VideoVmSmall
+    {
+        public int VideoId { get; set; }
+        public string VideoPath { get; set; }
+    }
+
+    public class GetVideosResult
+    {
+        public GetVideosResult()
+        {
+            this.Completed = false;
+            this.Description = "Ett fel uppstod";
+            this.Videos = new List<VideoVmSmall>();
+        }
+
+        public GetVideosResult(bool comp, string desc, List<VideoVmSmall> vs)
+        {
+            this.Completed = comp;
+            this.Description = desc;
+            this.Videos = vs;
+        }
+
+        public bool Completed { get; set; }
+        public string Description { get; set; }
+        public List<VideoVmSmall> Videos { get; set; }
+    }
+
+    public class GetFramesResult
+    {
+        public GetFramesResult()
+        {
+            this.Completed = false;
+            this.Description = "Ett fel uppstod";
+            this.Images = new List<string>();
+        }
+
+        public GetFramesResult(bool comp, string desc, List<string> imgs)
+        {
+            this.Completed = comp;
+            this.Description = desc;
+            this.Images = imgs;
+        }
+
+        public bool Completed { get; set; }
+        public string Description { get; set; }
+        public List<string> Images { get; set; }
+    }
+
     public class VideoResult
     {
         public VideoResult()
