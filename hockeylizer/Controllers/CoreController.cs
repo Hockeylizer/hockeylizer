@@ -187,16 +187,25 @@ namespace hockeylizer.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public JsonResult GetFramesFromVideo(int videoId, string token)
+        public JsonResult GetFramesFromVideo(int? videoId, string token)
         {
             GetFramesResult response;
             if (token == appkey)
             {
-                response = new GetFramesResult(true, "Alla frames hämtades", new List<string>());
+                var video = db.Videos.Find(videoId);
 
-                for (var img = 0; img <= 15; img++)
+                if (video != null)
                 {
-                    response.Images.Add(HttpContext.Request.Host + "images/hp.png");
+                    response = new GetFramesResult(true, "Alla frames hämtades", new List<string>());
+
+                    for (var img = 0; img <= 15; img++)
+                    {
+                        response.Images.Add(HttpContext.Request.Host + "images/hp.png");
+                    }
+                }
+                else
+                {
+                    response = new GetFramesResult(false, "Videon finns inte", new List<string>());
                 }
             }
             else
