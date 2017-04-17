@@ -196,7 +196,7 @@ namespace hockeylizer.Controllers
 
                 for (var img = 0; img <= 15; img++)
                 {
-                    response.Images.Add(HttpContext.Request.Host + HttpContext.Request.Path);
+                    response.Images.Add(HttpContext.Request.Host + "images/hp.png");
                 }
             }
             else
