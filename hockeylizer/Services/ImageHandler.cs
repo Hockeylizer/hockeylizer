@@ -63,9 +63,9 @@ namespace hockeylizer.Services
             return false;
         }
 
-        public static async Task<string> GetShareableVideoUrl(PlayerVideo v)
+        public static async Task<string> GetShareableVideoUrl(string vp)
         {
-            return v == null ? "Kunde inte hitta en url" : await utility.getBlobSas(v.VideoPath);
+            return await utility.GetBlobSas(vp);
         }
     }
 }

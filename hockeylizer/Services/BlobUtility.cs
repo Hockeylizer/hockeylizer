@@ -52,7 +52,7 @@ namespace hockeylizer.Services
             blockBlob.DeleteAsync();
         }
 
-        public async Task<string> getBlobSas(string url)
+        public async Task<string> GetBlobSas(string url)
         {
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             var blob = await blobClient.GetBlobReferenceFromServerAsync(new Uri(url));
