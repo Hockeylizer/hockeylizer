@@ -171,7 +171,18 @@ namespace hockeylizer.Controllers
 
                 foreach (PlayerVideo v in db.Videos.ToList())
                 {
-                    var videoPath = await ImageHandler.GetShareableVideoUrl(v.VideoPath);
+                    string videoPath;
+
+                    try
+                    {
+                        videoPath = await ImageHandler.GetShareableVideoUrl(v.VideoPath);
+                    }
+                    catch (Exception e)
+                    {
+                        response.Description += ". Vissa felmeddelanden uppstod dock: " + e.Message;
+                        videoPath = "";
+                    }
+
                     var videoInfo = new VideoVmSmall { VideoId = v.VideoId, VideoPath = videoPath };
 
                     response.Videos.Add(videoInfo);
