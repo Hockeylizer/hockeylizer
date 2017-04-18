@@ -177,9 +177,8 @@ namespace hockeylizer.Controllers
                     {
                         videoPath = await ImageHandler.GetShareableVideoUrl(v.VideoPath);
                     }
-                    catch (Exception e)
+                    catch
                     {
-                        response.Description += ". Vissa felmeddelanden uppstod dock: " + e.Message;
                         videoPath = "";
                     }
 
