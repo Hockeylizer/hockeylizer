@@ -208,7 +208,7 @@ namespace hockeylizer.Controllers
                 {
                     response = new GetFramesResult(true, "Alla frames hämtades", new List<string>());
 
-                    for (var img = 0; img <= 15; img++)
+                    for (var img = 0; img <= 1500; img++)
                     {
                         response.Images.Add("https://cdn.pixabay.com/photo/2016/06/24/16/49/hockey-puck-1477440_960_720.png");
                     }
