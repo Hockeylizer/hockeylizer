@@ -120,7 +120,7 @@ namespace hockeylizer.Controllers
                         return Json(vr);
                     }
 
-                    if (rounds == null)
+                    if (numberOfTargets == null)
                     {
                         vr = new VideoResult("Videoklippet kunde inte laddas upp då antal skott saknas!", false);
                         return Json(vr);
