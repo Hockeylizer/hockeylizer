@@ -11,7 +11,7 @@ namespace hockeylizer.Services
     {
         private static readonly BlobUtility utility = new BlobUtility("hockeydata", "QmoOoi3h8htf3+Luqz7GhVe9WZavcDvn/DHqEzc25f9/Ii4zKeqTwuP+x9M9UbZWSVTGKnNW2rF89X/D6yza+A==");
 
-        public async static Task<bool> UploadVideo(IFormFile file, ApplicationDbContext db, Player p, string fileStart)
+        public async static Task<string> UploadVideo(IFormFile file, ApplicationDbContext db, Player p, string fileStart)
         {
             var fileName = fileStart + "-0";
             var filetype = Path.GetFileName(file.FileName ?? "empty.mov").Split('.').ToList().Last();
@@ -32,15 +32,10 @@ namespace hockeylizer.Services
             var result = await utility.UploadBlob(fileName, containerName, imageStream);
             if (result != null)
             {
-                var v = new PlayerVideo(result.Uri.ToString(), p.PlayerId);
-
-                db.Videos.Add(v);
-                db.SaveChanges();
-
-                return true;
+                return result.Uri.ToString();
             }
 
-            return false;
+            return string.Empty;
         }
 
         public static bool DeleteImage(int videoId, ApplicationDbContext db)

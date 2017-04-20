@@ -20,6 +20,12 @@ namespace hockeylizer.Models
         public string Desctiption { get; set; }
     }
 
+    public class ShotTimestampVm
+    {
+        public long Start { get; set; }
+        public long End { get; set; }
+    }
+
     public class AddPlayerResult
     {
         public AddPlayerResult()
@@ -69,6 +75,14 @@ namespace hockeylizer.Models
     {
         public int VideoId { get; set; }
         public string VideoPath { get; set; }
+
+        public int? Interval { get; set; }
+        public int? Rounds { get; set; }
+        public int? Shots { get; set; }
+        public int? NumberOfTargets { get; set; }
+
+        public List<ShotTimestamp> Timestamps { get; set; }
+        public List<Target> Targets { get; set; }
     }
 
     public class GetVideosResult

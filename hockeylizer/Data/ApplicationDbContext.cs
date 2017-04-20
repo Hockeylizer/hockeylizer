@@ -19,5 +19,9 @@ namespace hockeylizer.Data
         public DbSet<Player> Players { get; set; }
 
         public DbSet<PlayerVideo> Videos { get; set; }
+
+        public DbSet<ShotTimestamp> Timestamps { get; set; }
+
+        public DbSet<Target> Targets { get; set; }
     }
 }

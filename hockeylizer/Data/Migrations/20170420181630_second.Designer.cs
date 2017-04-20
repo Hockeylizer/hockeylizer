@@ -8,9 +8,10 @@ using hockeylizer.Data;
 namespace hockeylizer.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170420181630_second")]
+    partial class second
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
@@ -82,10 +83,6 @@ namespace hockeylizer.Data.Migrations
                 {
                     b.Property<int>("VideoId")
                         .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Interval");
-
-                    b.Property<int>("NumberOfTargets");
 
                     b.Property<int>("PlayerId");
 

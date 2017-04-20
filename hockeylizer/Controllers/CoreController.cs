@@ -83,7 +83,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> UploadVideo(int? playerId, IFormFile video, string token)
+        public async Task<JsonResult> UploadVideo(int? playerId, IFormFile video, int? interval, int? rounds, int? shots, int? numberOfTargets, List<ShotTimestampVm> timestamps, List<int> targetOrder, string token)
         {
             VideoResult vr;
             if (token == appkey)
@@ -108,15 +108,72 @@ namespace hockeylizer.Controllers
                         return Json(vr);
                     }
 
+                    if (interval == null)
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då intervall saknas!", false);
+                        return Json(vr);
+                    }
+
+                    if (rounds == null)
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då rundor saknas!", false);
+                        return Json(vr);
+                    }
+
+                    if (rounds == null)
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då antal skott saknas!", false);
+                        return Json(vr);
+                    }
+
+                    if (!timestamps.Any())
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
+                        return Json(vr);
+                    }
+
+                    if (!targetOrder.Any())
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då skottordning saknas!", false);
+                        return Json(vr);
+                    }
+
                     // Logik för att ladda upp video
                     var v = await ImageHandler.UploadVideo(video, db, pl, "video");
 
-                    if (!v)
+                    if (string.IsNullOrEmpty(v))
                     {
                         vr = new VideoResult("Videoklippet kunde inte laddas upp!", false);
                     }
                     else
                     {
+                        var savedVideo = new PlayerVideo(v, (int)playerId, (int)interval, (int)rounds, (int)shots, (int)numberOfTargets);
+                        db.Videos.Add(savedVideo);
+
+                        foreach (var ts in timestamps)
+                        {
+                            var timestamp = new ShotTimestamp(ts.Start, ts.End)
+                            {
+                                Video = savedVideo
+                            };
+
+                            savedVideo.Timestamps.Add(timestamp);
+                        }
+
+                        var index = 1;
+                        foreach (var t in targetOrder)
+                        {
+                            var target = new Target(t, index)
+                            {
+                                RelatedVideo = savedVideo
+                            };
+                            index++;
+
+                            savedVideo.Targets.Add(target);
+                        }
+                        
+                        db.SaveChanges();
+
                         vr = new VideoResult("Videoklippet laddades upp!", true);
                     }
                 }
@@ -182,7 +239,17 @@ namespace hockeylizer.Controllers
                         videoPath = "";
                     }
 
-                    var videoInfo = new VideoVmSmall { VideoId = v.VideoId, VideoPath = videoPath };
+                    var videoInfo = new VideoVmSmall
+                    {
+                        VideoId = v.VideoId,
+                        VideoPath = videoPath,
+                        Interval = v.Interval,
+                        Rounds = v.Rounds,
+                        Shots = v.Shots,
+                        NumberOfTargets = v.NumberOfTargets,
+                        Timestamps = v.Timestamps.ToList(),
+                        Targets = v.Targets.ToList()
+                    };
 
                     response.Videos.Add(videoInfo);
                 }
