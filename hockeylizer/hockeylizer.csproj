@@ -44,14 +44,19 @@
   <ItemGroup>
     <None Include="bin\Debug\netcoreapp1.1\hockeylizer.dll" />
     <None Include="bin\Debug\netcoreapp1.1\hockeylizer.pdb" />
+    <None Include="bin\Debug\netcoreapp1.1\x64\CppConversion.dll" />
+    <None Include="bin\Debug\netcoreapp1.1\x64\CppConversion.dll.ilk" />
     <None Include="bin\Debug\netcoreapp1.1\x64\cvextern.dll" />
     <None Include="bin\Debug\netcoreapp1.1\x64\opencv_ffmpeg310_64.dll" />
+    <None Include="bin\Debug\netcoreapp1.1\x64\opencv_world320d.dll" />
     <None Include="bin\Debug\netcoreapp1.1\x86\cvextern.dll" />
     <None Include="bin\Debug\netcoreapp1.1\x86\opencv_ffmpeg310.dll" />
     <None Include="bin\Release\netcoreapp1.1\hockeylizer.dll" />
     <None Include="bin\Release\netcoreapp1.1\hockeylizer.pdb" />
+    <None Include="bin\Release\netcoreapp1.1\x64\CppConversion.dll" />
     <None Include="bin\Release\netcoreapp1.1\x64\cvextern.dll" />
     <None Include="bin\Release\netcoreapp1.1\x64\opencv_ffmpeg310_64.dll" />
+    <None Include="bin\Release\netcoreapp1.1\x64\opencv_world320.dll" />
     <None Include="bin\Release\netcoreapp1.1\x86\cvextern.dll" />
     <None Include="bin\Release\netcoreapp1.1\x86\opencv_ffmpeg310.dll" />
   </ItemGroup>
