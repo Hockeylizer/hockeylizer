@@ -83,7 +83,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> UploadVideo(int? playerId, IFormFile video, int? interval, int? rounds, int? shots, int? numberOfTargets, List<ShotTimestampVm> timestamps, List<int> targetOrder, string token)
+        public async Task<JsonResult> UploadVideo(int? playerId, IFormFile video, int? interval, int? rounds, int? shots, int? numberOfTargets, List<ShotTimestampVm> timestamps, List<int> targetOrder, List<TargetCoordsVm> targetCoords, string token)
         {
             VideoResult vr;
             if (token == appkey)
@@ -138,6 +138,12 @@ namespace hockeylizer.Controllers
                         return Json(vr);
                     }
 
+                    //if (!targetCoords.Any())
+                    //{
+                    //    vr = new VideoResult("Videoklippet kunde inte laddas upp då koordinater för skotten saknas!", false);
+                    //    return Json(vr);
+                    //}
+
                     // Logik för att ladda upp video
                     var v = await ImageHandler.UploadVideo(video, db, pl, "video");
 
@@ -171,7 +177,17 @@ namespace hockeylizer.Controllers
 
                             savedVideo.Targets.Add(target);
                         }
-                        
+
+                        foreach (var tc in targetCoords)
+                        {
+                            var targetCoordinate = new TargetCoord(tc.xCoord, tc.yCoord)
+                            {
+                                Video = savedVideo
+                            };
+
+                            savedVideo.TargetCoords.Add(targetCoordinate);
+                        }
+
                         db.SaveChanges();
 
                         vr = new VideoResult("Videoklippet laddades upp!", true);

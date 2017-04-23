@@ -23,5 +23,7 @@ namespace hockeylizer.Data
         public DbSet<ShotTimestamp> Timestamps { get; set; }
 
         public DbSet<Target> Targets { get; set; }
+
+        public DbSet<TargetCoord> TargetCoordinates { get; set; }
     }
 }

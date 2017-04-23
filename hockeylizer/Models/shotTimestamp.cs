@@ -7,20 +7,20 @@ namespace hockeylizer.Models
     {
         public ShotTimestamp()
         {
-            this.Start = 0;
-            this.End = 2000;
+            this.start = 0;
+            this.end = 2000;
         }
 
         public ShotTimestamp(long start, long end)
         {
-            this.Start = start;
-            this.End = end;
+            this.start = start;
+            this.end = end;
         }
 
         [Key]
         public int TimestampId { get; set; }
-        public long Start { get; set; }
-        public long End { get; set; }
+        public long start { get; set; }
+        public long end { get; set; }
 
         [ForeignKey("Video")]
         public int VideoId { get; set; }

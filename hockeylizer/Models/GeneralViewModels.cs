@@ -144,4 +144,10 @@ namespace hockeylizer.Models
         public bool Completed { get; set; }
         public string Description { get; set; }
     }
+
+    public class TargetCoordsVm
+    {
+        public int? xCoord { get; set; }
+        public int? yCoord { get; set; }
+    }
 }
