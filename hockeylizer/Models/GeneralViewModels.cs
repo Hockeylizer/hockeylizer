@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 
 namespace hockeylizer.Models
 {
@@ -22,7 +23,15 @@ namespace hockeylizer.Models
 
     public class UploadVideoVm
     {
+        public int? playerId { get; set; }
+        public IFormFile video { get; set; }
+        public int? interval { get; set; }
+        public int? rounds { get; set; }
+        public int? shots { get; set; }
+        public int? numberOfTargets { get; set; }
         public List<ShotTimestampVm> timestamps { get; set; }
+        public List<int> targetOrder { get; set; }
+        public List<TargetCoordsVm> targetCoords { get; set; }
         public string token { get; set; }
     }
 

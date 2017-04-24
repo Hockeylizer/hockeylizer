@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using hockeylizer.Services;
 using hockeylizer.Models;
 using hockeylizer.Data;
+using Newtonsoft.Json;
 using System.Linq;
 using System;
 
@@ -204,7 +205,139 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult TestUpload(List<string> timestamps, string token)
+        public async Task<JsonResult> UploadVideoFromJson(string json)
+        {
+            VideoResult vr;
+            UploadVideoVm vm;
+            try
+            {
+                vm = JsonConvert.DeserializeObject<UploadVideoVm>(json);
+            }
+            catch (Exception ex)
+            {
+                vr = new VideoResult("Videoklippet kunde inte laddas upp dånågot gick fel med att deserialisera. Felet: " + ex.Message, false);
+                return Json(vr);
+            }
+
+            if (vm.token == appkey)
+            {
+                if (vm.playerId == null)
+                {
+                    vr = new VideoResult("Spelaren kunde inte hittas då spelarens id inte var med i requesten.", false);
+                    return Json(vr);
+                }
+
+                var pl = db.Players.Find(vm.playerId);
+
+                if (pl == null)
+                {
+                    vr = new VideoResult("Spelaren kunde inte hittas.", false);
+                }
+                else
+                {
+                    if (vm.video == null || vm.video.Length == 0)
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då videon saknas!", false);
+                        return Json(vr);
+                    }
+
+                    if (vm.interval == null)
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då intervall saknas!", false);
+                        return Json(vr);
+                    }
+
+                    if (vm.rounds == null)
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då rundor saknas!", false);
+                        return Json(vr);
+                    }
+
+                    if (vm.numberOfTargets == null)
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då antal skott saknas!", false);
+                        return Json(vr);
+                    }
+
+                    if (!vm.timestamps.Any())
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
+                        return Json(vr);
+                    }
+
+                    if (!vm.targetOrder.Any())
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp då skottordning saknas!", false);
+                        return Json(vr);
+                    }
+
+                    //if (!targetCoords.Any())
+                    //{
+                    //    vr = new VideoResult("Videoklippet kunde inte laddas upp då koordinater för skotten saknas!", false);
+                    //    return Json(vr);
+                    //}
+
+                    // Logik för att ladda upp video
+                    var v = await ImageHandler.UploadVideo(vm.video, db, pl, "video");
+
+                    if (string.IsNullOrEmpty(v))
+                    {
+                        vr = new VideoResult("Videoklippet kunde inte laddas upp!", false);
+                    }
+                    else
+                    {
+                        var savedVideo = new PlayerVideo(v, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
+                        db.Videos.Add(savedVideo);
+
+                        foreach (var ts in vm.timestamps)
+                        {
+                            var timestamp = new ShotTimestamp(ts.Start, ts.End)
+                            {
+                                Video = savedVideo
+                            };
+
+                            savedVideo.Timestamps.Add(timestamp);
+                        }
+
+                        var index = 1;
+                        foreach (var t in vm.targetOrder)
+                        {
+                            var target = new Target(t, index)
+                            {
+                                RelatedVideo = savedVideo
+                            };
+                            index++;
+
+                            savedVideo.Targets.Add(target);
+                        }
+
+                        foreach (var tc in vm.targetCoords)
+                        {
+                            var targetCoordinate = new TargetCoord(tc.xCoord, tc.yCoord)
+                            {
+                                Video = savedVideo
+                            };
+
+                            savedVideo.TargetCoords.Add(targetCoordinate);
+                        }
+
+                        db.SaveChanges();
+
+                        vr = new VideoResult("Videoklippet laddades upp!", true);
+                    }
+                }
+            }
+            else
+            {
+                vr = new VideoResult("Token var inkorrekt", false);
+            }
+
+            return Json(vr);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult TestUpload(List<ShotTimestampVm> timestamps, string token)
         {
             VideoResult vr;
             if (string.IsNullOrEmpty(token))
