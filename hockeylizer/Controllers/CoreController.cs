@@ -207,6 +207,12 @@ namespace hockeylizer.Controllers
         public JsonResult TestUpload(List<ShotTimestampVm> timestamps, string token)
         {
             VideoResult vr;
+            if (string.IsNullOrEmpty(token))
+            {
+                vr = new VideoResult("Token tom!", false);
+                return Json(vr);
+            }
+
             if (token == appkey)
             {
                 if (!timestamps.Any())
