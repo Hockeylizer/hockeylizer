@@ -204,18 +204,18 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult TestUpload(List<ShotTimestampVm> timestamps, string token)
+        public JsonResult TestUpload(UploadVideoVm vm)
         {
             VideoResult vr;
-            if (string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(vm.token))
             {
                 vr = new VideoResult("Token tom!", false);
                 return Json(vr);
             }
 
-            if (token == appkey)
+            if (vm.token == appkey)
             {
-                if (!timestamps.Any())
+                if (!vm.timestamps.Any())
                 {
                     vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps för skotten saknas!", false);
                     return Json(vr);
