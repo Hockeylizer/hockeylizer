@@ -204,6 +204,29 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        public JsonResult TestUpload(List<TargetCoordsVm> targetCoords, string token)
+        {
+            VideoResult vr;
+            if (token == appkey)
+            {
+                if (!targetCoords.Any())
+                {
+                    vr = new VideoResult("Videoklippet kunde inte laddas upp då koordinater för skotten saknas!", false);
+                    return Json(vr);
+                }
+
+                vr = new VideoResult("Woop allt ser korrekt ut!", true);
+            }
+            else
+            {
+                vr = new VideoResult("Felaktig token", false);
+            }       
+
+            return Json(vr);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
         public JsonResult DeleteVideo(int videoId, string token)
         {
             GeneralResult response;
