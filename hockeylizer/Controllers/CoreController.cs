@@ -337,18 +337,30 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult TestUpload(List<ShotTimestampVm> timestamps, string token)
+        public JsonResult TestUpload(string json)
         {
             VideoResult vr;
-            if (string.IsNullOrEmpty(token))
+            UploadVideoVm vm;
+            try
+            {
+                vm = JsonConvert.DeserializeObject<UploadVideoVm>(json);
+            }
+            catch (Exception ex)
+            {
+                vr = new VideoResult("Videoklippet kunde inte laddas upp dånågot gick fel med att deserialisera. Felet: " + ex.Message, false);
+                return Json(vr);
+            }
+
+
+            if (string.IsNullOrEmpty(vm.token))
             {
                 vr = new VideoResult("Token tom!", false);
                 return Json(vr);
             }
 
-            if (token == appkey)
+            if (vm.token == appkey)
             {
-                if (!timestamps.Any())
+                if (!vm.timestamps.Any())
                 {
                     vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps för skotten saknas!", false);
                     return Json(vr);
