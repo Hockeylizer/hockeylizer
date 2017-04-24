@@ -204,7 +204,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult TestUpload(string timestamps, string token)
+        public JsonResult TestUpload(List<string> timestamps, string token)
         {
             VideoResult vr;
             if (string.IsNullOrEmpty(token))
