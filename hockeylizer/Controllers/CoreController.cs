@@ -204,14 +204,14 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult TestUpload(List<TargetCoordsVm> targetCoords, string token)
+        public JsonResult TestUpload(List<ShotTimestampVm> timestamps, string token)
         {
             VideoResult vr;
             if (token == appkey)
             {
-                if (!targetCoords.Any())
+                if (!timestamps.Any())
                 {
-                    vr = new VideoResult("Videoklippet kunde inte laddas upp då koordinater för skotten saknas!", false);
+                    vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps för skotten saknas!", false);
                     return Json(vr);
                 }
 
