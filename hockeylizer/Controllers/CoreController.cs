@@ -233,6 +233,35 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        public ContentResult Test(string json)
+        {
+            //VideoResult vr;
+            //if (string.IsNullOrEmpty(vm.token))
+            //{
+            //    vr = new VideoResult("Token tom!", false);
+            //    return Json(vr);
+            //}
+
+            //if (vm.token == appkey)
+            //{
+            //    if (!vm.timestamps.Any())
+            //    {
+            //        vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps för skotten saknas!", false);
+            //        return Json(vr);
+            //    }
+
+            //    vr = new VideoResult("Woop allt ser korrekt ut!", true);
+            //}
+            //else
+            //{
+            //    vr = new VideoResult("Felaktig token", false);
+            //}       
+
+            return Content(json);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
         public JsonResult DeleteVideo(int videoId, string token)
         {
             GeneralResult response;
