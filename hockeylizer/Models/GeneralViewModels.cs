@@ -35,6 +35,12 @@ namespace hockeylizer.Models
         public string token { get; set; }
     }
 
+    public class UploadTimeStampVm
+    {
+        public List<ShotTimestampVm> timestamps { get; set; }
+        public string token { get; set; }
+    }
+
     public class ShotTimestampVm
     {
         public long Start { get; set; }

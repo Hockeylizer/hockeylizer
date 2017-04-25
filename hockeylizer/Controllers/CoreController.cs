@@ -208,6 +208,7 @@ namespace hockeylizer.Controllers
         public async Task<JsonResult> UploadVideoFromJson([FromBody]UploadVideoVm vm)
         {
             VideoResult vr;
+
             if (vm.token == appkey)
             {
                 if (vm.playerId == null)
@@ -326,20 +327,9 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult TestUpload(string json)
+        public JsonResult TestUpload([FromBody]UploadTimeStampVm vm)
         {
             VideoResult vr;
-            UploadVideoVm vm;
-            try
-            {
-                vm = JsonConvert.DeserializeObject<UploadVideoVm>(json);
-            }
-            catch (Exception ex)
-            {
-                vr = new VideoResult("Videoklippet kunde inte laddas upp d�n�got gick fel med att deserialisera. Felet: " + ex.Message, false);
-                return Json(vr);
-            }
-
 
             if (string.IsNullOrEmpty(vm.token))
             {
@@ -351,7 +341,7 @@ namespace hockeylizer.Controllers
             {
                 if (!vm.timestamps.Any())
                 {
-                    vr = new VideoResult("Videoklippet kunde inte laddas upp d� timestamps f�r skotten saknas!", false);
+                    vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps för skotten saknas!", false);
                     return Json(vr);
                 }
 
