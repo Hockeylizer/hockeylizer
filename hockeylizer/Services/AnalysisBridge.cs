@@ -7,6 +7,23 @@ namespace Bridge
     // This class holds the entry points to the C++ analysis library
     static class AnalysisBridge
     {
+
+        public static bool DecodeFrames(String videoName, String outputDir, String extension)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return decodeFramesWin(videoName, outputDir, extension);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return decodeFramesLinux(videoName, outputDir, extension);
+            }
+            else
+            {
+                throw new System.ArgumentException("", "");
+            }
+        }
+
         // Main entry point for analysing a single shot.
         public static AnalysisResult AnalyzeShot(int firstFrame, int lastFrame,
                                                  Point2i[] targetCoords,
@@ -194,6 +211,9 @@ namespace Bridge
         private const String windowsSharedLibrary = "CppConversion.dll";
         private const String linuxSharedLibrary = "libanalyze.so";
 
+        [DllImport(windowsSharedLibrary, EntryPoint = "decodeFrames")]
+        private static extern bool decodeFramesWin(String videoName, String outputDir, String extension);
+
         //Windows entry points
         [DllImport(windowsSharedLibrary, EntryPoint = "analyzeShotCS")]
         private static extern void analyzeShotCSWin(int firstFrame, int lastFrame,
@@ -235,7 +255,13 @@ namespace Bridge
                                                         DumPoint2d ret);
 
 
+
         //Linux entry points
+
+
+        [DllImport(linuxSharedLibrary, EntryPoint = "decodeFrames")]
+        private static extern bool decodeFramesLinux(String videoName, String outputDir, String extension);
+
         [DllImport(linuxSharedLibrary, EntryPoint = "analyzeShotCS")]
         private static extern void analyzeShotCSLinux(int firstFrame, int lastFrame,
                                             int targetNo,
