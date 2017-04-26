@@ -25,7 +25,7 @@ namespace Bridge
         }
 
         // Main entry point for analysing a single shot.
-        public static AnalysisResult AnalyzeShot(int firstFrame, int lastFrame,
+        public static AnalysisResult AnalyzeShot(long msStartTimestamp, long msEndTimestamp,
                                                  Point2i[] targetCoords,
                                                  double sizeX, double sizeY,
                                                  Point2d[] targetOffsetsInCm,
@@ -51,12 +51,12 @@ namespace Bridge
             AnalysisResult ret = new AnalysisResult();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                analyzeShotCSWin(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
+                analyzeShotCSWin(msStartTimestamp, msEndTimestamp, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
                             targetOffsetsInCmFlat, videoName, ret);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                analyzeShotCSLinux(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
+                analyzeShotCSLinux(msStartTimestamp, msEndTimestamp, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
                             targetOffsetsInCmFlat, videoName, ret);
             }
             else
@@ -216,7 +216,7 @@ namespace Bridge
 
         //Windows entry points
         [DllImport(windowsSharedLibrary, EntryPoint = "analyzeShotCS")]
-        private static extern void analyzeShotCSWin(int firstFrame, int lastFrame,
+        private static extern void analyzeShotCSWin(long msStartTimestamp, long msEndTimestamp,
                                                     int targetNo,
                                                     [In] int[] targetCoords,
                                                     double sizeX, double sizeY,
@@ -263,13 +263,13 @@ namespace Bridge
         private static extern bool decodeFramesLinux(String videoName, String outputDir, String extension);
 
         [DllImport(linuxSharedLibrary, EntryPoint = "analyzeShotCS")]
-        private static extern void analyzeShotCSLinux(int firstFrame, int lastFrame,
-                                            int targetNo,
-                                            [In] int[] targetCoords,
-                                            double sizeX, double sizeY,
-                                            [In] double[] targetOffsetsInCm,
-                                            String videoName,
-                                            [In, Out, MarshalAs(UnmanagedType.LPStruct)]
+        private static extern void analyzeShotCSLinux(long msStartTimestamp, long msEndTimestamp,
+                                                    int targetNo,
+                                                    [In] int[] targetCoords,
+                                                    double sizeX, double sizeY,
+                                                    [In] double[] targetOffsetsInCm,
+                                                    String videoName,
+                                                    [In, Out, MarshalAs(UnmanagedType.LPStruct)]
                                                     AnalysisResult ret);
 
 
