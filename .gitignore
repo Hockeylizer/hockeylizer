@@ -11,12 +11,12 @@
 *.userprefs
 
 # Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
+#[Dd]ebug/
+#[Dd]ebugPublic/
+#[Rr]elease/
+#[Rr]eleases/
+#x64/
+#x86/
 bld/
 [Oo]bj/
 [Ll]og/
@@ -258,3 +258,10 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+
+# build output files
+**/bin/**/*.deps.json
+**/bin/**/*hockeylizer.dll
+**/bin/**/*.runtimeconfig*
+**/bin/**/x86/
