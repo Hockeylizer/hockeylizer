@@ -205,7 +205,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> UploadVideo([FromBody, FromForm]UploadVideoVm vm)
+        public async Task<JsonResult> UploadVideo(UploadVideoVm vm)
         {
             VideoResult vr;
 
