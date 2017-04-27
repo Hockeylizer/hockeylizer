@@ -19,9 +19,21 @@ namespace Bridge
             get { return new Point2i(pX, pY); }
         }
 
+        public Point2d OffsetFromTarget
+        {
+            get { return new Point2d(offsetX, offsetY); }
+        }
 
+        public bool DidHitGoal
+        {
+            get { return hit; }
+        }
+
+        private bool hit;
         private int frameNr;
         private int pX;
         private int pY;
+        private double offsetX;
+        private double offsetY;
     }
 }

@@ -25,7 +25,7 @@ namespace Bridge
         }
 
         // Main entry point for analysing a single shot.
-        public static AnalysisResult AnalyzeShot(long msStartTimestamp, long msEndTimestamp,
+        public static AnalysisResult AnalyzeShot(int firstFrame, int lastFrame,
                                                  Point2i[] targetCoords,
                                                  double sizeX, double sizeY,
                                                  Point2d[] targetOffsetsInCm,
@@ -51,12 +51,12 @@ namespace Bridge
             AnalysisResult ret = new AnalysisResult();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                analyzeShotCSWin(msStartTimestamp, msEndTimestamp, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
+                analyzeShotCSWin(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
                             targetOffsetsInCmFlat, videoName, ret);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                analyzeShotCSLinux(msStartTimestamp, msEndTimestamp, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
+                analyzeShotCSLinux(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
                             targetOffsetsInCmFlat, videoName, ret);
             }
             else
