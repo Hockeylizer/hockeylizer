@@ -11,6 +11,8 @@ namespace hockeylizer.Models
             this.Targets = new HashSet<Target>();
             this.Timestamps = new HashSet<ShotTimestamp>();
             this.TargetCoords = new HashSet<TargetCoord>();
+
+            this.Deleted = false;
         }
 
         public PlayerVideo(string path, int playerId, int interval, int rounds, int shots, int noTargets)
@@ -24,9 +26,17 @@ namespace hockeylizer.Models
             this.Shots = shots;
             this.NumberOfTargets = noTargets;
 
+            this.Deleted = false;
+
             this.Targets = new HashSet<Target>();
             this.Timestamps = new HashSet<ShotTimestamp>();
             this.TargetCoords = new HashSet<TargetCoord>();
+        }
+
+        public void Delete() 
+        {
+            this.Deleted = true;
+            this.VideoPath = string.Empty;
         }
 
         [Key]
@@ -42,6 +52,8 @@ namespace hockeylizer.Models
 
         public int Shots { get; set; }
         public int NumberOfTargets { get; set; }
+
+        public bool Deleted { get; set; }
 
         public virtual ICollection<Target> Targets { get; set; }
         public virtual ICollection<ShotTimestamp> Timestamps { get; set; }

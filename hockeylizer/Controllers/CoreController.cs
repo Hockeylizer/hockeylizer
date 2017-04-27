@@ -84,124 +84,7 @@ namespace hockeylizer.Controllers
 
         //[HttpPost]
         //[AllowAnonymous]
-        //public async Task<JsonResult> UploadVideo([FromBody, FromForm]int? playerId, IFormFile video, int? interval, int? rounds, int? shots, int? numberOfTargets, List<ShotTimestampVm> timestamps, List<int> targetOrder, List<TargetCoordsVm> targetCoords, string token)
-        //{
-        //    VideoResult vr;
-        //    if (token == appkey)
-        //    {
-        //        if (playerId == null)
-        //        {
-        //            vr = new VideoResult("Spelaren kunde inte hittas d� spelarens id inte var med i requesten.", false);
-        //            return Json(vr);
-        //        }
-
-        //        var pl = db.Players.Find(playerId);
-
-        //        if (pl == null)
-        //        {
-        //            vr = new VideoResult("Spelaren kunde inte hittas.", false);
-        //        }
-        //        else
-        //        {
-        //            if (video == null || video.Length == 0)
-        //            {
-        //                vr = new VideoResult("Videoklippet kunde inte laddas upp d� videon saknas!", false);
-        //                return Json(vr);
-        //            }
-
-        //            if (interval == null)
-        //            {
-        //                vr = new VideoResult("Videoklippet kunde inte laddas upp d� intervall saknas!", false);
-        //                return Json(vr);
-        //            }
-
-        //            if (rounds == null)
-        //            {
-        //                vr = new VideoResult("Videoklippet kunde inte laddas upp d� rundor saknas!", false);
-        //                return Json(vr);
-        //            }
-
-        //            if (numberOfTargets == null)
-        //            {
-        //                vr = new VideoResult("Videoklippet kunde inte laddas upp d� antal skott saknas!", false);
-        //                return Json(vr);
-        //            }
-
-        //            if (!timestamps.Any())
-        //            {
-        //                vr = new VideoResult("Videoklippet kunde inte laddas upp d� timestamps saknas!", false);
-        //                return Json(vr);
-        //            }
-
-        //            if (!targetOrder.Any())
-        //            {
-        //                vr = new VideoResult("Videoklippet kunde inte laddas upp d� skottordning saknas!", false);
-        //                return Json(vr);
-        //            }
-
-        //            //if (!targetCoords.Any())
-        //            //{
-        //            //    vr = new VideoResult("Videoklippet kunde inte laddas upp d� koordinater f�r skotten saknas!", false);
-        //            //    return Json(vr);
-        //            //}
-
-        //            // Logik f�r att ladda upp video
-        //            var v = await ImageHandler.UploadVideo(video, db, pl, "video");
-
-        //            if (string.IsNullOrEmpty(v))
-        //            {
-        //                vr = new VideoResult("Videoklippet kunde inte laddas upp!", false);
-        //            }
-        //            else
-        //            {
-        //                var savedVideo = new PlayerVideo(v, (int)playerId, (int)interval, (int)rounds, (int)shots, (int)numberOfTargets);
-        //                db.Videos.Add(savedVideo);
-
-        //                foreach (var ts in timestamps)
-        //                {
-        //                    var timestamp = new ShotTimestamp(ts.Start, ts.End)
-        //                    {
-        //                        Video = savedVideo
-        //                    };
-
-        //                    savedVideo.Timestamps.Add(timestamp);
-        //                }
-
-        //                var index = 1;
-        //                foreach (var t in targetOrder)
-        //                {
-        //                    var target = new Target(t, index)
-        //                    {
-        //                        RelatedVideo = savedVideo
-        //                    };
-        //                    index++;
-
-        //                    savedVideo.Targets.Add(target);
-        //                }
-
-        //                foreach (var tc in targetCoords)
-        //                {
-        //                    var targetCoordinate = new TargetCoord(tc.xCoord, tc.yCoord)
-        //                    {
-        //                        Video = savedVideo
-        //                    };
-
-        //                    savedVideo.TargetCoords.Add(targetCoordinate);
-        //                }
-
-        //                db.SaveChanges();
-
-        //                vr = new VideoResult("Videoklippet laddades upp!", true);
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        vr = new VideoResult("Token var inkorrekt", false);
-        //    }
-
-        //    return Json(vr);
-        //}
+        //public async Task<JsonResult> UploadVideo([FromBody, FromForm]int? playerId, IFormFile video, int? interval, int? rounds, int? shots, int? numberOfTargets, List<ShotTimestampVm> timestamps, List<int> targetOrder, List<TargetCoordsVm> targetCoords, string token
 
         [HttpPost]
         [AllowAnonymous]
@@ -327,65 +210,6 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult TestUpload([FromBody]UploadTimeStampVm vm)
-        {
-            VideoResult vr;
-
-            if (string.IsNullOrEmpty(vm.token))
-            {
-                vr = new VideoResult("Token tom!", false);
-                return Json(vr);
-            }
-
-            if (vm.token == appkey)
-            {
-                if (!vm.timestamps.Any())
-                {
-                    vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps för skotten saknas!", false);
-                    return Json(vr);
-                }
-
-                vr = new VideoResult("Woop allt ser korrekt ut!", true);
-            }
-            else
-            {
-                vr = new VideoResult("Felaktig token", false);
-            }       
-
-            return Json(vr);
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        public ContentResult Test(string json)
-        {
-            //VideoResult vr;
-            //if (string.IsNullOrEmpty(vm.token))
-            //{
-            //    vr = new VideoResult("Token tom!", false);
-            //    return Json(vr);
-            //}
-
-            //if (vm.token == appkey)
-            //{
-            //    if (!vm.timestamps.Any())
-            //    {
-            //        vr = new VideoResult("Videoklippet kunde inte laddas upp d� timestamps f�r skotten saknas!", false);
-            //        return Json(vr);
-            //    }
-
-            //    vr = new VideoResult("Woop allt ser korrekt ut!", true);
-            //}
-            //else
-            //{
-            //    vr = new VideoResult("Felaktig token", false);
-            //}       
-
-            return Content(json);
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
         public JsonResult DeleteVideo(int videoId, string token)
         {
             GeneralResult response;
@@ -424,7 +248,7 @@ namespace hockeylizer.Controllers
             {
                 response = new GetVideosResult(true, "Alla videor h�mtades", new List<VideoVmSmall>());
 
-                foreach (PlayerVideo v in db.Videos.ToList())
+                foreach (PlayerVideo v in db.Videos.Where(v => !v.Deleted).ToList())
                 {
                     string videoPath;
 
@@ -469,7 +293,7 @@ namespace hockeylizer.Controllers
             {
                 var video = db.Videos.Find(videoId);
 
-                if (video != null)
+                if (video != null && !video.Deleted)
                 {
                     response = new GetFramesResult(true, "Alla frames h�mtades", new List<string>());
 

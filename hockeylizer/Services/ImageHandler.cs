@@ -49,7 +49,7 @@ namespace hockeylizer.Services
                 var blobToDelete = video.VideoPath.Split('/').Last();
                 utility.DeleteBlob(blobToDelete, containerName);
 
-                db.Videos.Remove(video);
+                video.Delete();
                 db.SaveChanges();
 
                 return true;

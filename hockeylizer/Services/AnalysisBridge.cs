@@ -20,7 +20,7 @@ namespace Bridge
             }
             else
             {
-                throw new System.ArgumentException("", "");
+                throw new ArgumentException("", "");
             }
         }
 
@@ -33,7 +33,7 @@ namespace Bridge
         {
             if (targetCoords.Length != targetOffsetsInCm.Length)
             {
-                throw new System.ArgumentException("targetOffsetsInCm.Length != targetCoords.Length",
+                throw new ArgumentException("targetOffsetsInCm.Length != targetCoords.Length",
                                                    "targetOffsetsInCm");
             }
             int[] targetCoordsFlat = new int[targetCoords.Length*2];
@@ -61,7 +61,7 @@ namespace Bridge
             }
             else
             {
-                throw new System.ArgumentException("", "");
+                throw new ArgumentException("", "");
             }
             return ret;
         }
@@ -102,7 +102,7 @@ namespace Bridge
             }
             else
             {
-                throw new System.ArgumentException("", "");
+                throw new ArgumentException("", "");
             }
         }
 
@@ -121,7 +121,7 @@ namespace Bridge
         {
             if (pointsSrcSpace.Length != pointsDstSpace.Length)
             {
-                throw new System.ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length",
+                throw new ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length",
                                                    "pointsDstSpace.Length");
             }
             double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length*2];
@@ -153,7 +153,7 @@ namespace Bridge
             }
             else
             {
-                throw new System.ArgumentException("", "");
+                throw new ArgumentException("", "");
             }
             return new Point2d(ret.x, ret.y);
         }
@@ -166,7 +166,7 @@ namespace Bridge
         {
             if (pointsSrcSpace.Length != pointsCmSpace.Length)
             {
-                throw new System.ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length",
+                throw new ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length",
                                                    "pointsDstSpace.Length");
             }
             double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length*2];
@@ -200,7 +200,7 @@ namespace Bridge
             }
             else
             {
-                throw new System.ArgumentException("", "");
+                throw new ArgumentException("", "");
             }
             return new Point2d(ret.x, ret.y);
         }
