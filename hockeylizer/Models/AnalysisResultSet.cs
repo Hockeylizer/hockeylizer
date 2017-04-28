@@ -1,22 +1,35 @@
 ﻿/* Hittades på av Daniel. Tanken är att det är en lista med
  * alla individuella analysresultat för en given video.
  */
-
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 using System;
-using System.Runtime.InteropServices;
 
-namespace idk //TEMP Vad ska stå här?
+namespace hockeylizer.Models
 {
-    // The return value of AnalysisBridge.AnalyzeShot(...)
-    [StructLayout(LayoutKind.Sequential)]
-    public class AnalysisResultSet
-    {
-        //an AnalysisResult has: (int FrameNr, Point2i HitPoint, Point2d OffsetFromTarget, bool DidHitGoal)
-        public List<AnalysisResult> analysisResultList { get; set; }
-        public int numberOfHits { get; set; }
+	public class AnalysisResult
+	{
+        public AnalysisResult()
+        {
+            
+        }
 
-        [key]
-        public int VideoId { get; set; }
-    }
+		public AnalysisResult(int videoId)
+		{
+            this.VideoId = videoId;
+		}
 
+		[Key]
+		public int AnalysisId { get; set; }
+
+        // Detta kommer vara en individuell point
+
+        // Lägg till resten av allt
+        public bool HitGoal { get; set; }
+
+        [ForeignKey("Video")]
+        public int? VideoId { get; set; }
+        public virtual PlayerVideo Video { get; set; }
+	}
 }

@@ -73,7 +73,9 @@ namespace hockeylizer.Models
             this.VideoRemoved = false;
 
             this.Targets = new HashSet<Target>();
-            this.Timestamps = new HashSet<ShotTimestamp>();
+			this.Targets = new HashSet<Target>();
+
+			this.Timestamps = new HashSet<ShotTimestamp>();
             this.TargetCoords = new HashSet<TargetCoord>();
         }
 
@@ -109,6 +111,8 @@ namespace hockeylizer.Models
         public bool VideoRemoved { get; set; }
 
         public virtual ICollection<Target> Targets { get; set; }
+        public virtual ICollection<AnalysisResult> AnalysisResults { get; set; }
+
         public virtual ICollection<ShotTimestamp> Timestamps { get; set; }
         public virtual ICollection<TargetCoord> TargetCoords { get; set; }
     }
