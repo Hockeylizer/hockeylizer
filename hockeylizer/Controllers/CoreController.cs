@@ -1,13 +1,11 @@
-﻿﻿﻿using Microsoft.AspNetCore.Authorization;
+﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using hockeylizer.Services;
 using hockeylizer.Helpers;
 using hockeylizer.Models;
 using hockeylizer.Data;
-using Newtonsoft.Json;
 using System.Linq;
 using System;
 
