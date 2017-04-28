@@ -11,12 +11,11 @@ namespace hockeylizer.Services
     {
         private static readonly BlobUtility utility = new BlobUtility("hockeydata", "QmoOoi3h8htf3+Luqz7GhVe9WZavcDvn/DHqEzc25f9/Ii4zKeqTwuP+x9M9UbZWSVTGKnNW2rF89X/D6yza+A==");
 
-        public async static Task<string> UploadVideo(IFormFile file, ApplicationDbContext db, Player p, string fileStart)
+        public async static Task<string> UploadVideo(IFormFile file, string containerName, string fileStart)
         {
             var fileName = fileStart + "-0";
-            var filetype = Path.GetFileName(file.FileName ?? "empty.mov").Split('.').ToList().Last();
+            var filetype = file.ContentType;
 
-            var containerName = p.RetrieveContainerName();
             while (await utility.BlobExistsOnCloud(containerName, fileName + "." + filetype))
             {
                 var ids = fileName.Split('-');

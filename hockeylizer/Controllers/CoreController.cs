@@ -171,7 +171,7 @@ namespace hockeylizer.Controllers
                         return Json(vm.vr);
                     }
 
-                    var v = await ImageHandler.UploadVideo(vm.video, db, pl, "video");
+                    var v = await ImageHandler.UploadVideo(vm.video, pl.RetrieveContainerName(), "video");
 
                     if (string.IsNullOrEmpty(v))
                     {
