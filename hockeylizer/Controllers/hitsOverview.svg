@@ -1,0 +1,57 @@
+﻿<svg width = "243" height="182" viewBox="-30 -30 243 182"
+     xmlns="http://www.w3.org/2000/svg" version="1.1">
+  <!-- All data below in centimeters -->
+
+  <!-- Goal(with inner dimensions 183 x 122 cm) -->
+  <path d = "M-2 122
+           L-2 6
+           A 8 8, 0, 0, 1, 6 -2
+           L177 -2
+           A 8 8, 0, 0, 1, 185 6
+           L185 122"
+        fill="none" stroke="red" stroke-width="4" />
+
+  <!-- Ground -->
+  <line x1 = "-30" x2="212" y1="122" y2="122"
+        stroke="black" />
+
+  <!-- Target points(outer) -->
+  <circle cx = "10.0" cy="91.0" r="4.25"
+          stroke="red" stroke-width="1.5" fill="transparent" />
+  <circle cx = "10.0" cy="18.0" r="4.25"
+          stroke="red" stroke-width="1.5" fill="transparent" />
+  <circle cx = "173.0" cy="18.0" r="4.25"
+          stroke="red" stroke-width="1.5" fill="transparent" />
+  <circle cx = "173.0" cy="91.0" r="4.25"
+          stroke="red" stroke-width="1.5" fill="transparent" />
+  <circle cx = "91.5" cy="101.0" r="4.25"
+          stroke="red" stroke-width="1.5" fill="transparent" />
+
+  <!-- Target points(inner) -->
+  <circle cx = "10.0" cy="91.0" r="1.25"
+          stroke="red" stroke-width="0" fill="red" />
+  <circle cx = "10.0" cy="18.0" r="1.25"
+          stroke="red" stroke-width="0" fill="red" />
+  <circle cx = "173.0" cy="18.0" r="1.25"
+          stroke="red" stroke-width="0" fill="red" />
+  <circle cx = "173.0" cy="91.0" r="1.25"
+          stroke="red" stroke-width="0" fill="red" />
+  <circle cx = "91.5" cy="101.0" r="1.25"
+          stroke="red" stroke-width="0" fill="red" />
+
+  <!-- Analyzed area
+       15 cm outside goal on left, right and top sides.
+       5 cm above ground on lower side. -->
+  <rect x = "-15" y= "-15" width= "213" height= "132"
+        stroke= "lightgreen" fill= "transparent" />
+
+  <!-- Hit points -->
+  <!-- REPLACE BELOW WITH ACTUAL DATA IN CENTIMETERS -->
+  <!-- Hit point examples:
+  <circle cx = "100" cy= "81" r= "4"
+          fill= "black" />
+  < circle cx= "20" cy= "21" r= "4"
+          fill= "black" />
+  < circle cx= "160" cy= "41" r= "4"
+          fill= "black" />-->
+</ svg >

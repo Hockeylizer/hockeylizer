@@ -331,5 +331,40 @@ namespace hockeylizer.Controllers
             response = new GeneralResult(false, "Inkorrekt token");
             return Json(response);
         }
+
+        //Daniels funktion 
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult getHitsOverviewSVG(int videoId, string token)
+        {
+
+            // Just return a goddamn picture of the goal with no hits.
+            // It's something.
+            string svgStr = System.IO.File.ReadAllText("hitsOverview.svg");
+            return Json(svgStr);
+
+        //    GeneralResult response;
+        //    if (token == appkey)
+        //    {
+        //        var analysisList = db.AnalysisResults.Where(ar => ar.VideoId == videoId);
+
+        //        // Lite osäker på om ett query utan resultat ger
+        //        // void eller en enumarable av längd noll.
+        //        if (analysisList == null || analysisList.Count() == 0)
+        //        {
+        //            response = new GeneralResult(false, "Analysen finns inte");
+        //            return Json(response);
+        //        }
+
+        //        foreach (var analysis in analysisList)
+        //        {
+                    
+        //        }
+
+        //    }
+
+        //    response = new GeneralResult(false, "Inkorrekt token");
+        //    return Json(response);
+        }
     }
 }
