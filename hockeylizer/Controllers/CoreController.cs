@@ -47,7 +47,7 @@ namespace hockeylizer.Controllers
 
                 response = new CreateTeamResult(true, "Laget skapades. Appen är nu registrerad.")
                 {
-                    TeamId = teamId
+                    TeamId = team.TeamId
                 };
             }
 
