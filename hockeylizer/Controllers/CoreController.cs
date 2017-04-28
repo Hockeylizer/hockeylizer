@@ -131,7 +131,7 @@ namespace hockeylizer.Controllers
             return Json(r);
         }
 
-        [HttpGet]
+        [HttpPost]
         [AllowAnonymous]
         public JsonResult GetAllPlayers(Guid teamId, string token)
         {
@@ -316,7 +316,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> ChopVideo(int videoId, string token)
+        public JsonResult ChopVideo(int videoId, string token)
         {
             GeneralResult response;
             if (token == appkey)
@@ -329,14 +329,26 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var path = hostingEnvironment.ContentRootPath + "/videos";
-                var download = FileHandler.DownloadBlob(path, video.VideoPath, video.Player.RetrieveContainerName());
+                var blobname = video.VideoPath.Split('/').LastOrDefault() ?? "video-" + video.Player.Name.ToLower() + ".mp4";
+                var path = hostingEnvironment.WebRootPath + "/videos/" + blobname;
+
+                var download = FileHandler.DownloadBlob(path, blobname, video.Player.RetrieveContainerName());
 
                 if (!download)
                 {
                     response = new GeneralResult(false, "Videon kunde inte laddas ned.");
                     return Json(response);
                 }
+
+                // Logik för att choppa video
+
+                if (!System.IO.File.Exists(@path))
+                {
+                    response = new GeneralResult(false, "Videon kunde inte raderas då den inte existerar.");
+                    return Json(response);
+                }
+
+                System.IO.File.Delete(@path);
             }
 
             response = new GeneralResult(false, "Inkorrekt token");
