@@ -12,9 +12,10 @@ namespace hockeylizer.Models
             this.Videos = new HashSet<PlayerVideo>();
         }
 
-        public Player(string name)
+        public Player(string name, Guid? teamId = null)
         {
             this.Name = name;
+            this.TeamId = teamId;
             this.Videos = new HashSet<PlayerVideo>();
         }
 

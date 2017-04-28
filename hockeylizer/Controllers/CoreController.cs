@@ -53,7 +53,7 @@ namespace hockeylizer.Controllers
         // Add player
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult AddPlayer(string name, string token)
+        public JsonResult AddPlayer(string name, Guid? teamId, string token)
         {
             AddPlayerResult response;
 
@@ -65,7 +65,14 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var player = new Player(name);
+                var team = db.AppTeams.Find(teamId);
+                if (teamId == null || team == null)
+                {
+                    response = new AddPlayerResult("Spelaren " + name + " kunde inte läggas till då appteamet som hen tillhör saknas.", false);
+                    return Json(response);
+                }
+
+                var player = new Player(name, teamId);
                 try
                 {
                     db.Players.Add(player);
@@ -86,20 +93,54 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult AddPlayer(UpdateNameVm vm)
+        {
+            GeneralResult r;
+
+            if (vm.token != appkey)
+            {
+                r = new GeneralResult(false, "Token var inkorrekt");
+            }
+            else
+            {
+                if (!vm.Validate())
+                {
+                    return Json(vm.Result);
+                }
+
+                var player = db.Players.Find(vm.playerId);
+                if (player == null) 
+                {
+                    r = new GeneralResult(false, "Spelaren finns inte.");
+                }
+                else
+                {
+                    player.Name = vm.name;
+                    db.SaveChanges();
+
+                    r = new GeneralResult(true, "Namnet uppdaterades!");
+                }
+            }
+
+            return Json(r);
+        }
+
         [HttpGet]
         [AllowAnonymous]
-        public JsonResult GetAllPlayers(string token)
+        public JsonResult GetAllPlayers(Guid teamId, string token)
         {
             GetPlayersResult response;
             if (token == appkey)
             {
                 response = new GetPlayersResult(true, "Alla spelare hämtades",
-                    db.Players.Select(p =>
-                        new PlayerVmSmall
-                        {
-                            PlayerId = p.PlayerId,
-                            Name = p.Name
-                        }).ToList());
+		                        db.Players.Where(p => p.TeamId == teamId).Select(p => 
+                                  new PlayerVmSmall
+			                        {
+			                            PlayerId = p.PlayerId,
+			                            Name = p.Name
+			                        }).ToList());
             }
             else
             {

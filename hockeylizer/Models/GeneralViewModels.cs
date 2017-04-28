@@ -6,6 +6,33 @@ using System;
 
 namespace hockeylizer.Models
 {
+    public class UpdateNameVm
+    {
+        public bool Validate() 
+        {
+            if (playerId == null)
+            {
+                this.Result = new GeneralResult(false, "SpelarId är inte med i anropet.");
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+            {
+                this.Result = new GeneralResult(false, "Det nya namnet får inte vara tomt.");
+                return false;
+            }
+
+            this.Result = new GeneralResult(true, "Allt fixat!");
+            return true;
+        }
+
+        public int? playerId { get; set; }
+        public string name { get; set; }
+        public string token { get; set; }
+
+        public GeneralResult Result { get; set; }
+    }
+
     public class GeneralResult
     {
         public GeneralResult()
