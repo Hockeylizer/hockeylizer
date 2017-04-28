@@ -66,5 +66,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\" />
+    <Folder Include="Videos\" />
+    <Folder Include="Pictures\" />
   </ItemGroup>
 </Project>

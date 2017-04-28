@@ -8,9 +8,10 @@ using hockeylizer.Data;
 namespace hockeylizer.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170427153958_fifth")]
+    partial class fifth
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
@@ -66,16 +67,6 @@ namespace hockeylizer.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("hockeylizer.Models.AppTeam", b =>
-                {
-                    b.Property<Guid>("TeamId")
-                        .ValueGeneratedOnAdd();
-
-                    b.HasKey("TeamId");
-
-                    b.ToTable("AppTeams");
-                });
-
             modelBuilder.Entity("hockeylizer.Models.Player", b =>
                 {
                     b.Property<int>("PlayerId")
@@ -83,11 +74,7 @@ namespace hockeylizer.Data.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<Guid?>("TeamId");
-
                     b.HasKey("PlayerId");
-
-                    b.HasIndex("TeamId");
 
                     b.ToTable("Players");
                 });
@@ -277,13 +264,6 @@ namespace hockeylizer.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
-                });
-
-            modelBuilder.Entity("hockeylizer.Models.Player", b =>
-                {
-                    b.HasOne("hockeylizer.Models.AppTeam", "Team")
-                        .WithMany("Players")
-                        .HasForeignKey("TeamId");
                 });
 
             modelBuilder.Entity("hockeylizer.Models.PlayerVideo", b =>

@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using System;
 
 namespace hockeylizer.Models
 {
@@ -24,6 +26,10 @@ namespace hockeylizer.Models
         [Key]
         public int PlayerId { get; set; }
         public string Name { get; set; }
+
+        [ForeignKey("Team")]
+        public Guid? TeamId { get; set; }
+        public virtual AppTeam Team { get; set; }
 
         public virtual ICollection<PlayerVideo> Videos { get; set; }
     }

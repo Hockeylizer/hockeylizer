@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 
@@ -13,6 +13,47 @@ namespace hockeylizer.Models
             this.TargetCoords = new HashSet<TargetCoord>();
 
             this.Deleted = false;
+        }
+
+        public void AddTimeStamps(List<ShotTimestampVm> timestamps)
+        {
+            foreach (var ts in timestamps)
+            {
+                var timestamp = new ShotTimestamp(ts.Start, ts.End)
+                {
+                    Video = this
+                };
+
+                this.Timestamps.Add(timestamp);
+            }
+        }
+
+        public void AddTargets(List<int> targetOrder) 
+        {
+			var index = 1;
+			foreach (var t in targetOrder)
+			{
+				var target = new Target(t, index)
+				{
+					RelatedVideo = this
+				};
+				index++;
+
+				this.Targets.Add(target);
+			}
+        }
+
+        public void AddTargetCoordinates(List<TargetCoordsVm> targetCoordinates)
+        {
+			foreach (var tc in targetCoordinates)
+			{
+				var targetCoordinate = new TargetCoord(tc.xCoord, tc.yCoord)
+				{
+					Video = this
+				};
+
+				this.TargetCoords.Add(targetCoordinate);
+			}
         }
 
         public PlayerVideo(string path, int playerId, int interval, int rounds, int shots, int noTargets)

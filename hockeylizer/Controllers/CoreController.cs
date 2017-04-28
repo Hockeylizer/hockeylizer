@@ -1,9 +1,10 @@
-﻿﻿using Microsoft.AspNetCore.Authorization;
+﻿﻿﻿using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using hockeylizer.Services;
+using hockeylizer.Helpers;
 using hockeylizer.Models;
 using hockeylizer.Data;
 using Newtonsoft.Json;
@@ -23,6 +24,32 @@ namespace hockeylizer.Controllers
             db = _db;
         }
 
+        public JsonResult CreateTeam(string token) 
+        {
+            CreateTeamResult response;
+
+            if (token != appkey)
+            {
+                response = new CreateTeamResult(false, "Laget kunde inte skapas då fel token angavs. Appen är inte registrerad.");
+            }
+            else 
+            {
+                var teamId = db.GetAvailableTeamId();
+
+                var team = new AppTeam(teamId);
+                db.AppTeams.Add(team);
+
+                db.SaveChanges();
+
+                response = new CreateTeamResult(true, "Laget skapades. Appen är nu registrerad.")
+                {
+                    TeamId = teamId
+                };
+            }
+
+            return Json(response);
+        }
+
         // Add player
         [HttpPost]
         [AllowAnonymous]
@@ -34,7 +61,7 @@ namespace hockeylizer.Controllers
             {
                 if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
                 {
-                    response = new AddPlayerResult("Spelaren " + name + " kunde inte l�ggas till d� namnet saknas.", false);
+                    response = new AddPlayerResult("Spelaren " + name + " kunde inte läggas till då namnet saknas.", false);
                     return Json(response);
                 }
 
@@ -48,7 +75,7 @@ namespace hockeylizer.Controllers
                 }
                 catch (Exception e)
                 {
-                    response = new AddPlayerResult("Spelaren " + name + " kunde inte l�ggas till. Felmeddelande: " + e.Message, false);
+                    response = new AddPlayerResult("Spelaren " + name + " kunde inte läggas till. Felmeddelande: " + e.Message, false);
                 }
             }
             else
@@ -66,7 +93,7 @@ namespace hockeylizer.Controllers
             GetPlayersResult response;
             if (token == appkey)
             {
-                response = new GetPlayersResult(true, "Alla spelare h�mtades",
+                response = new GetPlayersResult(true, "Alla spelare hämtades",
                     db.Players.Select(p =>
                         new PlayerVmSmall
                         {
@@ -82,10 +109,6 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-        //[HttpPost]
-        //[AllowAnonymous]
-        //public async Task<JsonResult> UploadVideo([FromBody, FromForm]int? playerId, IFormFile video, int? interval, int? rounds, int? shots, int? numberOfTargets, List<ShotTimestampVm> timestamps, List<int> targetOrder, List<TargetCoordsVm> targetCoords, string token
-
         [HttpPost]
         [AllowAnonymous]
         public async Task<JsonResult> UploadVideo(UploadVideoVm vm)
@@ -94,12 +117,6 @@ namespace hockeylizer.Controllers
 
             if (vm.token == appkey)
             {
-                if (vm.playerId == null)
-                {
-                    vr = new VideoResult("Spelaren kunde inte hittas då spelarens id inte var med i requesten.", false);
-                    return Json(vr);
-                }
-
                 var pl = db.Players.Find(vm.playerId);
 
                 if (pl == null)
@@ -108,49 +125,11 @@ namespace hockeylizer.Controllers
                 }
                 else
                 {
-                    if (vm.video == null || vm.video.Length == 0)
+                    if (!vm.validate())
                     {
-                        vr = new VideoResult("Videoklippet kunde inte laddas upp då videon saknas!", false);
-                        return Json(vr);
+                        return Json(vm.vr);
                     }
 
-                    if (vm.interval == null)
-                    {
-                        vr = new VideoResult("Videoklippet kunde inte laddas upp då intervall saknas!", false);
-                        return Json(vr);
-                    }
-
-                    if (vm.rounds == null)
-                    {
-                        vr = new VideoResult("Videoklippet kunde inte laddas upp då rundor saknas!", false);
-                        return Json(vr);
-                    }
-
-                    if (vm.numberOfTargets == null)
-                    {
-                        vr = new VideoResult("Videoklippet kunde inte laddas upp då antal skott saknas!", false);
-                        return Json(vr);
-                    }
-
-                    if (!vm.timestamps.Any())
-                    {
-                        vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
-                        return Json(vr);
-                    }
-
-                    if (!vm.targetOrder.Any())
-                    {
-                        vr = new VideoResult("Videoklippet kunde inte laddas upp då skottordning saknas!", false);
-                        return Json(vr);
-                    }
-
-                    //if (!targetCoords.Any())
-                    //{
-                    //    vr = new VideoResult("Videoklippet kunde inte laddas upp då koordinater för skotten saknas!", false);
-                    //    return Json(vr);
-                    //}
-
-                    // Logik f�r att ladda upp video
                     var v = await ImageHandler.UploadVideo(vm.video, db, pl, "video");
 
                     if (string.IsNullOrEmpty(v))
@@ -162,37 +141,9 @@ namespace hockeylizer.Controllers
                         var savedVideo = new PlayerVideo(v, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
                         db.Videos.Add(savedVideo);
 
-                        foreach (var ts in vm.timestamps)
-                        {
-                            var timestamp = new ShotTimestamp(ts.Start, ts.End)
-                            {
-                                Video = savedVideo
-                            };
-
-                            savedVideo.Timestamps.Add(timestamp);
-                        }
-
-                        var index = 1;
-                        foreach (var t in vm.targetOrder)
-                        {
-                            var target = new Target(t, index)
-                            {
-                                RelatedVideo = savedVideo
-                            };
-                            index++;
-
-                            savedVideo.Targets.Add(target);
-                        }
-
-                        foreach (var tc in vm.targetCoords)
-                        {
-                            var targetCoordinate = new TargetCoord(tc.xCoord, tc.yCoord)
-                            {
-                                Video = savedVideo
-                            };
-
-                            savedVideo.TargetCoords.Add(targetCoordinate);
-                        }
+                        savedVideo.AddTimeStamps(vm.timestamps);
+                        savedVideo.AddTargets(vm.targetOrder);
+                        savedVideo.AddTargetCoordinates(vm.targetCoords);
 
                         db.SaveChanges();
 
@@ -246,7 +197,7 @@ namespace hockeylizer.Controllers
             GetVideosResult response;
             if (token == appkey)
             {
-                response = new GetVideosResult(true, "Alla videor h�mtades", new List<VideoVmSmall>());
+                response = new GetVideosResult(true, "Alla videor hämtades", new List<VideoVmSmall>());
 
                 foreach (PlayerVideo v in db.Videos.Where(v => !v.Deleted).ToList())
                 {
@@ -330,7 +281,7 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                // Logik f�r analysen
+                // Logik för analysen
             }
 
             response = new GeneralResult(false, "Inkorrekt token");

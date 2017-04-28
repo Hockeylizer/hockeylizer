@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System.Linq;
+using System;
+
 
 namespace hockeylizer.Models
 {
@@ -21,8 +24,70 @@ namespace hockeylizer.Models
         public string Desctiption { get; set; }
     }
 
+	public class CreateTeamResult
+	{
+		public CreateTeamResult()
+		{
+			this.Completed = false;
+			this.Desctiption = "Okänt fel";
+		}
+
+		public CreateTeamResult(bool comp, string desc)
+		{
+			this.Completed = comp;
+			this.Desctiption = desc;
+		}
+
+		public bool Completed { get; set; }
+		public string Desctiption { get; set; }
+
+        public Guid? TeamId { get; set; }
+	}
+
     public class UploadVideoVm
     {
+        public bool validate() 
+        {
+			if (this.video == null || this.video.Length == 0)
+			{
+				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då videon saknas!", false);
+                return false;
+			}
+
+			if (this.interval == null)
+			{
+				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då intervall saknas!", false);
+                return false;
+			}
+
+			if (this.rounds == null)
+			{
+				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då rundor saknas!", false);
+                return false;
+			}
+
+			if (this.numberOfTargets == null)
+			{
+				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då antal skott saknas!", false);
+                return false;
+			}
+
+            if (!this.timestamps.Any())
+            {
+                this.vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
+                return false;
+            }
+
+			if (!this.targetOrder.Any())
+			{
+				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då skottordning saknas!", false);
+                return false;
+			}
+
+			this.vr = new VideoResult("Videoklippet laddades upp!", true);
+			return true;
+        }
+
         public int? playerId { get; set; }
         public IFormFile video { get; set; }
         public int? interval { get; set; }
@@ -33,6 +98,8 @@ namespace hockeylizer.Models
         public List<int> targetOrder { get; set; }
         public List<TargetCoordsVm> targetCoords { get; set; }
         public string token { get; set; }
+
+        public VideoResult vr { get; set; }
     }
 
     public class UploadTimeStampVm
