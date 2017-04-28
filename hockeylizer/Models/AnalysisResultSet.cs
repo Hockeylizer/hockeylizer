@@ -14,6 +14,8 @@ namespace idk //TEMP Vad ska stå här?
         //an AnalysisResult has: (int FrameNr, Point2i HitPoint, Point2d OffsetFromTarget, bool DidHitGoal)
         public List<AnalysisResult> analysisResultList { get; set; }
         public int numberOfHits { get; set; }
+
+        [key]
         public int VideoId { get; set; }
     }
 
