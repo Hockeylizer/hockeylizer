@@ -318,7 +318,7 @@ namespace hockeylizer.Controllers
 
                 if (video == null)
                 {
-                    response = new GeneralResult(false, "Inkorrekt token");
+                    response = new GeneralResult(false, "Videon finns inte");
                     return Json(response);
                 }
 
