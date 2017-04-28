@@ -1,4 +1,5 @@
 ﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -15,11 +16,13 @@ namespace hockeylizer.Controllers
     {
         private readonly string appkey;
         private readonly ApplicationDbContext db;
+        private readonly IHostingEnvironment hostingEnvironment;
 
-        public CoreController(ApplicationDbContext _db)
+        public CoreController(ApplicationDbContext _db, IHostingEnvironment _hostingEnvironment)
         {
             appkey = "langY6fgXWossV9o";
             db = _db;
+            hostingEnvironment = _hostingEnvironment;
         }
 
 		[HttpPost]
@@ -340,7 +343,10 @@ namespace hockeylizer.Controllers
 
             // Just return a goddamn picture of the goal with no hits.
             // It's something.
-            string svgStr = System.IO.File.ReadAllText("hitsOverview.svg");
+            var path = hostingEnvironment.WebRootPath + "/images/hitsOverview.svg";
+
+            string svgStr = System.IO.File.ReadAllText(path);
+
             return Json(svgStr);
 
         //    GeneralResult response;

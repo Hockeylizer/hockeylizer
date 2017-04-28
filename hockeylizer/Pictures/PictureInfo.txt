@@ -1,0 +1,1 @@
+﻿// Här lagras alla bilder TEMPORÄRT, annars blob

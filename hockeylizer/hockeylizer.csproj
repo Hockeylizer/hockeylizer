@@ -62,12 +62,7 @@
     <None Include="bin\Release\netcoreapp1.1\x64\opencv_world320.dll" />
     <None Include="bin\Release\netcoreapp1.1\x86\cvextern.dll" />
     <None Include="bin\Release\netcoreapp1.1\x86\opencv_ffmpeg310.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\images\" />
-    <Folder Include="Videos\" />
-    <Folder Include="Pictures\" />
+    <None Include="wwwroot\images\hitsOverview.svg" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Services\ImageHandler.cs" />
