@@ -69,4 +69,7 @@
     <Folder Include="Videos\" />
     <Folder Include="Pictures\" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Services\ImageHandler.cs" />
+  </ItemGroup>
 </Project>

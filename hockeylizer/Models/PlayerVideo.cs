@@ -1,6 +1,7 @@
 ﻿﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using hockeylizer.Services;
 
 namespace hockeylizer.Models
 {
@@ -13,6 +14,7 @@ namespace hockeylizer.Models
             this.TargetCoords = new HashSet<TargetCoord>();
 
             this.Deleted = false;
+            this.VideoRemoved = false;
         }
 
         public void AddTimeStamps(List<ShotTimestampVm> timestamps)
@@ -68,6 +70,7 @@ namespace hockeylizer.Models
             this.NumberOfTargets = noTargets;
 
             this.Deleted = false;
+            this.VideoRemoved = false;
 
             this.Targets = new HashSet<Target>();
             this.Timestamps = new HashSet<ShotTimestamp>();
@@ -79,6 +82,14 @@ namespace hockeylizer.Models
             this.Deleted = true;
             this.VideoPath = string.Empty;
         }
+
+		public void RemoveBlob()
+		{
+            FileHandler.DeleteVideo(this.VideoPath, this.Player.RetrieveContainerName());
+
+			this.VideoRemoved = true;
+			this.VideoPath = string.Empty;
+		}
 
         [Key]
         public int VideoId { get; set; }
@@ -95,6 +106,7 @@ namespace hockeylizer.Models
         public int NumberOfTargets { get; set; }
 
         public bool Deleted { get; set; }
+        public bool VideoRemoved { get; set; }
 
         public virtual ICollection<Target> Targets { get; set; }
         public virtual ICollection<ShotTimestamp> Timestamps { get; set; }

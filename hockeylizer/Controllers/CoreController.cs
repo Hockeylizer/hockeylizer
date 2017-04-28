@@ -22,6 +22,8 @@ namespace hockeylizer.Controllers
             db = _db;
         }
 
+		[HttpPost]
+		[AllowAnonymous]
         public JsonResult CreateTeam(string token) 
         {
             CreateTeamResult response;
@@ -169,7 +171,7 @@ namespace hockeylizer.Controllers
                         return Json(vm.vr);
                     }
 
-                    var v = await ImageHandler.UploadVideo(vm.video, pl.RetrieveContainerName(), "video");
+                    var v = await FileHandler.UploadVideo(vm.video, pl.RetrieveContainerName(), "video");
 
                     if (string.IsNullOrEmpty(v))
                     {
@@ -213,10 +215,13 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var deleted = ImageHandler.DeleteImage(videoId, db);
+                var deleted = FileHandler.DeleteVideo(video.VideoPath, video.Player.RetrieveContainerName());
 
                 if (deleted)
                 {
+                    video.Delete();
+                    db.SaveChanges();
+
                     response = new GeneralResult(true, "Videoklippet raderades");
                     return Json(response);
                 }
@@ -244,7 +249,7 @@ namespace hockeylizer.Controllers
 
                     try
                     {
-                        videoPath = await ImageHandler.GetShareableVideoUrl(v.VideoPath);
+                        videoPath = await FileHandler.GetShareableVideoUrl(v.VideoPath);
                     }
                     catch
                     {
@@ -285,7 +290,7 @@ namespace hockeylizer.Controllers
 
                 if (video != null && !video.Deleted)
                 {
-                    response = new GetFramesResult(true, "Alla frames h�mtades", new List<string>());
+                    response = new GetFramesResult(true, "Alla frames hämtades", new List<string>());
 
                     for (var img = 0; img <= 1500; img++)
                     {

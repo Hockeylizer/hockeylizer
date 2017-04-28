@@ -73,7 +73,9 @@ namespace hockeylizer.Services
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             CloudBlobContainer container = blobClient.GetContainerReference(ContainerName);
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(BlobName);
+
             //blockBlob.DownloadToStream(Response.OutputStream);
+
             return blockBlob;
         }
     }
