@@ -27,5 +27,7 @@ namespace hockeylizer.Data
         public DbSet<TargetCoord> TargetCoordinates { get; set; }
 
         public DbSet<AppTeam> AppTeams { get; set; }
+
+        public DbSet<AnalysisResultSet> AnalysisResults { get; set; }
     }
 }
