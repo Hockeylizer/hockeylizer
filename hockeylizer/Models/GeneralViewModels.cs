@@ -250,11 +250,14 @@ namespace hockeylizer.Models
             this.Completed = false;
         }
 
-        public VideoResult(string desc, bool comp)
+        public VideoResult(string desc, bool comp, int? videoId = null)
         {
             this.Description = desc;
             this.Completed = comp;
+            this.VideoId = VideoId;
         }
+
+        public int? VideoId { get; set; }
 
         public bool Completed { get; set; }
         public string Description { get; set; }

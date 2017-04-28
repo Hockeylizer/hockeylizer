@@ -192,7 +192,7 @@ namespace hockeylizer.Controllers
 
                         db.SaveChanges();
 
-                        vr = new VideoResult("Videoklippet laddades upp!", true);
+                        vr = new VideoResult("Videoklippet laddades upp!", true, savedVideo.VideoId);
                     }
                 }
             }
