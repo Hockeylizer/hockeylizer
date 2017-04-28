@@ -8,6 +8,7 @@ using hockeylizer.Helpers;
 using hockeylizer.Models;
 using hockeylizer.Data;
 using System.Linq;
+using System.IO;
 using System;
 
 namespace hockeylizer.Controllers
@@ -98,7 +99,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult AddPlayer(UpdateNameVm vm)
+        public JsonResult UpdatePlayerName(UpdateNameVm vm)
         {
             GeneralResult r;
 
@@ -315,7 +316,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public ActionResult AnalyzeVideo(int videoId, string token)
+        public async Task<JsonResult> ChopVideo(int videoId, string token)
         {
             GeneralResult response;
             if (token == appkey)
@@ -328,7 +329,14 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                // Logik för analysen
+                var path = hostingEnvironment.ContentRootPath + "/videos";
+                var download = FileHandler.DownloadBlob(path, video.VideoPath, video.Player.RetrieveContainerName());
+
+                if (!download)
+                {
+                    response = new GeneralResult(false, "Videon kunde inte laddas ned.");
+                    return Json(response);
+                }
             }
 
             response = new GeneralResult(false, "Inkorrekt token");
