@@ -7,6 +7,12 @@ namespace hockeylizer.Models
 {
     public class AppTeam
     {
+        public AppTeam()
+        {
+            this.TeamId = new Guid();
+            this.Players = new HashSet<Player>();
+        }
+
         public AppTeam(Guid teamId)
         {
             this.TeamId = teamId;
