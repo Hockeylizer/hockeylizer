@@ -15,7 +15,7 @@ namespace hockeylizer.Services
         public async static Task<string> UploadVideo(IFormFile file, string containerName, string fileStart)
         {
             var fileName = fileStart + "-0";
-            var filetype = file.ContentType;
+            var filetype = file.ContentType.Split('/').LastOrDefault() ?? "mp4";
 
             while (await utility.BlobExistsOnCloud(containerName, fileName + "." + filetype))
             {
