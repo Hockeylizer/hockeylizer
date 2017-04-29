@@ -51,6 +51,26 @@ namespace hockeylizer.Models
         public GeneralResult Result { get; set; }
     }
 
+    public class DeletePlayerVm
+    {
+        public bool Validate()
+        {
+            if (playerId == null)
+            {
+                this.Result = new GeneralResult(false, "SpelarId är inte med i anropet.");
+                return false;
+            }
+
+            this.Result = new GeneralResult(true, "Allt fixat!");
+            return true;
+        }
+
+        public int? playerId { get; set; }
+        public string token { get; set; }
+
+        public GeneralResult Result { get; set; }
+    }
+
     public class GeneralResult
     {
         public GeneralResult()

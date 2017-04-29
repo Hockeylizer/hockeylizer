@@ -135,13 +135,47 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        public JsonResult DeletePlayer(DeletePlayerVm vm)
+        {
+            GeneralResult r;
+
+            if (vm.token != appkey)
+            {
+                r = new GeneralResult(false, "Token var inkorrekt");
+            }
+            else
+            {
+                if (!vm.Validate())
+                {
+                    return Json(vm.Result);
+                }
+
+                var player = db.Players.Find(vm.playerId);
+                if (player == null)
+                {
+                    r = new GeneralResult(false, "Spelaren finns inte.");
+                }
+                else
+                {
+                    player.Deleted = true;
+                    db.SaveChanges();
+
+                    r = new GeneralResult(true, "Spelaren raderades!");
+                }
+            }
+
+            return Json(r);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
         public JsonResult GetAllPlayers(Guid teamId, string token)
         {
             GetPlayersResult response;
             if (token == appkey)
             {
                 response = new GetPlayersResult(true, "Alla spelare hämtades",
-		                        db.Players.Where(p => p.TeamId == teamId).Select(p => 
+		                        db.Players.Where(p => p.TeamId == teamId && !p.Deleted).Select(p => 
                                   new PlayerVmSmall
 			                        {
 			                            PlayerId = p.PlayerId,
@@ -156,16 +190,17 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-        //[AllowAnonymous]
-        //public ContentResult fixplayerid(UploadVideoVm vm)
-        //{
-        //    foreach (var pl in db.Players)
-        //    {
-        //        pl.UpdateContainerId();
-        //        db.SaveChanges();
-        //    }
-        //    return Content("Done");
-        //}
+        [AllowAnonymous]
+        public ContentResult fixplayerid(UploadVideoVm vm)
+        {
+            foreach (var pl in db.Players)
+            {
+                pl.Deleted = false;
+                pl.UpdateContainerId();
+                db.SaveChanges();
+            }
+            return Content("Done");
+        }
 
         [HttpPost]
         [AllowAnonymous]
