@@ -191,8 +191,9 @@ namespace hockeylizer.Controllers
                         savedVideo.AddTargetCoordinates(vm.targetCoords);
 
                         db.SaveChanges();
+                        var videoId = savedVideo.VideoId;
 
-                        vr = new VideoResult("Videoklippet laddades upp!", true, savedVideo.VideoId);
+                        vr = new VideoResult("Videoklippet laddades upp!", true, videoId);
                     }
                 }
             }
@@ -328,6 +329,8 @@ namespace hockeylizer.Controllers
                     response = new GeneralResult(false, "Videon finns inte");
                     return Json(response);
                 }
+
+                await Task.Run(() => System.Threading.Thread.Sleep(1)); ;
 
                 var blobname = video.VideoPath.Split('/').LastOrDefault();
                 var path = hostingEnvironment.WebRootPath + "/videos/video.mp4";
