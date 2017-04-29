@@ -388,6 +388,18 @@ namespace hockeylizer.Controllers
 
                 // Logik för att choppa video
 
+                var pictureUrls = new List<string>();
+                if (pictureUrls.Any())
+                {
+                    foreach (var url in pictureUrls)
+                    {
+                        var picture = new PictureToAnalyze(url, videoId);
+                        await db.Pictures.AddAsync(picture);
+                    }
+
+                    await db.SaveChangesAsync();
+                }
+
                 if (!System.IO.File.Exists(path))
                 {
                     response = new GeneralResult(false, "Videon kunde inte raderas då den inte existerar.");
