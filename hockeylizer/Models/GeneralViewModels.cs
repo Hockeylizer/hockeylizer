@@ -274,7 +274,7 @@ namespace hockeylizer.Models
         {
             this.Description = desc;
             this.Completed = comp;
-            this.VideoId = VideoId;
+            this.VideoId = videoId;
         }
 
         public int? VideoId { get; set; }
