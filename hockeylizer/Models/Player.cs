@@ -21,13 +21,13 @@ namespace hockeylizer.Models
             this.containerId = new Guid();
         }
 
+        public void UpdateContainerId()
+        {
+            this.containerId = new Guid();
+        }
+
         public string RetrieveContainerName()
         {
-            if (this.containerId == null)
-            {
-                this.containerId = new Guid();
-            }
-
             return  this.containerId + "-" + this.PlayerId;
         }
 
