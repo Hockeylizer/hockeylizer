@@ -368,9 +368,11 @@ namespace hockeylizer.Controllers
             // It's something.
             var path = hostingEnvironment.WebRootPath + "/images/hitsOverview.svg";
 
+            var svgURL = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
+
             string svgStr = System.IO.File.ReadAllText(path);
 
-            return Json(svgStr);
+            return Json(svgURL);
 
         //    GeneralResult response;
         //    if (token == appkey)

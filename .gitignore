@@ -265,3 +265,5 @@ __pycache__/
 **/bin/**/*hockeylizer.dll
 **/bin/**/*.runtimeconfig*
 **/bin/**/x86/
+/hockeylizer/Data/Migrations/20170427153958_fifth.cs
+/hockeylizer/Data/Migrations/20170427153958_fifth.Designer.cs
