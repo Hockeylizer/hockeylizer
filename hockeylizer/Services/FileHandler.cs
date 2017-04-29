@@ -38,12 +38,13 @@ namespace hockeylizer.Services
             return string.Empty;
         }
 
-        public static bool DownloadBlob(string path, string blobname, string container)
+        public async static Task<bool> DownloadBlob(string path, string blobname, string container)
         {
             try
             {
 				var blob = utility.DownloadBlob(blobname, container);
-				blob.DownloadToFileAsync(path, FileMode.Create);
+                
+				await blob.DownloadToFileAsync(path + blob.Name, FileMode.Create);
 
                 return true;
             }

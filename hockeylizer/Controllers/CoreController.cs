@@ -316,7 +316,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult ChopVideo(int videoId, string token)
+        public async Task<JsonResult> ChopVideo(int videoId, string token)
         {
             GeneralResult response;
             if (token == appkey)
@@ -329,26 +329,28 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var blobname = video.VideoPath.Split('/').LastOrDefault() ?? "video-" + video.Player.Name.ToLower() + ".mp4";
-                var path = hostingEnvironment.WebRootPath + "/videos/" + blobname;
+                var blobname = video.VideoPath.Split('/').LastOrDefault();
+                var path = hostingEnvironment.WebRootPath + "/videos/video.mp4";
+                //var download = await FileHandler.DownloadBlob(path, blobname, video.Player.RetrieveContainerName());
 
-                var download = FileHandler.DownloadBlob(path, blobname, video.Player.RetrieveContainerName());
+                //if (!download)
+                //{
+                //    response = new GeneralResult(false, "Videon kunde inte laddas ned.");
+                //    return Json(response);
+                //}
 
-                if (!download)
-                {
-                    response = new GeneralResult(false, "Videon kunde inte laddas ned.");
-                    return Json(response);
-                }
+                //// Logik för att choppa video
 
-                // Logik för att choppa video
+                //if (!System.IO.File.Exists(path))
+                //{
+                //    response = new GeneralResult(false, "Videon kunde inte raderas då den inte existerar.");
+                //    return Json(response);
+                //}
 
-                if (!System.IO.File.Exists(@path))
-                {
-                    response = new GeneralResult(false, "Videon kunde inte raderas då den inte existerar.");
-                    return Json(response);
-                }
+                //System.IO.File.Delete(path);
 
-                System.IO.File.Delete(@path);
+                response = new GeneralResult(true, "Allt fixat!");
+                return Json(response);
             }
 
             response = new GeneralResult(false, "Inkorrekt token");
