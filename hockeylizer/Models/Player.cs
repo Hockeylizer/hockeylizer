@@ -9,7 +9,7 @@ namespace hockeylizer.Models
     {
         public Player()
         {
-            this.containerId = new Guid();
+            this.containerId = Guid.NewGuid();
             this.Videos = new HashSet<PlayerVideo>();
             this.Deleted = false;
         }
@@ -19,13 +19,13 @@ namespace hockeylizer.Models
             this.Name = name;
             this.TeamId = teamId;
             this.Videos = new HashSet<PlayerVideo>();
-            this.containerId = new Guid();
+            this.containerId = Guid.NewGuid();
             this.Deleted = false;
         }
 
         public void UpdateContainerId()
         {
-            this.containerId = new Guid();
+            this.containerId = Guid.NewGuid();
         }
 
         public string RetrieveContainerName()

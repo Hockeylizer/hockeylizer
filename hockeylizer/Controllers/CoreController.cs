@@ -190,18 +190,6 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-        [AllowAnonymous]
-        public ContentResult fixplayerid(UploadVideoVm vm)
-        {
-            foreach (var pl in db.Players)
-            {
-                pl.Deleted = false;
-                pl.UpdateContainerId();
-                db.SaveChanges();
-            }
-            return Content("Done");
-        }
-
         [HttpPost]
         [AllowAnonymous]
         public async Task<JsonResult> UploadVideo(UploadVideoVm vm)
