@@ -167,12 +167,14 @@ namespace hockeylizer.Models
             this.Completed = false;
         }
 
-        public AddPlayerResult(string desc, bool comp)
+        public AddPlayerResult(string desc, bool comp, int? pl = null)
         {
+            this.PlayerId = pl;
             this.Description = desc;
             this.Completed = comp;
         }
 
+        public int? PlayerId { get; set; }
         public bool Completed { get; set; }
         public string Description { get; set; }
     }

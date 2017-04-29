@@ -9,6 +9,7 @@ namespace hockeylizer.Models
     {
         public Player()
         {
+            this.containerId = new Guid();
             this.Videos = new HashSet<PlayerVideo>();
         }
 
@@ -17,11 +18,17 @@ namespace hockeylizer.Models
             this.Name = name;
             this.TeamId = teamId;
             this.Videos = new HashSet<PlayerVideo>();
+            this.containerId = new Guid();
         }
 
         public string RetrieveContainerName()
         {
-            return this.Name.ToLower() + "-" + this.PlayerId;
+            if (this.containerId == null)
+            {
+                this.containerId = new Guid();
+            }
+
+            return  this.containerId + "-" + this.PlayerId;
         }
 
         [Key]
@@ -32,6 +39,7 @@ namespace hockeylizer.Models
         public Guid? TeamId { get; set; }
         public virtual AppTeam Team { get; set; }
 
+        private Guid containerId { get; set; }
         public virtual ICollection<PlayerVideo> Videos { get; set; }
     }
 }

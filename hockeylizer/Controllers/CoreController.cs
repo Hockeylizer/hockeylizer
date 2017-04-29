@@ -82,7 +82,9 @@ namespace hockeylizer.Controllers
                     db.Players.Add(player);
                     db.SaveChanges();
 
-                    response = new AddPlayerResult("Spelaren " + name + " lades till utan problem", true);
+                    db.Entry(player).GetDatabaseValues();
+
+                    response = new AddPlayerResult("Spelaren " + name + " lades till utan problem", true, player.PlayerId);
                 }
                 catch (Exception e)
                 {
