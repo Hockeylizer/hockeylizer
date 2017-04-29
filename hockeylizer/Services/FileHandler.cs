@@ -43,9 +43,8 @@ namespace hockeylizer.Services
         {
             try
             {
-				var blob = utility.DownloadBlob(blobname, container);
-                
-				await blob.DownloadToFileAsync(Path.Combine(path, blob.Name), FileMode.Create);
+                var blob = utility.DownloadBlob(blobname, container);
+                await blob.DownloadToFileAsync(path, FileMode.Create);
 
                 return true;
             }

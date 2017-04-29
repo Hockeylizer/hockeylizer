@@ -367,8 +367,18 @@ namespace hockeylizer.Controllers
                 }
 
                 var blobname = video.FileName;
-                var path = Path.Combine(hostingEnvironment.WebRootPath, "uploads");
-                var download = await FileHandler.DownloadBlob(path, blobname, video.Player.RetrieveContainerName());
+                var path = Path.Combine(hostingEnvironment.WebRootPath, "videos");
+                path = Path.Combine(path, blobname);
+
+                var player = db.Players.Find(video.PlayerId);
+
+                if (player == null)
+                {
+                    response = new GeneralResult(false, "Spelaren finns inte");
+                    return Json(response);
+                }
+
+                var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
 
                 if (!download)
                 {

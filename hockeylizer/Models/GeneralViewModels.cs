@@ -76,17 +76,17 @@ namespace hockeylizer.Models
         public GeneralResult()
         {
             this.Completed = false;
-            this.Desctiption = "Okänt fel";
+            this.Description = "Okänt fel";
         }
 
         public GeneralResult(bool comp, string desc)
         {
             this.Completed = comp;
-            this.Desctiption = desc;
+            this.Description = desc;
         }
 
         public bool Completed { get; set; }
-        public string Desctiption { get; set; }
+        public string Description { get; set; }
     }
 
 	public class CreateTeamResult
@@ -94,17 +94,17 @@ namespace hockeylizer.Models
 		public CreateTeamResult()
 		{
 			this.Completed = false;
-			this.Desctiption = "Okänt fel";
+			this.Description = "Okänt fel";
 		}
 
 		public CreateTeamResult(bool comp, string desc)
 		{
 			this.Completed = comp;
-			this.Desctiption = desc;
+			this.Description = desc;
 		}
 
 		public bool Completed { get; set; }
-		public string Desctiption { get; set; }
+		public string Description { get; set; }
 
         public Guid? TeamId { get; set; }
 	}
