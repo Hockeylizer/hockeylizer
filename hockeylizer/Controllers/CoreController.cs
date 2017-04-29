@@ -191,9 +191,9 @@ namespace hockeylizer.Controllers
                         savedVideo.AddTargetCoordinates(vm.targetCoords);
 
                         db.SaveChanges();
-                        var videoId = savedVideo.VideoId;
+                        await db.Entry(savedVideo).GetDatabaseValuesAsync();
 
-                        vr = new VideoResult("Videoklippet laddades upp!", true, videoId);
+                        vr = new VideoResult("Videoklippet laddades upp!", true, savedVideo.VideoId);
                     }
                 }
             }
