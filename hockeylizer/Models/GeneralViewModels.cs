@@ -6,6 +6,24 @@ using System;
 
 namespace hockeylizer.Models
 {
+    public class UploadFileResult
+    {
+        public UploadFileResult()
+        {
+            this.FilePath = "";
+            this.FileName = "";
+        }
+
+        public UploadFileResult(string fp, string fn)
+        {
+            this.FilePath = fp;
+            this.FileName = fn;
+        }
+
+        public string FilePath { get; set; }
+        public string FileName { get; set; }
+    }
+
     public class UpdateNameVm
     {
         public bool Validate() 

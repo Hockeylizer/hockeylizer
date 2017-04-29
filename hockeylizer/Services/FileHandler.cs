@@ -12,10 +12,10 @@ namespace hockeylizer.Services
     {
         private static readonly BlobUtility utility = new BlobUtility("hockeydata", "QmoOoi3h8htf3+Luqz7GhVe9WZavcDvn/DHqEzc25f9/Ii4zKeqTwuP+x9M9UbZWSVTGKnNW2rF89X/D6yza+A==");
 
-        public async static Task<string> UploadVideo(IFormFile file, string containerName, string fileStart)
+        public async static Task<UploadFileResult> UploadVideo(IFormFile file, string containerName, string fileStart)
         {
             var fileName = fileStart + "-0";
-            var filetype = file.ContentType.Split('/').LastOrDefault() ?? "mp4";
+            var filetype = file.ContentType;
 
             while (await utility.BlobExistsOnCloud(containerName, fileName + "." + filetype))
             {
@@ -32,10 +32,11 @@ namespace hockeylizer.Services
             var result = await utility.UploadBlob(fileName, containerName, imageStream);
             if (result != null)
             {
-                return result.Uri.ToString();
+                var response = new UploadFileResult(result.Uri.ToString(), fileName);
+                return response;
             }
 
-            return string.Empty;
+            return new UploadFileResult();
         }
 
         public async static Task<bool> DownloadBlob(string path, string blobname, string container)
@@ -44,7 +45,7 @@ namespace hockeylizer.Services
             {
 				var blob = utility.DownloadBlob(blobname, container);
                 
-				await blob.DownloadToFileAsync(path + blob.Name, FileMode.Create);
+				await blob.DownloadToFileAsync(Path.Combine(path, blob.Name), FileMode.Create);
 
                 return true;
             }

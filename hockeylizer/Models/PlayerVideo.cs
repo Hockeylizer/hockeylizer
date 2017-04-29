@@ -58,9 +58,10 @@ namespace hockeylizer.Models
 			}
         }
 
-        public PlayerVideo(string path, int playerId, int interval, int rounds, int shots, int noTargets)
+        public PlayerVideo(string path, string name, int playerId, int interval, int rounds, int shots, int noTargets)
         {
             this.VideoPath = path;
+            this.FileName = name;
             this.PlayerId = playerId;
 
             this.Interval = interval;
@@ -95,7 +96,9 @@ namespace hockeylizer.Models
 
         [Key]
         public int VideoId { get; set; }
+
         public string VideoPath { get; set; }
+        public string FileName { get; set; }
 
         [ForeignKey("Player")]
         public int PlayerId { get; set; }

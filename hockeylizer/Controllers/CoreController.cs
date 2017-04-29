@@ -177,13 +177,13 @@ namespace hockeylizer.Controllers
 
                     var v = await FileHandler.UploadVideo(vm.video, pl.RetrieveContainerName(), "video");
 
-                    if (string.IsNullOrEmpty(v))
+                    if (string.IsNullOrEmpty(v.FilePath))
                     {
                         vr = new VideoResult("Videoklippet kunde inte laddas upp!", false);
                     }
                     else
                     {
-                        var savedVideo = new PlayerVideo(v, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
+                        var savedVideo = new PlayerVideo(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
                         db.Videos.Add(savedVideo);
 
                         savedVideo.AddTimeStamps(vm.timestamps);
@@ -191,7 +191,7 @@ namespace hockeylizer.Controllers
                         savedVideo.AddTargetCoordinates(vm.targetCoords);
 
                         db.SaveChanges();
-                        await db.Entry(savedVideo).GetDatabaseValuesAsync();
+                        var video = await db.Entry(savedVideo).GetDatabaseValuesAsync();
 
                         vr = new VideoResult("Videoklippet laddades upp!", true, savedVideo.VideoId);
                     }
@@ -330,27 +330,25 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                await Task.Run(() => System.Threading.Thread.Sleep(1)); ;
+                var blobname = video.FileName;
+                var path = Path.Combine(hostingEnvironment.WebRootPath, "uploads");
+                var download = await FileHandler.DownloadBlob(path, blobname, video.Player.RetrieveContainerName());
 
-                var blobname = video.VideoPath.Split('/').LastOrDefault();
-                var path = hostingEnvironment.WebRootPath + "/videos/video.mp4";
-                //var download = await FileHandler.DownloadBlob(path, blobname, video.Player.RetrieveContainerName());
+                if (!download)
+                {
+                    response = new GeneralResult(false, "Videon kunde inte laddas ned.");
+                    return Json(response);
+                }
 
-                //if (!download)
-                //{
-                //    response = new GeneralResult(false, "Videon kunde inte laddas ned.");
-                //    return Json(response);
-                //}
+                // Logik för att choppa video
 
-                //// Logik för att choppa video
+                if (!System.IO.File.Exists(path))
+                {
+                    response = new GeneralResult(false, "Videon kunde inte raderas då den inte existerar.");
+                    return Json(response);
+                }
 
-                //if (!System.IO.File.Exists(path))
-                //{
-                //    response = new GeneralResult(false, "Videon kunde inte raderas då den inte existerar.");
-                //    return Json(response);
-                //}
-
-                //System.IO.File.Delete(path);
+                System.IO.File.Delete(path);
 
                 response = new GeneralResult(true, "Allt fixat!");
                 return Json(response);
