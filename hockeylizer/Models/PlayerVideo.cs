@@ -10,51 +10,23 @@ namespace hockeylizer.Models
         private PlayerVideo()
         {
             this.Targets = new HashSet<Target>();
-            this.Timestamps = new HashSet<ShotTimestamp>();
-            this.TargetCoords = new HashSet<TargetCoord>();
-
             this.Deleted = false;
             this.VideoRemoved = false;
         }
 
-        public void AddTimeStamps(List<ShotTimestampVm> timestamps)
-        {
-            foreach (var ts in timestamps)
-            {
-                var timestamp = new ShotTimestamp(ts.Start, ts.End)
-                {
-                    Video = this
-                };
-
-                this.Timestamps.Add(timestamp);
-            }
-        }
-
-        public void AddTargets(List<int> targetOrder) 
+        // to = targetorder, ts = timestamps
+        public void AddTargets(List<int> to, List<TargetCoordsVm> coords, List<ShotTimestampVm> ts) 
         {
 			var index = 1;
-			foreach (var t in targetOrder)
+			for (var t = 0; t < to.Count; t++)
 			{
-				var target = new Target(t, index)
+				var target = new Target(to[t], index, ts[t].Start, ts[t].End, coords[t].xCoord, coords[t].yCoord)
 				{
 					RelatedVideo = this
 				};
 				index++;
 
 				this.Targets.Add(target);
-			}
-        }
-
-        public void AddTargetCoordinates(List<TargetCoordsVm> targetCoordinates)
-        {
-			foreach (var tc in targetCoordinates)
-			{
-				var targetCoordinate = new TargetCoord(tc.xCoord, tc.yCoord)
-				{
-					Video = this
-				};
-
-				this.TargetCoords.Add(targetCoordinate);
 			}
         }
 
@@ -74,10 +46,6 @@ namespace hockeylizer.Models
             this.VideoRemoved = false;
 
             this.Targets = new HashSet<Target>();
-			this.Targets = new HashSet<Target>();
-
-			this.Timestamps = new HashSet<ShotTimestamp>();
-            this.TargetCoords = new HashSet<TargetCoord>();
         }
 
         public void Delete() 
@@ -114,9 +82,5 @@ namespace hockeylizer.Models
         public bool VideoRemoved { get; set; }
 
         public virtual ICollection<Target> Targets { get; set; }
-        public virtual ICollection<AnalysisResult> AnalysisResults { get; set; }
-
-        public virtual ICollection<ShotTimestamp> Timestamps { get; set; }
-        public virtual ICollection<TargetCoord> TargetCoords { get; set; }
     }
 }

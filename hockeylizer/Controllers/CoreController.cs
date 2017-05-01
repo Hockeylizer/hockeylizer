@@ -206,7 +206,7 @@ namespace hockeylizer.Controllers
                 }
                 else
                 {
-                    if (!vm.validate())
+                    if (!vm.Validate())
                     {
                         return Json(vm.vr);
                     }
@@ -219,12 +219,11 @@ namespace hockeylizer.Controllers
                     }
                     else
                     {
+                   
                         var savedVideo = new PlayerVideo(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
                         db.Videos.Add(savedVideo);
 
-                        savedVideo.AddTimeStamps(vm.timestamps);
-                        savedVideo.AddTargets(vm.targetOrder);
-                        savedVideo.AddTargetCoordinates(vm.targetCoords);
+                        savedVideo.AddTargets(vm.targetOrder, vm.targetCoords, vm.timestamps);
 
                         db.SaveChanges();
                         db.Entry(savedVideo).GetDatabaseValues();
@@ -305,7 +304,6 @@ namespace hockeylizer.Controllers
                         Rounds = v.Rounds,
                         Shots = v.Shots,
                         NumberOfTargets = v.NumberOfTargets,
-                        Timestamps = v.Timestamps.ToList(),
                         Targets = v.Targets.ToList()
                     };
 
@@ -391,13 +389,13 @@ namespace hockeylizer.Controllers
                 var pictureUrls = new List<string>();
                 if (pictureUrls.Any())
                 {
-                    foreach (var url in pictureUrls)
-                    {
-                        var picture = new PictureToAnalyze(url, videoId);
-                        await db.Pictures.AddAsync(picture);
-                    }
+                    //foreach (var url in pictureUrls)
+                    //{
+                    //    var picture = new PictureToAnalyze(url, videoId);
+                    //    await db.Pictures.AddAsync(picture);
+                    //}
 
-                    await db.SaveChangesAsync();
+                    //await db.SaveChangesAsync();
                 }
 
                 if (!System.IO.File.Exists(path))

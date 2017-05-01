@@ -20,8 +20,6 @@ namespace hockeylizer.Data
 
         public DbSet<PlayerVideo> Videos { get; set; }
 
-        public DbSet<ShotTimestamp> Timestamps { get; set; }
-
         public DbSet<Target> Targets { get; set; }
 
         public DbSet<TargetCoord> TargetCoordinates { get; set; }
@@ -29,7 +27,5 @@ namespace hockeylizer.Data
         public DbSet<AppTeam> AppTeams { get; set; }
 
         public DbSet<AnalysisResult> AnalysisResults { get; set; }
-
-        public DbSet<PictureToAnalyze> Pictures { get; set; }
     }
 }

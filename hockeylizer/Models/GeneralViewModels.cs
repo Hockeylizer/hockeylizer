@@ -111,7 +111,7 @@ namespace hockeylizer.Models
 
     public class UploadVideoVm
     {
-        public bool validate() 
+        public bool Validate() 
         {
 			if (this.video == null || this.video.Length == 0)
 			{
@@ -149,7 +149,18 @@ namespace hockeylizer.Models
                 return false;
 			}
 
-			this.vr = new VideoResult("Videoklippet laddades upp!", true);
+
+            var to = this.targetOrder.Count;
+            var tc = this.targetCoords.Count;
+            var ts = this.timestamps.Count;
+
+            if (!(to == tc && to == ts && tc == ts))
+            {
+                this.vr = new VideoResult("Videoklippet kunde inte laddas upp då antalet listor inte stämmer överens!", false);
+                return false;
+            }
+
+            this.vr = new VideoResult("Videoklippet laddades upp!", true);
 			return true;
         }
 
@@ -167,10 +178,10 @@ namespace hockeylizer.Models
         public VideoResult vr { get; set; }
     }
 
-    public class UploadTimeStampVm
+    public class TargetCoord
     {
-        public List<ShotTimestampVm> timestamps { get; set; }
-        public string token { get; set; }
+        public int? xCoord { get; set; }
+        public int? yCoord { get; set; }
     }
 
     public class ShotTimestampVm
@@ -236,7 +247,6 @@ namespace hockeylizer.Models
         public int? Shots { get; set; }
         public int? NumberOfTargets { get; set; }
 
-        public List<ShotTimestamp> Timestamps { get; set; }
         public List<Target> Targets { get; set; }
     }
 
