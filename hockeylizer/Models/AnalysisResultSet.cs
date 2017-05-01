@@ -9,10 +9,10 @@ namespace hockeylizer.Models
 	{
         public AnalysisResult() { }
 
-        public AnalysisResult(int targetId)
-        {
-            this.TargetId = targetId;
-        }
+        //public AnalysisResult(int targetId)
+        //{
+        //    this.TargetId = targetId;
+        //}
 
         [Key]
 		public int AnalysisId { get; set; }
@@ -22,8 +22,8 @@ namespace hockeylizer.Models
         // Lägg till resten av allt
         public bool HitGoal { get; set; }
 
-        [ForeignKey("Target")]
-        public int TargetId { get; set; }
-        public virtual Target Target { get; set; }
+        //[ForeignKey("Target")]
+        //public int TargetId { get; set; }
+        //public virtual Target Target { get; set; }
     }
 }

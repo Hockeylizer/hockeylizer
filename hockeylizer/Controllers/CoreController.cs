@@ -394,7 +394,7 @@ namespace hockeylizer.Controllers
                     //    var picture = new PictureToAnalyze(url, videoId);
                     //    await db.Pictures.AddAsync(picture);
                     //}
-
+                    
                     //await db.SaveChangesAsync();
                 }
 
