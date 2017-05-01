@@ -178,12 +178,6 @@ namespace hockeylizer.Models
         public VideoResult vr { get; set; }
     }
 
-    public class TargetCoord
-    {
-        public int? xCoord { get; set; }
-        public int? yCoord { get; set; }
-    }
-
     public class ShotTimestampVm
     {
         public long Start { get; set; }
