@@ -414,6 +414,19 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult del()
+        {
+            foreach (var vi in db.Videos)
+            {
+                db.Remove(vi);
+            }
+            db.SaveChanges();
+            return Json("Done");
+        }
+
         //Daniels funktion 
         [HttpPost]
         [AllowAnonymous]
