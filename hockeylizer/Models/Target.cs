@@ -27,5 +27,9 @@ namespace hockeylizer.Models
         [ForeignKey("RelatedVideo")]
         public int VideoId { get; set; }
         public virtual PlayerVideo RelatedVideo { get; set; }
+
+        [ForeignKey("Analysis")]
+        public int? AnalysisResultId { get; set; }
+        public virtual AnalysisResult Analysis { get; set; }
     }
 }
