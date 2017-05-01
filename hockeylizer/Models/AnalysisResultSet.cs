@@ -15,10 +15,10 @@ namespace hockeylizer.Models
             
         }
 
-		public AnalysisResult(int videoId)
-		{
-            this.VideoId = videoId;
-		}
+		//public AnalysisResult(int videoId)
+		//{
+  //          this.VideoId = videoId;
+		//}
 
 		[Key]
 		public int AnalysisId { get; set; }
@@ -28,8 +28,8 @@ namespace hockeylizer.Models
         // Lägg till resten av allt
         public bool HitGoal { get; set; }
 
-        [ForeignKey("Video")]
-        public int? VideoId { get; set; }
-        public virtual PlayerVideo Video { get; set; }
+        //[ForeignKey("Video")]
+        //public int? VideoId { get; set; }
+        //public virtual PlayerVideo Video { get; set; }
 	}
 }

@@ -113,7 +113,16 @@ namespace hockeylizer.Models
     {
         public bool Validate() 
         {
-			if (this.video == null || this.video.Length == 0)
+            var allowedFileTypes = "msvideo ogg mp4 avi mpeg quicktime 3gpp 3gpp2";
+            var currentFileType = this.video.ContentType.Split('/').LastOrDefault();
+
+            if (!allowedFileTypes.Contains(currentFileType))
+            {
+                this.vr = new VideoResult("Videoklippet kunde inte laddas upp då videon har fel feltyp! Kan ej ta emot filer av typ: " + currentFileType + ". Endast " + allowedFileTypes + " tas emot.", false);
+                return false;
+            }
+
+            if (this.video == null || this.video.Length == 0)
 			{
 				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då videon saknas!", false);
                 return false;
