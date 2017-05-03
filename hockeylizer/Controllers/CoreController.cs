@@ -101,7 +101,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult UpdatePlayerName(UpdateNameVm vm)
+        public async Task<JsonResult> UpdatePlayerName(UpdateNameVm vm)
         {
             GeneralResult r;
 
@@ -124,7 +124,7 @@ namespace hockeylizer.Controllers
                 else
                 {
                     player.Name = vm.name;
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
 
                     r = new GeneralResult(true, "Namnet uppdaterades!");
                 }
@@ -135,7 +135,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult DeletePlayer(DeletePlayerVm vm)
+        public async Task<JsonResult> DeletePlayer(DeletePlayerVm vm)
         {
             GeneralResult r;
 
@@ -158,7 +158,7 @@ namespace hockeylizer.Controllers
                 else
                 {
                     player.Deleted = true;
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
 
                     r = new GeneralResult(true, "Spelaren raderades!");
                 }
@@ -169,24 +169,32 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult GetAllPlayers(Guid teamId, string token)
+        public JsonResult GetAllPlayers(Guid? teamId, string token)
         {
             GetPlayersResult response;
             if (token == appkey)
             {
+                var team = db.AppTeams.Find(teamId);
+
+                if (team == null)
+                {
+					// Team missing
+                    response = new GetPlayersResult(false, "Appen saknas i databasen", new List<PlayerVmSmall>());
+                    return Json(response);
+				}
+
                 response = new GetPlayersResult(true, "Alla spelare hämtades",
-		                        db.Players.Where(p => p.TeamId == teamId && !p.Deleted).Select(p => 
+                                db.Players.Where(p => p.TeamId == teamId && !p.Deleted).Select(p =>
                                   new PlayerVmSmall
-			                        {
-			                            PlayerId = p.PlayerId,
-			                            Name = p.Name
-			                        }).ToList());
-            }
-            else
-            {
-                response = new GetPlayersResult(false, "Token var inkorrekt", new List<PlayerVmSmall>());
+                                  {
+                                      PlayerId = p.PlayerId,
+                                      Name = p.Name
+                                  }).ToList());
+                return Json(response);
             }
 
+            response = new GetPlayersResult(false, "Token var inkorrekt", new List<PlayerVmSmall>());
+         
             return Json(response);
         }
 
@@ -242,7 +250,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult DeleteVideoFromSession(int sessionId, string token)
+        public async Task<JsonResult> DeleteVideoFromSession(int sessionId, string token)
         {
             GeneralResult response;
             if (token == appkey)
@@ -260,7 +268,7 @@ namespace hockeylizer.Controllers
                 if (deleted)
                 {
                     session.Delete();
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
 
                     response = new GeneralResult(true, "Videoklippet raderades");
                     return Json(response);
@@ -351,49 +359,49 @@ namespace hockeylizer.Controllers
 			return Json(response);
         }
 
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<JsonResult> GetAllSessions(string token)
-        {
-            GetSessionsResult response;
-            if (token == appkey)
-            {
-                response = new GetSessionsResult(true, "Alla videor hämtades", new List<SessionVmSmall>());
+        //[HttpGet]
+        //[AllowAnonymous]
+        //public async Task<JsonResult> GetAllSessions(string token)
+        //{
+        //    GetSessionsResult response;
+        //    if (token == appkey)
+        //    {
+        //        response = new GetSessionsResult(true, "Alla videor hämtades", new List<SessionVmSmall>());
 
-                foreach (PlayerSession s in db.Sessions.Where(v => !v.Deleted).ToList())
-                {
-                    string videoPath;
+        //        foreach (PlayerSession s in db.Sessions.Where(v => !v.Deleted).ToList())
+        //        {
+        //            string videoPath;
 
-                    try
-                    {
-                        videoPath = await FileHandler.GetShareableVideoUrl(s.VideoPath);
-                    }
-                    catch
-                    {
-                        videoPath = "";
-                    }
+        //            try
+        //            {
+        //                videoPath = await FileHandler.GetShareableVideoUrl(s.VideoPath);
+        //            }
+        //            catch
+        //            {
+        //                videoPath = "";
+        //            }
 
-                    var sessionInfo = new SessionVmSmall
-                    {
-                        SessionId = s.SessionId,
-                        VideoPath = videoPath,
-                        Interval = s.Interval,
-                        Rounds = s.Rounds,
-                        Shots = s.Shots,
-                        NumberOfTargets = s.NumberOfTargets,
-                        Targets = s.Targets.ToList()
-                    };
+        //            var sessionInfo = new SessionVmSmall
+        //            {
+        //                SessionId = s.SessionId,
+        //                VideoPath = videoPath,
+        //                Interval = s.Interval,
+        //                Rounds = s.Rounds,
+        //                Shots = s.Shots,
+        //                NumberOfTargets = s.NumberOfTargets,
+        //                Targets = s.Targets.ToList()
+        //            };
 
-                    response.Sessions.Add(sessionInfo);
-                }
-            }
-            else
-            {
-                response = new GetSessionsResult(false, "Token var inkorrekt", new List<SessionVmSmall>());
-            }
+        //            response.Sessions.Add(sessionInfo);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        response = new GetSessionsResult(false, "Token var inkorrekt", new List<SessionVmSmall>());
+        //    }
 
-            return Json(response);
-        }
+        //    return Json(response);
+        //}
 
         [HttpGet]
         [AllowAnonymous]
@@ -408,9 +416,9 @@ namespace hockeylizer.Controllers
                 {
                     response = new GetFramesResult(true, "Alla frames hämtades", new List<string>());
 
-                    for (var img = 0; img <= 1500; img++)
+                    foreach (var t in session.Targets)
                     {
-                        response.Images.Add("https://cdn.pixabay.com/photo/2016/06/24/16/49/hockey-puck-1477440_960_720.png");
+                        response.Images.AddRange(t.FramesToAnalyze.Select(frame => frame.FrameUrl));
                     }
                 }
                 else
