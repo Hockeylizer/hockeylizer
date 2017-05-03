@@ -76,6 +76,7 @@
     <Compile Remove="Models\PlayerVideo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="wwwroot\imagesfromvideo\" />
   </ItemGroup>
 </Project>
