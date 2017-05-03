@@ -19,6 +19,7 @@ namespace Bridge
             get { return new Point2i(pX, pY); }
         }
 
+        // Positive y is up.
         public Point2d OffsetFromTarget
         {
             get { return new Point2d(offsetX, offsetY); }
@@ -29,6 +30,19 @@ namespace Bridge
             get { return hit; }
         }
 
+        // If there was an error only ErrorMessage has sane values
+        public bool WasErrors
+        {
+            get { return error; }
+        }
+
+        public string ErrorMessage
+        {
+            get { return errorMessage; }
+        }
+
+        private bool error;
+        private string errorMessage;
         private bool hit;
         private int frameNr;
         private int pX;

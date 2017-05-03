@@ -8,20 +8,61 @@ namespace Bridge
     static class AnalysisBridge
     {
 
-        public static bool DecodeFrames(String videoName, String outputDir, String extension)
+        // Decodes Frames and uploads them to blob storage
+        public static FrameCollection[] DecodeFrames(String videoName, String accountName, String accountKey, String containerName, DecodeInterval[] decodeIntervals)
         {
+            IntPtr res;
+            int size;
+            int[] decodeIntervalsFlat = new int[decodeIntervals.Length * 2];
+            int flatIndex = 0;
+            for (int i = 0; i < decodeIntervals.Length; ++i)
+            {
+                decodeIntervalsFlat[flatIndex] = decodeIntervals[i].startMs;
+                flatIndex++;
+                decodeIntervalsFlat[flatIndex] = decodeIntervals[i].endMs;
+                flatIndex++;
+            }
+            int[] shotIndexes = new int[decodeIntervalsFlat.Length];
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return decodeFramesWin(videoName, outputDir, extension);
+                res = decodeFramesWin(videoName, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return decodeFramesLinux(videoName, outputDir, extension);
+                res = decodeFramesLinux(videoName, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
             }
             else
             {
-                throw new ArgumentException("", "");
+                throw new System.PlatformNotSupportedException();
             }
+            if (size == 0)
+            {
+                Console.WriteLine("zero size");
+            }
+            FrameCollection[] decodedFrames = new FrameCollection[decodeIntervals.Length];
+            flatIndex = 0;
+            for (int i = 0; i < decodedFrames.Length; i++)
+            {
+                int start = shotIndexes[flatIndex];
+                flatIndex++;
+                int end = shotIndexes[flatIndex];
+                flatIndex++;
+                decodedFrames[i] = new FrameCollection();
+                decodedFrames[i].Shot = i;
+                String[] uris = new String[end - start];
+                unsafe // NICE!
+                {
+                    byte** ptrs = (byte**)res.ToPointer();
+                    for (int k = 0; k < uris.Length; ++k)
+                    {
+                        IntPtr ptr = new IntPtr((void*)(*ptrs));
+                        uris[k] = Marshal.PtrToStringUTF8(ptr);
+                        ptrs += 1;
+                    }
+                }
+                decodedFrames[i].Uris = uris;
+            }
+            return decodedFrames;
         }
 
         // Main entry point for analysing a single shot.
@@ -33,7 +74,7 @@ namespace Bridge
         {
             if (targetCoords.Length != targetOffsetsInCm.Length)
             {
-                throw new ArgumentException("targetOffsetsInCm.Length != targetCoords.Length",
+                throw new System.ArgumentException("targetOffsetsInCm.Length != targetCoords.Length",
                                                    "targetOffsetsInCm");
             }
             int[] targetCoordsFlat = new int[targetCoords.Length*2];
@@ -61,7 +102,7 @@ namespace Bridge
             }
             else
             {
-                throw new ArgumentException("", "");
+                throw new System.PlatformNotSupportedException();
             }
             return ret;
         }
@@ -102,7 +143,7 @@ namespace Bridge
             }
             else
             {
-                throw new ArgumentException("", "");
+                throw new System.PlatformNotSupportedException();
             }
         }
 
@@ -121,7 +162,7 @@ namespace Bridge
         {
             if (pointsSrcSpace.Length != pointsDstSpace.Length)
             {
-                throw new ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length",
+                throw new System.ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length",
                                                    "pointsDstSpace.Length");
             }
             double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length*2];
@@ -153,7 +194,7 @@ namespace Bridge
             }
             else
             {
-                throw new ArgumentException("", "");
+                throw new System.PlatformNotSupportedException();
             }
             return new Point2d(ret.x, ret.y);
         }
@@ -166,7 +207,7 @@ namespace Bridge
         {
             if (pointsSrcSpace.Length != pointsCmSpace.Length)
             {
-                throw new ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length",
+                throw new System.ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length",
                                                    "pointsDstSpace.Length");
             }
             double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length*2];
@@ -200,7 +241,7 @@ namespace Bridge
             }
             else
             {
-                throw new ArgumentException("", "");
+                throw new System.PlatformNotSupportedException();
             }
             return new Point2d(ret.x, ret.y);
         }
@@ -212,7 +253,8 @@ namespace Bridge
         private const String linuxSharedLibrary = "libanalyze.so";
 
         [DllImport(windowsSharedLibrary, EntryPoint = "decodeFrames")]
-        private static extern bool decodeFramesWin(String videoName, String outputDir, String extension);
+        private static extern IntPtr decodeFramesWin(String videoName, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
+                                                     int decodeIntervalsSize, [In, Out] int[] shotIndexes);
 
         //Windows entry points
         [DllImport(windowsSharedLibrary, EntryPoint = "analyzeShotCS")]
@@ -260,7 +302,8 @@ namespace Bridge
 
 
         [DllImport(linuxSharedLibrary, EntryPoint = "decodeFrames")]
-        private static extern bool decodeFramesLinux(String videoName, String outputDir, String extension);
+        private static extern IntPtr decodeFramesLinux(String videoName, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
+                                                     int decodeIntervalsSize, [In, Out] int[] shotIndexes);
 
         [DllImport(linuxSharedLibrary, EntryPoint = "analyzeShotCS")]
         private static extern void analyzeShotCSLinux(long msStartTimestamp, long msEndTimestamp,

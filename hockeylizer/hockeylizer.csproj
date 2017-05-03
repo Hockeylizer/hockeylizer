@@ -12,6 +12,10 @@
     <UserSecretsId>aspnet-hockeylizer-b8f5a940-87b9-4acf-a4a3-cab25b6fd203</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="bin\Debug\netcoreapp1.1\hockeylizer.deps.json" />
     <Content Include="bin\Debug\netcoreapp1.1\hockeylizer.runtimeconfig.dev.json" />
