@@ -1,16 +1,30 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace hockeylizer.Models
 {
     public class Target
     {
-        public Target() { }
+        public Target()
+        {
+            this.FramesToAnalyze = new HashSet<FrameToAnalyze>();
+        }
 
         public Target(int targetNumber, int order, long? tsStart, long? tsEnd, int? xc, int? yc)
         {
             this.TargetNumber = targetNumber;
             this.Order = order;
+            this.FramesToAnalyze = new HashSet<FrameToAnalyze>();
+        }
+
+        public void AddFrames(List<string> urls)
+        {
+            foreach (var url in urls)
+            {
+                var frame = new FrameToAnalyze();
+
+            }
         }
 
         [Key]
@@ -26,10 +40,12 @@ namespace hockeylizer.Models
 
         [ForeignKey("RelatedVideo")]
         public int VideoId { get; set; }
-        public virtual PlayerVideo RelatedVideo { get; set; }
+        public virtual PlayerSession RelatedSession { get; set; }
 
         //[ForeignKey("Analysis")]
         //public int? AnalysisResultId { get; set; }
         //public virtual AnalysisResult Analysis { get; set; }
+
+        public virtual ICollection<FrameToAnalyze> FramesToAnalyze { get; set; }
     }
 }

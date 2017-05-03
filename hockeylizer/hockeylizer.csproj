@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Services\ImageHandler.cs" />
+    <Compile Remove="Models\PlayerVideo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\imagesfromvideo\" />

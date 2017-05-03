@@ -10,7 +10,7 @@ namespace hockeylizer.Models
         public Player()
         {
             this.containerId = Guid.NewGuid();
-            this.Videos = new HashSet<PlayerVideo>();
+            this.Sessions = new HashSet<PlayerSession>();
             this.Deleted = false;
         }
 
@@ -18,7 +18,7 @@ namespace hockeylizer.Models
         {
             this.Name = name;
             this.TeamId = teamId;
-            this.Videos = new HashSet<PlayerVideo>();
+            this.Sessions = new HashSet<PlayerSession>();
             this.containerId = Guid.NewGuid();
             this.Deleted = false;
         }
@@ -43,6 +43,6 @@ namespace hockeylizer.Models
 
         public bool Deleted { get; set; }
         public Guid containerId { get; set; }
-        public virtual ICollection<PlayerVideo> Videos { get; set; }
+        public virtual ICollection<PlayerSession> Sessions { get; set; }
     }
 }

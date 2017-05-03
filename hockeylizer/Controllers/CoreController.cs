@@ -192,9 +192,9 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> UploadVideo(UploadVideoVm vm)
+        public async Task<JsonResult> CreateSession(CreateSessionVm vm)
         {
-            VideoResult vr;
+            SessionResult sr;
 
             if (vm.token == appkey)
             {
@@ -202,64 +202,64 @@ namespace hockeylizer.Controllers
 
                 if (pl == null)
                 {
-                    vr = new VideoResult("Spelaren kunde inte hittas.", false);
+                    sr = new SessionResult("Spelaren kunde inte hittas.", false);
                 }
                 else
                 {
                     if (!vm.Validate())
                     {
-                        return Json(vm.vr);
+                        return Json(vm.sr);
                     }
 
                     var v = await FileHandler.UploadVideo(vm.video, pl.RetrieveContainerName(), "video");
 
                     if (string.IsNullOrEmpty(v.FilePath))
                     {
-                        vr = new VideoResult("Videoklippet kunde inte laddas upp!", false);
+                        sr = new SessionResult("Videoklippet kunde inte laddas upp då något gick knas vid uppladdning!", false);
                     }
                     else
                     {
                    
-                        var savedVideo = new PlayerVideo(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
-                        db.Videos.Add(savedVideo);
+                        var savedSession = new PlayerSession(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
+                        db.Sessions.Add(savedSession);
 
-                        savedVideo.AddTargets(vm.targetOrder, vm.targetCoords, vm.timestamps);
+                        savedSession.AddTargets(vm.targetOrder, vm.targetCoords, vm.timestamps);
 
                         db.SaveChanges();
-                        db.Entry(savedVideo).GetDatabaseValues();
+                        db.Entry(savedSession).GetDatabaseValues();
 
-                        vr = new VideoResult("Videoklippet laddades upp!", true, savedVideo.VideoId);
+                        sr = new SessionResult("Videoklippet laddades upp!", true, savedSession.SessionId);
                     }
                 }
             }
             else
             {
-                vr = new VideoResult("Token var inkorrekt", false);
+                sr = new SessionResult("Token var inkorrekt", false);
             }
 
-            return Json(vr);
+            return Json(sr);
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult DeleteVideo(int videoId, string token)
+        public JsonResult DeleteVideoFromSession(int sessionId, string token)
         {
             GeneralResult response;
             if (token == appkey)
             {
-                var video = db.Videos.Find(videoId);
+                var session = db.Sessions.Find(sessionId);
 
-                if (video == null)
+                if (session == null)
                 {
-                    response = new GeneralResult(false, "Inkorrekt token");
+                    response = new GeneralResult(false, "Sessionen kunde inte hittas");
                     return Json(response);
                 }
 
-                var deleted = FileHandler.DeleteVideo(video.VideoPath, video.Player.RetrieveContainerName());
+                var deleted = FileHandler.DeleteVideo(session.VideoPath, session.Player.RetrieveContainerName());
 
                 if (deleted)
                 {
-                    video.Delete();
+                    session.Delete();
                     db.SaveChanges();
 
                     response = new GeneralResult(true, "Videoklippet raderades");
@@ -274,45 +274,122 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+		[HttpGet]
+		[AllowAnonymous]
+		public JsonResult GetFramesFromShot(GetTargetFramesVm vm)
+        {
+			GetFramesFromShotResult response;
+			if (vm.token == appkey)
+			{
+				var session = db.Sessions.Find(vm.sessionId);
+
+				if (session == null)
+				{
+					response = new GetFramesFromShotResult(false, "Sessionen kunde inte hittas");
+					return Json(response);
+				}
+
+				if (!vm.Validate())
+				{
+					return Json(vm.gr);
+				}
+
+				var shot = session.Targets.FirstOrDefault(t => t.Order == vm.shot);
+
+				if (shot == null)
+				{
+					response = new GetFramesFromShotResult(false, "Skottet som skulle uppdateras kunde inte hittas.");
+					return Json(response);
+				}
+
+                response = new GetFramesFromShotResult(true, "Skottets träffpunkt har uppdaterats!", shot.FramesToAnalyze.Select(frame => frame.FrameUrl).ToList());
+				return Json(response);
+			}
+
+			response = new GetFramesFromShotResult(false, "Inkorrekt token");
+			return Json(response);
+        }
+
+		[HttpGet]
+		[AllowAnonymous]
+		public async Task<JsonResult> UpdateTargetHit(UpdateTargetHitVm vm)
+        {
+			GeneralResult response;
+			if (vm.token == appkey)
+			{
+				var session = db.Sessions.Find(vm.sessionId);
+
+				if (session == null)
+				{
+					response = new GeneralResult(false, "Sessionen kunde inte hittas");
+					return Json(response);
+				}
+
+                if (!vm.Validate())
+				{
+					return Json(vm.ur);
+				}
+
+                var shotToUpdate = session.Targets.FirstOrDefault(t => t.Order == vm.shot);
+
+                if (shotToUpdate == null)
+                {
+					response = new GeneralResult(false, "Skottet som skulle uppdateras kunde inte hittas.");
+					return Json(response);
+                }
+
+                shotToUpdate.XCoordinate = vm.x;
+                shotToUpdate.YCoordinate = vm.y;
+
+                await db.SaveChangesAsync();
+
+                response = new GeneralResult(true, "Skottets träffpunkt har uppdaterats!");
+				return Json(response);
+			}
+
+			response = new GeneralResult(false, "Inkorrekt token");
+			return Json(response);
+        }
+
         [HttpGet]
         [AllowAnonymous]
-        public async Task<JsonResult> GetAllVideos(string token)
+        public async Task<JsonResult> GetAllSessions(string token)
         {
-            GetVideosResult response;
+            GetSessionsResult response;
             if (token == appkey)
             {
-                response = new GetVideosResult(true, "Alla videor hämtades", new List<VideoVmSmall>());
+                response = new GetSessionsResult(true, "Alla videor hämtades", new List<SessionVmSmall>());
 
-                foreach (PlayerVideo v in db.Videos.Where(v => !v.Deleted).ToList())
+                foreach (PlayerSession s in db.Sessions.Where(v => !v.Deleted).ToList())
                 {
                     string videoPath;
 
                     try
                     {
-                        videoPath = await FileHandler.GetShareableVideoUrl(v.VideoPath);
+                        videoPath = await FileHandler.GetShareableVideoUrl(s.VideoPath);
                     }
                     catch
                     {
                         videoPath = "";
                     }
 
-                    var videoInfo = new VideoVmSmall
+                    var sessionInfo = new SessionVmSmall
                     {
-                        VideoId = v.VideoId,
+                        SessionId = s.SessionId,
                         VideoPath = videoPath,
-                        Interval = v.Interval,
-                        Rounds = v.Rounds,
-                        Shots = v.Shots,
-                        NumberOfTargets = v.NumberOfTargets,
-                        Targets = v.Targets.ToList()
+                        Interval = s.Interval,
+                        Rounds = s.Rounds,
+                        Shots = s.Shots,
+                        NumberOfTargets = s.NumberOfTargets,
+                        Targets = s.Targets.ToList()
                     };
 
-                    response.Videos.Add(videoInfo);
+                    response.Sessions.Add(sessionInfo);
                 }
             }
             else
             {
-                response = new GetVideosResult(false, "Token var inkorrekt", new List<VideoVmSmall>());
+                response = new GetSessionsResult(false, "Token var inkorrekt", new List<SessionVmSmall>());
             }
 
             return Json(response);
@@ -320,14 +397,14 @@ namespace hockeylizer.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public JsonResult GetFramesFromVideo(int? videoId, string token)
+        public JsonResult GetFramesFromVideo(int? sessionId, string token)
         {
             GetFramesResult response;
             if (token == appkey)
             {
-                var video = db.Videos.Find(videoId);
+                var session = db.Sessions.Find(sessionId);
 
-                if (video != null && !video.Deleted)
+                if (session != null && !session.Deleted)
                 {
                     response = new GetFramesResult(true, "Alla frames hämtades", new List<string>());
 
@@ -349,31 +426,30 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<JsonResult> ChopVideo(int videoId, string token)
+
+        private async Task<GeneralResult> ChopVideo(int sessionId, string token)
         {
             GeneralResult response;
             if (token == appkey)
             {
-                var video = db.Videos.Find(videoId);
+                var session = db.Sessions.Find(sessionId);
 
-                if (video == null)
+                if (session == null)
                 {
                     response = new GeneralResult(false, "Videon finns inte");
-                    return Json(response);
+                    return response;
                 }
 
-                var blobname = video.FileName;
+                var blobname = session.FileName;
                 var path = Path.Combine(hostingEnvironment.WebRootPath, "videos");
                 path = Path.Combine(path, blobname);
 
-                var player = db.Players.Find(video.PlayerId);
+                var player = db.Players.Find(session.PlayerId);
 
                 if (player == null)
                 {
                     response = new GeneralResult(false, "Spelaren finns inte");
-                    return Json(response);
+                    return response;
                 }
 
                 var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
@@ -381,37 +457,43 @@ namespace hockeylizer.Controllers
                 if (!download)
                 {
                     response = new GeneralResult(false, "Videon kunde inte laddas ned.");
-                    return Json(response);
+                    return response;
                 }
 
                 // Logik för att choppa video
 
-                var pictureUrls = new List<string>();
-                if (pictureUrls.Any())
+                var pictures = new List<DecodeFramesResult>();
+                if (pictures.Any())
                 {
-                    //foreach (var url in pictureUrls)
-                    //{
-                    //    var picture = new PictureToAnalyze(url, videoId);
-                    //    await db.Pictures.AddAsync(picture);
-                    //}
+                    foreach (var p in pictures)
+                    {
+                        var target = session.Targets.FirstOrDefault(shot => shot.Order == p.Shot);
+
+                        if (target != null)
+                        {
+                            var picture = new FrameToAnalyze(target.TargetId, p.FrameUrl);
+                            await db.Frames.AddAsync(picture); 
+                        }
+
+                    }
                     
-                    //await db.SaveChangesAsync();
+                    await db.SaveChangesAsync();
                 }
 
                 if (!System.IO.File.Exists(path))
                 {
                     response = new GeneralResult(false, "Videon kunde inte raderas då den inte existerar.");
-                    return Json(response);
+                    return response;
                 }
 
                 System.IO.File.Delete(path);
 
                 response = new GeneralResult(true, "Allt fixat!");
-                return Json(response);
+                return response;
             }
 
             response = new GeneralResult(false, "Inkorrekt token");
-            return Json(response);
+            return response;
         }
 
         //Daniels funktion 

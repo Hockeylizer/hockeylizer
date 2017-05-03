@@ -54,7 +54,7 @@ namespace hockeylizer.Models
             this.VideoPath = string.Empty;
         }
 
-		public void RemoveBlob()
+		public void RemoveVideo()
 		{
             FileHandler.DeleteVideo(this.VideoPath, this.Player.RetrieveContainerName());
 

@@ -18,12 +18,14 @@ namespace hockeylizer.Data
 
         public DbSet<Player> Players { get; set; }
 
-        public DbSet<PlayerVideo> Videos { get; set; }
+        public DbSet<PlayerSession> Sessions { get; set; }
 
         public DbSet<Target> Targets { get; set; }
 
         public DbSet<AppTeam> AppTeams { get; set; }
 
         public DbSet<AnalysisResult> AnalysisResults { get; set; }
+
+        public DbSet<FrameToAnalyze> Frames { get; set; }
     }
 }

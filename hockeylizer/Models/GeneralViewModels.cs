@@ -89,6 +89,97 @@ namespace hockeylizer.Models
         public string Description { get; set; }
     }
 
+	public class GetFramesFromShotResult
+	{
+		public GetFramesFromShotResult()
+		{
+			this.Completed = false;
+			this.Description = "Okänt fel";
+            this.FrameUrls = new List<string>();
+		}
+
+		public GetFramesFromShotResult(bool comp, string desc, List<string> urls = null)
+		{
+			this.Completed = comp;
+			this.Description = desc;
+            this.FrameUrls = urls == null ? new List<string>() : urls;
+		}
+
+		public bool Completed { get; set; }
+		public string Description { get; set; }
+        public List<string> FrameUrls { get; set; }
+	}
+
+	public class UpdateTargetHitVm
+	{
+        public bool Validate()
+        {
+            // Validation
+            if (this.sessionId == null)
+            {
+                this.ur = new GeneralResult(false, "Sessionsid saknas.");
+                return false;
+            }
+
+			if (this.shot == null)
+			{
+				this.ur = new GeneralResult(false, "Skott i skottordningen saknas.");
+				return false;
+			}
+
+			if (this.x == null)
+			{
+				this.ur = new GeneralResult(false, "x-koordinat saknas.");
+				return false;
+			}
+
+			if (this.y == null)
+			{
+				this.ur = new GeneralResult(false, "y-koordinat saknas.");
+				return false;
+			}
+
+			this.ur = new GeneralResult(true, "Allt ser korrekt ut.");
+			return true;
+        }
+
+        public int? sessionId { get; set; }
+        public int? shot { get; set; }
+        public int? x { get; set; }
+        public int? y { get; set; }
+        public string token { get; set; }
+
+        public GeneralResult ur { get; set; }
+	}
+
+	public class GetTargetFramesVm
+	{
+		public bool Validate()
+		{
+			// Validation
+			if (this.sessionId == null)
+			{
+				this.gr = new GetFramesFromShotResult(false, "Sessionsid saknas.");
+				return false;
+			}
+
+            if (this.shot == null)
+            {
+                this.gr = new GetFramesFromShotResult(false, "Skott i skottordningen saknas.");
+                return false;
+            }
+
+			this.gr = new GetFramesFromShotResult(true, "Allt ser korrekt ut.");
+			return true;
+		}
+
+		public int? sessionId { get; set; }
+		public int? shot { get; set; }
+		public string token { get; set; }
+
+		public GetFramesFromShotResult gr { get; set; }
+	}
+
 	public class CreateTeamResult
 	{
 		public CreateTeamResult()
@@ -109,7 +200,7 @@ namespace hockeylizer.Models
         public Guid? TeamId { get; set; }
 	}
 
-    public class UploadVideoVm
+    public class CreateSessionVm
     {
         public bool Validate() 
         {
@@ -118,43 +209,43 @@ namespace hockeylizer.Models
 
             if (!allowedFileTypes.Contains(currentFileType))
             {
-                this.vr = new VideoResult("Videoklippet kunde inte laddas upp då videon har fel feltyp! Kan ej ta emot filer av typ: " + currentFileType + ". Endast " + allowedFileTypes + " tas emot.", false);
+                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon har fel feltyp! Kan ej ta emot filer av typ: " + currentFileType + ". Endast " + allowedFileTypes + " tas emot.", false);
                 return false;
             }
 
             if (this.video == null || this.video.Length == 0)
 			{
-				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då videon saknas!", false);
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon saknas!", false);
                 return false;
 			}
 
 			if (this.interval == null)
 			{
-				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då intervall saknas!", false);
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då intervall saknas!", false);
                 return false;
 			}
 
 			if (this.rounds == null)
 			{
-				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då rundor saknas!", false);
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då rundor saknas!", false);
                 return false;
 			}
 
 			if (this.numberOfTargets == null)
 			{
-				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då antal skott saknas!", false);
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antal skott saknas!", false);
                 return false;
 			}
 
             if (!this.timestamps.Any())
             {
-                this.vr = new VideoResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
+                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
                 return false;
             }
 
 			if (!this.targetOrder.Any())
 			{
-				this.vr = new VideoResult("Videoklippet kunde inte laddas upp då skottordning saknas!", false);
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då skottordning saknas!", false);
                 return false;
 			}
 
@@ -165,11 +256,11 @@ namespace hockeylizer.Models
 
             if (!(to == tc && to == ts && tc == ts))
             {
-                this.vr = new VideoResult("Videoklippet kunde inte laddas upp då antalet listor inte stämmer överens!", false);
+                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet listor inte stämmer överens!", false);
                 return false;
             }
 
-            this.vr = new VideoResult("Videoklippet laddades upp!", true);
+            this.sr = new SessionResult("Videoklippet laddades upp!", true);
 			return true;
         }
 
@@ -184,7 +275,7 @@ namespace hockeylizer.Models
         public List<TargetCoordsVm> targetCoords { get; set; }
         public string token { get; set; }
 
-        public VideoResult vr { get; set; }
+        public SessionResult sr { get; set; }
     }
 
     public class ShotTimestampVm
@@ -240,9 +331,9 @@ namespace hockeylizer.Models
         public List<PlayerVmSmall> Players { get; set; }
     }
 
-    public class VideoVmSmall
+    public class SessionVmSmall
     {
-        public int VideoId { get; set; }
+        public int SessionId { get; set; }
         public string VideoPath { get; set; }
 
         public int? Interval { get; set; }
@@ -253,25 +344,25 @@ namespace hockeylizer.Models
         public List<Target> Targets { get; set; }
     }
 
-    public class GetVideosResult
+    public class GetSessionsResult
     {
-        public GetVideosResult()
+        public GetSessionsResult()
         {
             this.Completed = false;
             this.Description = "Ett fel uppstod";
-            this.Videos = new List<VideoVmSmall>();
+            this.Sessions = new List<SessionVmSmall>();
         }
 
-        public GetVideosResult(bool comp, string desc, List<VideoVmSmall> vs)
+        public GetSessionsResult(bool comp, string desc, List<SessionVmSmall> ss)
         {
             this.Completed = comp;
             this.Description = desc;
-            this.Videos = vs;
+            this.Sessions = ss;
         }
 
         public bool Completed { get; set; }
         public string Description { get; set; }
-        public List<VideoVmSmall> Videos { get; set; }
+        public List<SessionVmSmall> Sessions { get; set; }
     }
 
     public class GetFramesResult
@@ -295,22 +386,22 @@ namespace hockeylizer.Models
         public List<string> Images { get; set; }
     }
 
-    public class VideoResult
+    public class SessionResult
     {
-        public VideoResult()
+        public SessionResult()
         {
             this.Description = "Kunde inte lägga till, okänt fel uppstod";
             this.Completed = false;
         }
 
-        public VideoResult(string desc, bool comp, int? videoId = null)
+        public SessionResult(string desc, bool comp, int? sessionId = null)
         {
             this.Description = desc;
             this.Completed = comp;
-            this.VideoId = videoId;
+            this.SessionId = sessionId;
         }
 
-        public int? VideoId { get; set; }
+        public int? SessionId { get; set; }
 
         public bool Completed { get; set; }
         public string Description { get; set; }
@@ -320,5 +411,20 @@ namespace hockeylizer.Models
     {
         public int? xCoord { get; set; }
         public int? yCoord { get; set; }
+    }
+
+    public class DecodeFramesResult
+    {
+        public DecodeFramesResult() { }
+
+        public DecodeFramesResult(int shot, string url)
+        {
+            // Constructor
+            this.Shot = shot;
+            this.FrameUrl = url;
+        }
+
+        public int Shot { get; set; }
+        public string FrameUrl { get; set; }
     }
 }
