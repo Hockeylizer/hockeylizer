@@ -110,6 +110,33 @@ namespace hockeylizer.Models
         public List<string> FrameUrls { get; set; }
 	}
 
+	public class GetDataFromShotResult
+	{
+		public GetDataFromShotResult()
+		{
+			this.Completed = false;
+			this.Description = "Okänt fel";
+			this.FrameUrls = new List<string>();
+		}
+
+		public GetDataFromShotResult(bool comp, string desc, List<string> urls = null)
+		{
+			this.Completed = comp;
+			this.Description = desc;
+			this.FrameUrls = urls == null ? new List<string>() : urls;
+		}
+
+		public int TargetNumber { get; set; }
+		public int Order { get; set; }
+
+		public int? XCoordinate { get; set; }
+		public int? YCoordinate { get; set; }
+
+		public bool Completed { get; set; }
+		public string Description { get; set; }
+		public List<string> FrameUrls { get; set; }
+	}
+
 	public class UpdateTargetHitVm
 	{
         public bool Validate()

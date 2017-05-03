@@ -320,6 +320,49 @@ namespace hockeylizer.Controllers
 
 		[HttpGet]
 		[AllowAnonymous]
+		public JsonResult GetDataFromShot(GetTargetFramesVm vm)
+		{
+			GetDataFromShotResult response;
+			if (vm.token == appkey)
+			{
+				var session = db.Sessions.Find(vm.sessionId);
+
+				if (session == null)
+				{
+					response = new GetDataFromShotResult(false, "Sessionen kunde inte hittas");
+					return Json(response);
+				}
+
+				if (!vm.Validate())
+				{
+					return Json(vm.gr);
+				}
+
+				var shot = session.Targets.FirstOrDefault(t => t.Order == vm.shot);
+
+				if (shot == null)
+				{
+					response = new GetDataFromShotResult(false, "Skottet som skulle uppdateras kunde inte hittas.");
+					return Json(response);
+				}
+
+				response = new GetDataFromShotResult(true, "Skottets träffpunkt har uppdaterats!", shot.FramesToAnalyze.Select(frame => frame.FrameUrl).ToList())
+                {
+                    TargetNumber = shot.TargetNumber,
+                    Order = shot.Order,
+                    XCoordinate = shot.XCoordinate,
+                    YCoordinate = shot.YCoordinate
+                };
+
+				return Json(response);
+			}
+
+			response = new GetDataFromShotResult(false, "Inkorrekt token");
+			return Json(response);
+		}
+
+		[HttpGet]
+		[AllowAnonymous]
 		public async Task<JsonResult> UpdateTargetHit(UpdateTargetHitVm vm)
         {
 			GeneralResult response;
