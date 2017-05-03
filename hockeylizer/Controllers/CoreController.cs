@@ -169,11 +169,16 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult GetAllPlayers(Guid? teamId, string token)
+        public JsonResult GetAllPlayers([FromBody]Guid? teamId, string token)
         {
             GetPlayersResult response;
             if (token == appkey)
             {
+                if (teamId == null)
+                {
+					response = new GetPlayersResult(false, "teamId saknas i requesten", new List<PlayerVmSmall>());
+					return Json(response);
+                }
                 var team = db.AppTeams.Find(teamId);
 
                 if (team == null)
