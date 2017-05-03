@@ -169,7 +169,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult GetAllPlayers(Guid? teamId, string token)
+        public JsonResult GetAllPlayers([FromBody]Guid? teamId, string token)
         {
             GetPlayersResult response;
             if (token == appkey)
