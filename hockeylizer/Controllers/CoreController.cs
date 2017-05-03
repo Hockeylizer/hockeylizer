@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
+﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
@@ -169,7 +169,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult GetAllPlayers([FromBody]Guid? teamId, string token)
+        public JsonResult GetAllPlayers(Guid? teamId, string token)
         {
             GetPlayersResult response;
             if (token == appkey)
