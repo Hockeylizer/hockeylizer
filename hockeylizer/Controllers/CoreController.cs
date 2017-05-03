@@ -209,6 +209,12 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+        public void delete()
+        {
+            db.Targets.RemoveRange(db.Targets);
+            db.SaveChanges();
+        }
+
         [HttpPost]
         [AllowAnonymous]
         public async Task<JsonResult> CreateSession([FromForm]CreateSessionVm vm)
