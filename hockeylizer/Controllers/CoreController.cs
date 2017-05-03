@@ -28,11 +28,11 @@ namespace hockeylizer.Controllers
 
 		[HttpPost]
 		[AllowAnonymous]
-        public JsonResult CreateTeam(string token) 
+        public JsonResult CreateTeam([FromBody]CreateTeamVm vm) 
         {
             CreateTeamResult response;
 
-            if (token != appkey)
+            if (vm.token != appkey)
             {
                 response = new CreateTeamResult(false, "Laget kunde inte skapas då fel token angavs. Appen är inte registrerad.");
             }
@@ -57,26 +57,32 @@ namespace hockeylizer.Controllers
         // Add player
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult AddPlayer(string name, Guid? teamId, string token)
+        public JsonResult AddPlayer([FromBody]AddPlayerVm vm)
         {
             AddPlayerResult response;
 
-            if (token == appkey)
+            if (vm.token == appkey)
             {
-                if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+                if (string.IsNullOrEmpty(vm.name) || string.IsNullOrWhiteSpace(vm.name))
                 {
-                    response = new AddPlayerResult("Spelaren " + name + " kunde inte läggas till då namnet saknas.", false);
+                    response = new AddPlayerResult("Spelaren " + vm.name + " kunde inte läggas till då namnet saknas.", false);
                     return Json(response);
                 }
 
-                var team = db.AppTeams.Find(teamId);
-                if (teamId == null || team == null)
+                if (vm.teamId == null)
                 {
-                    response = new AddPlayerResult("Spelaren " + name + " kunde inte läggas till då appteamet som hen tillhör saknas.", false);
+                    response = new AddPlayerResult("Spelaren " + vm.name + " kunde inte läggas till då requesten saknar appid", false);
                     return Json(response);
                 }
 
-                var player = new Player(name, teamId);
+                var team = db.AppTeams.Find(vm.teamId);
+                if (vm.teamId == null || team == null)
+                {
+                    response = new AddPlayerResult("Spelaren " + vm.name + " kunde inte läggas till då appteamet som hen tillhör saknas.", false);
+                    return Json(response);
+                }
+
+                var player = new Player(vm.name, vm.teamId);
                 try
                 {
                     db.Players.Add(player);
@@ -84,11 +90,11 @@ namespace hockeylizer.Controllers
 
                     db.Entry(player).GetDatabaseValues();
 
-                    response = new AddPlayerResult("Spelaren " + name + " lades till utan problem", true, player.PlayerId);
+                    response = new AddPlayerResult("Spelaren " + vm.name + " lades till utan problem", true, player.PlayerId);
                 }
                 catch (Exception e)
                 {
-                    response = new AddPlayerResult("Spelaren " + name + " kunde inte läggas till. Felmeddelande: " + e.Message, false);
+                    response = new AddPlayerResult("Spelaren " + vm.name + " kunde inte läggas till. Felmeddelande: " + e.Message, false);
                 }
             }
             else
@@ -101,7 +107,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> UpdatePlayerName(UpdateNameVm vm)
+        public async Task<JsonResult> UpdatePlayerName([FromBody]UpdateNameVm vm)
         {
             GeneralResult r;
 
@@ -135,7 +141,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> DeletePlayer(DeletePlayerVm vm)
+        public async Task<JsonResult> DeletePlayer([FromBody]DeletePlayerVm vm)
         {
             GeneralResult r;
 
@@ -169,17 +175,17 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult GetAllPlayers([FromBody]Guid? teamId, string token)
+        public JsonResult GetAllPlayers([FromBody]GetAllPlayersVm vm)
         {
             GetPlayersResult response;
-            if (token == appkey)
+            if (vm.token == appkey)
             {
-                if (teamId == null)
+                if (vm.teamId == null)
                 {
 					response = new GetPlayersResult(false, "teamId saknas i requesten", new List<PlayerVmSmall>());
 					return Json(response);
                 }
-                var team = db.AppTeams.Find(teamId);
+                var team = db.AppTeams.Find(vm.teamId);
 
                 if (team == null)
                 {
@@ -189,7 +195,7 @@ namespace hockeylizer.Controllers
 				}
 
                 response = new GetPlayersResult(true, "Alla spelare hämtades",
-                                db.Players.Where(p => p.TeamId == teamId && !p.Deleted).Select(p =>
+                                db.Players.Where(p => p.TeamId == vm.teamId && !p.Deleted).Select(p =>
                                   new PlayerVmSmall
                                   {
                                       PlayerId = p.PlayerId,
@@ -205,7 +211,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> CreateSession(CreateSessionVm vm)
+        public async Task<JsonResult> CreateSession([FromForm]CreateSessionVm vm)
         {
             SessionResult sr;
 
@@ -255,12 +261,12 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> DeleteVideoFromSession(int sessionId, string token)
+        public async Task<JsonResult> DeleteVideoFromSession([FromBody]SessionVm vm)
         {
             GeneralResult response;
-            if (token == appkey)
+            if (vm.token == appkey)
             {
-                var session = db.Sessions.Find(sessionId);
+                var session = db.Sessions.Find(vm.sessionId);
 
                 if (session == null)
                 {
@@ -287,9 +293,9 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-		[HttpGet]
+		[HttpPost]
 		[AllowAnonymous]
-		public JsonResult GetFramesFromShot(GetTargetFramesVm vm)
+		public JsonResult GetFramesFromShot([FromBody]GetTargetFramesVm vm)
         {
 			GetFramesFromShotResult response;
 			if (vm.token == appkey)
@@ -323,9 +329,9 @@ namespace hockeylizer.Controllers
 			return Json(response);
         }
 
-		[HttpGet]
+		[HttpPost]
 		[AllowAnonymous]
-		public JsonResult GetDataFromShot(GetTargetFramesVm vm)
+		public JsonResult GetDataFromShot([FromBody]GetTargetFramesVm vm)
 		{
 			GetDataFromShotResult response;
 			if (vm.token == appkey)
@@ -366,9 +372,9 @@ namespace hockeylizer.Controllers
 			return Json(response);
 		}
 
-		[HttpGet]
+		[HttpPost]
 		[AllowAnonymous]
-		public async Task<JsonResult> UpdateTargetHit(UpdateTargetHitVm vm)
+		public async Task<JsonResult> UpdateTargetHit([FromBody]UpdateTargetHitVm vm)
         {
 			GeneralResult response;
 			if (vm.token == appkey)
@@ -407,58 +413,14 @@ namespace hockeylizer.Controllers
 			return Json(response);
         }
 
-        //[HttpGet]
-        //[AllowAnonymous]
-        //public async Task<JsonResult> GetAllSessions(string token)
-        //{
-        //    GetSessionsResult response;
-        //    if (token == appkey)
-        //    {
-        //        response = new GetSessionsResult(true, "Alla videor hämtades", new List<SessionVmSmall>());
-
-        //        foreach (PlayerSession s in db.Sessions.Where(v => !v.Deleted).ToList())
-        //        {
-        //            string videoPath;
-
-        //            try
-        //            {
-        //                videoPath = await FileHandler.GetShareableVideoUrl(s.VideoPath);
-        //            }
-        //            catch
-        //            {
-        //                videoPath = "";
-        //            }
-
-        //            var sessionInfo = new SessionVmSmall
-        //            {
-        //                SessionId = s.SessionId,
-        //                VideoPath = videoPath,
-        //                Interval = s.Interval,
-        //                Rounds = s.Rounds,
-        //                Shots = s.Shots,
-        //                NumberOfTargets = s.NumberOfTargets,
-        //                Targets = s.Targets.ToList()
-        //            };
-
-        //            response.Sessions.Add(sessionInfo);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        response = new GetSessionsResult(false, "Token var inkorrekt", new List<SessionVmSmall>());
-        //    }
-
-        //    return Json(response);
-        //}
-
         [HttpGet]
         [AllowAnonymous]
-        public JsonResult GetFramesFromSession(int? sessionId, string token)
+        public JsonResult GetFramesFromSession([FromBody]SessionVm vm)
         {
             GetFramesResult response;
-            if (token == appkey)
+            if (vm.token == appkey)
             {
-                var session = db.Sessions.Find(sessionId);
+                var session = db.Sessions.Find(vm.sessionId);
 
                 if (session != null && !session.Deleted)
                 {
@@ -483,12 +445,12 @@ namespace hockeylizer.Controllers
         }
 
 
-        private async Task<GeneralResult> ChopVideo(int sessionId, string token)
+        private async Task<GeneralResult> ChopVideo([FromBody]SessionVm vm)
         {
             GeneralResult response;
-            if (token == appkey)
+            if (vm.token == appkey)
             {
-                var session = db.Sessions.Find(sessionId);
+                var session = db.Sessions.Find(vm.sessionId);
 
                 if (session == null)
                 {

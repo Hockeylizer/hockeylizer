@@ -207,6 +207,30 @@ namespace hockeylizer.Models
 		public GetFramesFromShotResult gr { get; set; }
 	}
 
+    public class SessionVm
+    {
+        public int sessionId { get; set; }
+        public string token { get; set; }
+    }
+
+    public class CreateTeamVm
+    {
+        public string token { get; set; }
+    }
+
+    public class AddPlayerVm
+    {
+        public string name { get; set; }
+        public Guid? teamId { get; set; }
+        public string token { get; set; }
+    }
+
+    public class GetAllPlayersVm
+    {
+        public Guid? teamId { get; set; }
+        public string token { get; set; }
+    }
+
 	public class CreateTeamResult
 	{
 		public CreateTeamResult()
