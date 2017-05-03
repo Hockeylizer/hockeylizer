@@ -252,7 +252,7 @@ namespace hockeylizer.Controllers
             }
             else
             {
-                sr = new SessionResult("Token var inkorrekt", false);
+                sr = new SessionResult("Token var inkorrekt.", false);
             }
 
             return Json(sr);
