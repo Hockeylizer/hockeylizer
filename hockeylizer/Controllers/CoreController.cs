@@ -413,7 +413,7 @@ namespace hockeylizer.Controllers
 			return Json(response);
         }
 
-        [HttpGet]
+        [HttpPost]
         [AllowAnonymous]
         public JsonResult GetFramesFromSession([FromBody]SessionVm vm)
         {
