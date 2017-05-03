@@ -10,20 +10,21 @@ using hockeylizer.Data;
 using System.Linq;
 using System.IO;
 using System;
+    using System.Diagnostics;
 
 namespace hockeylizer.Controllers
 {
     public class CoreController : Controller
     {
-        private readonly string appkey;
-        private readonly ApplicationDbContext db;
-        private readonly IHostingEnvironment hostingEnvironment;
+        private readonly string _appkey;
+        private readonly ApplicationDbContext _db;
+        private readonly IHostingEnvironment _hostingEnvironment;
 
-        public CoreController(ApplicationDbContext _db, IHostingEnvironment _hostingEnvironment)
+        public CoreController(ApplicationDbContext db, IHostingEnvironment hostingEnvironment)
         {
-            appkey = "langY6fgXWossV9o";
-            db = _db;
-            hostingEnvironment = _hostingEnvironment;
+            _appkey = "langY6fgXWossV9o";
+            this._db = db;
+            this._hostingEnvironment = hostingEnvironment;
         }
 
 		[HttpPost]
@@ -32,18 +33,18 @@ namespace hockeylizer.Controllers
         {
             CreateTeamResult response;
 
-            if (vm.token != appkey)
+            if (vm.token != _appkey)
             {
                 response = new CreateTeamResult(false, "Laget kunde inte skapas då fel token angavs. Appen är inte registrerad.");
             }
             else 
             {
-                var teamId = db.GetAvailableTeamId();
+                var teamId = _db.GetAvailableTeamId();
 
                 var team = new AppTeam(teamId);
-                db.AppTeams.Add(team);
+                _db.AppTeams.Add(team);
 
-                db.SaveChanges();
+                _db.SaveChanges();
 
                 response = new CreateTeamResult(true, "Laget skapades. Appen är nu registrerad.")
                 {
@@ -61,7 +62,7 @@ namespace hockeylizer.Controllers
         {
             AddPlayerResult response;
 
-            if (vm.token == appkey)
+            if (vm.token == _appkey)
             {
                 if (string.IsNullOrEmpty(vm.name) || string.IsNullOrWhiteSpace(vm.name))
                 {
@@ -75,7 +76,7 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var team = db.AppTeams.Find(vm.teamId);
+                var team = _db.AppTeams.Find(vm.teamId);
                 if (vm.teamId == null || team == null)
                 {
                     response = new AddPlayerResult("Spelaren " + vm.name + " kunde inte läggas till då appteamet som hen tillhör saknas.", false);
@@ -85,10 +86,10 @@ namespace hockeylizer.Controllers
                 var player = new Player(vm.name, vm.teamId);
                 try
                 {
-                    db.Players.Add(player);
-                    db.SaveChanges();
+                    _db.Players.Add(player);
+                    _db.SaveChanges();
 
-                    db.Entry(player).GetDatabaseValues();
+                    _db.Entry(player).GetDatabaseValues();
 
                     response = new AddPlayerResult("Spelaren " + vm.name + " lades till utan problem", true, player.PlayerId);
                 }
@@ -111,7 +112,7 @@ namespace hockeylizer.Controllers
         {
             GeneralResult r;
 
-            if (vm.token != appkey)
+            if (vm.token != _appkey)
             {
                 r = new GeneralResult(false, "Token var inkorrekt");
             }
@@ -122,7 +123,7 @@ namespace hockeylizer.Controllers
                     return Json(vm.Result);
                 }
 
-                var player = db.Players.Find(vm.playerId);
+                var player = _db.Players.Find(vm.playerId);
                 if (player == null) 
                 {
                     r = new GeneralResult(false, "Spelaren finns inte.");
@@ -130,7 +131,7 @@ namespace hockeylizer.Controllers
                 else
                 {
                     player.Name = vm.name;
-                    await db.SaveChangesAsync();
+                    await _db.SaveChangesAsync();
 
                     r = new GeneralResult(true, "Namnet uppdaterades!");
                 }
@@ -145,7 +146,7 @@ namespace hockeylizer.Controllers
         {
             GeneralResult r;
 
-            if (vm.token != appkey)
+            if (vm.token != _appkey)
             {
                 r = new GeneralResult(false, "Token var inkorrekt");
             }
@@ -156,7 +157,7 @@ namespace hockeylizer.Controllers
                     return Json(vm.Result);
                 }
 
-                var player = db.Players.Find(vm.playerId);
+                var player = _db.Players.Find(vm.playerId);
                 if (player == null)
                 {
                     r = new GeneralResult(false, "Spelaren finns inte.");
@@ -164,7 +165,7 @@ namespace hockeylizer.Controllers
                 else
                 {
                     player.Deleted = true;
-                    await db.SaveChangesAsync();
+                    await _db.SaveChangesAsync();
 
                     r = new GeneralResult(true, "Spelaren raderades!");
                 }
@@ -178,14 +179,14 @@ namespace hockeylizer.Controllers
         public JsonResult GetAllPlayers([FromBody]GetAllPlayersVm vm)
         {
             GetPlayersResult response;
-            if (vm.token == appkey)
+            if (vm.token == _appkey)
             {
                 if (vm.teamId == null)
                 {
 					response = new GetPlayersResult(false, "teamId saknas i requesten", new List<PlayerVmSmall>());
 					return Json(response);
                 }
-                var team = db.AppTeams.Find(vm.teamId);
+                var team = _db.AppTeams.Find(vm.teamId);
 
                 if (team == null)
                 {
@@ -195,7 +196,7 @@ namespace hockeylizer.Controllers
 				}
 
                 response = new GetPlayersResult(true, "Alla spelare hämtades",
-                                db.Players.Where(p => p.TeamId == vm.teamId && !p.Deleted).Select(p =>
+                                _db.Players.Where(p => p.TeamId == vm.teamId && !p.Deleted).Select(p =>
                                   new PlayerVmSmall
                                   {
                                       PlayerId = p.PlayerId,
@@ -215,9 +216,9 @@ namespace hockeylizer.Controllers
         {
             SessionResult sr;
 
-            if (vm.token == appkey)
+            if (vm.token == _appkey)
             {
-                var pl = db.Players.Find(vm.playerId);
+                var pl = _db.Players.Find(vm.playerId);
 
                 if (pl == null)
                 {
@@ -239,12 +240,12 @@ namespace hockeylizer.Controllers
                     else
                     {
                         var savedSession = new PlayerSession(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
-                        db.Sessions.Add(savedSession);
+                        _db.Sessions.Add(savedSession);
 
                         savedSession.AddTargets(vm.targetOrder, vm.targetCoords, vm.timestamps);
 
-                        db.SaveChanges();
-                        db.Entry(savedSession).GetDatabaseValues();
+                        _db.SaveChanges();
+                        _db.Entry(savedSession).GetDatabaseValues();
 
                         sr = new SessionResult("Videoklippet laddades upp!", true, savedSession.SessionId);
                     }
@@ -263,9 +264,9 @@ namespace hockeylizer.Controllers
         public async Task<JsonResult> DeleteVideoFromSession([FromBody]SessionVm vm)
         {
             GeneralResult response;
-            if (vm.token == appkey)
+            if (vm.token == _appkey)
             {
-                var session = db.Sessions.Find(vm.sessionId);
+                var session = _db.Sessions.Find(vm.sessionId);
 
                 if (session == null)
                 {
@@ -278,7 +279,7 @@ namespace hockeylizer.Controllers
                 if (deleted)
                 {
                     session.Delete();
-                    await db.SaveChangesAsync();
+                    await _db.SaveChangesAsync();
 
                     response = new GeneralResult(true, "Videoklippet raderades");
                     return Json(response);
@@ -297,9 +298,9 @@ namespace hockeylizer.Controllers
 		public JsonResult GetFramesFromShot([FromBody]GetTargetFramesVm vm)
         {
 			GetFramesFromShotResult response;
-			if (vm.token == appkey)
+			if (vm.token == _appkey)
 			{
-				var session = db.Sessions.Find(vm.sessionId);
+				var session = _db.Sessions.Find(vm.sessionId);
 
 				if (session == null)
 				{
@@ -333,9 +334,9 @@ namespace hockeylizer.Controllers
 		public JsonResult GetDataFromShot([FromBody]GetTargetFramesVm vm)
 		{
 			GetDataFromShotResult response;
-			if (vm.token == appkey)
+			if (vm.token == _appkey)
 			{
-				var session = db.Sessions.Find(vm.sessionId);
+				var session = _db.Sessions.Find(vm.sessionId);
 
 				if (session == null)
 				{
@@ -376,9 +377,9 @@ namespace hockeylizer.Controllers
 		public async Task<JsonResult> UpdateTargetHit([FromBody]UpdateTargetHitVm vm)
         {
 			GeneralResult response;
-			if (vm.token == appkey)
+			if (vm.token == _appkey)
 			{
-				var session = db.Sessions.Find(vm.sessionId);
+				var session = _db.Sessions.Find(vm.sessionId);
 
 				if (session == null)
 				{
@@ -402,7 +403,7 @@ namespace hockeylizer.Controllers
                 shotToUpdate.XCoordinate = vm.x;
                 shotToUpdate.YCoordinate = vm.y;
 
-                await db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
 
                 response = new GeneralResult(true, "Skottets träffpunkt har uppdaterats!");
 				return Json(response);
@@ -417,9 +418,9 @@ namespace hockeylizer.Controllers
         public JsonResult GetFramesFromSession([FromBody]SessionVm vm)
         {
             GetFramesResult response;
-            if (vm.token == appkey)
+            if (vm.token == _appkey)
             {
-                var session = db.Sessions.Find(vm.sessionId);
+                var session = _db.Sessions.Find(vm.sessionId);
 
                 if (session != null && !session.Deleted)
                 {
@@ -443,13 +444,12 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-
-        private async Task<GeneralResult> ChopVideo([FromBody]SessionVm vm)
+        public async Task<GeneralResult> ChopVideo([FromBody]SessionVm vm)
         {
             GeneralResult response;
-            if (vm.token == appkey)
+            if (vm.token == _appkey)
             {
-                var session = db.Sessions.Find(vm.sessionId);
+                var session = _db.Sessions.Find(vm.sessionId);
 
                 if (session == null)
                 {
@@ -458,10 +458,10 @@ namespace hockeylizer.Controllers
                 }
 
                 var blobname = session.FileName;
-                var path = Path.Combine(hostingEnvironment.WebRootPath, "videos");
+                var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
                 path = Path.Combine(path, blobname);
 
-                var player = db.Players.Find(session.PlayerId);
+                var player = _db.Players.Find(session.PlayerId);
 
                 if (player == null)
                 {
@@ -496,12 +496,12 @@ namespace hockeylizer.Controllers
                             foreach (var frame in s.Uris)
                             {
                                 var picture = new FrameToAnalyze(target.TargetId, frame);
-                                await db.Frames.AddAsync(picture);
+                                await _db.Frames.AddAsync(picture);
                             }
                         }
                     }
                     
-                    await db.SaveChangesAsync();
+                    await _db.SaveChangesAsync();
                 }
 
                 if (!System.IO.File.Exists(path))
@@ -528,7 +528,7 @@ namespace hockeylizer.Controllers
 
             // Just return a goddamn picture of the goal with no hits.
             // It's something.
-            var path = hostingEnvironment.WebRootPath + "/images/hitsOverview.svg";
+            var path = _hostingEnvironment.WebRootPath + "/images/hitsOverview.svg";
 
             var svgURL = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
 
