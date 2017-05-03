@@ -238,7 +238,6 @@ namespace hockeylizer.Controllers
                     }
                     else
                     {
-                   
                         var savedSession = new PlayerSession(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
                         db.Sessions.Add(savedSession);
 

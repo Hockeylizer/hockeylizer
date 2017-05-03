@@ -38,8 +38,8 @@ namespace hockeylizer.Models
         public int? XCoordinate { get; set; }
         public int? YCoordinate { get; set; }
 
-        [ForeignKey("RelatedVideo")]
-        public int VideoId { get; set; }
+        [ForeignKey("RelatedSession")]
+        public int SessionId { get; set; }
         public virtual PlayerSession RelatedSession { get; set; }
 
         //[ForeignKey("Analysis")]
