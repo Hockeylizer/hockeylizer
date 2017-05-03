@@ -24,8 +24,6 @@ namespace hockeylizer.Data
 
         public DbSet<AppTeam> AppTeams { get; set; }
 
-        public DbSet<AnalysisResult> AnalysisResults { get; set; }
-
         public DbSet<FrameToAnalyze> Frames { get; set; }
     }
 }

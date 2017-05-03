@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Bridge
+namespace hockeylizer.Models
 {
     // Needs a better name
     class FrameCollection

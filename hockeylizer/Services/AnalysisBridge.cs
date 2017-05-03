@@ -1,8 +1,10 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using hockeylizer.Models;
+using hockeylizer.Helpers;
 
-namespace Bridge
+namespace hockeylizer.Services
 {
     // This class holds the entry points to the C++ analysis library
     static class AnalysisBridge

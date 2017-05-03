@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Bridge
+namespace hockeylizer.Models
 {
     // The return value of AnalysisBridge.AnalyzeShot(...)
     [StructLayout(LayoutKind.Sequential)]

@@ -8,9 +8,15 @@ using System;
 
 namespace hockeylizer.Services
 {
+    public static class BlobCredentials
+    {
+        public static readonly string AccountName = "hockeydata";
+        public static readonly string Key = "QmoOoi3h8htf3+Luqz7GhVe9WZavcDvn/DHqEzc25f9/Ii4zKeqTwuP+x9M9UbZWSVTGKnNW2rF89X/D6yza+A==";
+    }
+
     public static class FileHandler
     {
-        private static readonly BlobUtility utility = new BlobUtility("hockeydata", "QmoOoi3h8htf3+Luqz7GhVe9WZavcDvn/DHqEzc25f9/Ii4zKeqTwuP+x9M9UbZWSVTGKnNW2rF89X/D6yza+A==");
+        private static readonly BlobUtility utility = new BlobUtility(BlobCredentials.AccountName, BlobCredentials.Key);
 
         public async static Task<UploadFileResult> UploadVideo(IFormFile file, string containerName, string fileStart)
         {

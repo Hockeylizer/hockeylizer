@@ -480,17 +480,25 @@ namespace hockeylizer.Controllers
 
                 // Logik för att choppa video
 
-                var pictures = new List<DecodeFramesResult>();
-                if (pictures.Any())
+                var intervals = session.Targets.Select(t => new DecodeInterval {
+                    startMs = (int?)t.TimestampStart ?? 0,
+                    endMs = (int?)t.TimestampEnd ?? 0
+                }).ToArray();
+
+                var shots = AnalysisBridge.DecodeFrames(path, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
+                if (shots.Any())
                 {
-                    foreach (var p in pictures)
+                    foreach (var s in shots)
                     {
-                        var target = session.Targets.FirstOrDefault(shot => shot.Order == p.Shot);
+                        var target = session.Targets.FirstOrDefault(shot => shot.Order == s.Shot);
 
                         if (target != null)
                         {
-                            var picture = new FrameToAnalyze(target.TargetId, p.FrameUrl);
-                            await db.Frames.AddAsync(picture);
+                            foreach (var frame in s.Uris)
+                            {
+                                var picture = new FrameToAnalyze(target.TargetId, frame);
+                                await db.Frames.AddAsync(picture);
+                            }
                         }
                     }
                     

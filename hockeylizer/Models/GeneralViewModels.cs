@@ -255,6 +255,12 @@ namespace hockeylizer.Models
     {
         public bool Validate() 
         {
+            if (this.video == null || this.video.Length == 0)
+            {
+                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon saknas!", false);
+                return false;
+            }
+
             var allowedFileTypes = "msvideo ogg mp4 avi mpeg quicktime 3gpp 3gpp2";
             var currentFileType = this.video.ContentType.Split('/').LastOrDefault();
 
@@ -263,12 +269,6 @@ namespace hockeylizer.Models
                 this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon har fel feltyp! Kan ej ta emot filer av typ: " + currentFileType + ". Endast " + allowedFileTypes + " tas emot.", false);
                 return false;
             }
-
-            if (this.video == null || this.video.Length == 0)
-			{
-				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon saknas!", false);
-                return false;
-			}
 
 			if (this.interval == null)
 			{
@@ -464,18 +464,18 @@ namespace hockeylizer.Models
         public int? yCoord { get; set; }
     }
 
-    public class DecodeFramesResult
-    {
-        public DecodeFramesResult() { }
+    //public class DecodeFramesResult
+    //{
+    //    public DecodeFramesResult() { }
 
-        public DecodeFramesResult(int shot, string url)
-        {
-            // Constructor
-            this.Shot = shot;
-            this.FrameUrl = url;
-        }
+    //    public DecodeFramesResult(int shot, string url)
+    //    {
+    //        // Constructor
+    //        this.Shot = shot;
+    //        this.FrameUrl = url;
+    //    }
 
-        public int Shot { get; set; }
-        public string FrameUrl { get; set; }
-    }
+    //    public int Shot { get; set; }
+    //    public string FrameUrl { get; set; }
+    //}
 }

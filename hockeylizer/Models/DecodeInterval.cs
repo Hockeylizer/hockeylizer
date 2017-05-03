@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Bridge
+﻿namespace hockeylizer.Models
 {
     class DecodeInterval
     {
+        public DecodeInterval() { }
+
         public DecodeInterval(int start, int end)
         {
             this.startMs = start;
             this.endMs = end;
         }
+
         public int startMs;
         public int endMs;
     }

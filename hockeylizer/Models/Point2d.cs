@@ -1,4 +1,4 @@
-namespace Bridge
+namespace hockeylizer.Models
 {
     public class Point2d
     {

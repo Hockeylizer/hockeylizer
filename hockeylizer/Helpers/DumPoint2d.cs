@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Bridge
+namespace hockeylizer.Helpers
 {
     // This class is only used internally by the bridge.
     // Shold probably be a private inner class of Bridge 
