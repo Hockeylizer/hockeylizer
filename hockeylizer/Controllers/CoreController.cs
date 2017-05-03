@@ -397,7 +397,7 @@ namespace hockeylizer.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public JsonResult GetFramesFromVideo(int? sessionId, string token)
+        public JsonResult GetFramesFromSession(int? sessionId, string token)
         {
             GetFramesResult response;
             if (token == appkey)
@@ -472,9 +472,8 @@ namespace hockeylizer.Controllers
                         if (target != null)
                         {
                             var picture = new FrameToAnalyze(target.TargetId, p.FrameUrl);
-                            await db.Frames.AddAsync(picture); 
+                            await db.Frames.AddAsync(picture);
                         }
-
                     }
                     
                     await db.SaveChangesAsync();
