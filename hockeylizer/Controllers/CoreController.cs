@@ -218,6 +218,12 @@ namespace hockeylizer.Controllers
 
             if (vm.token == _appkey)
             {
+                if (vm.playerId == null)
+                {
+                    sr = new SessionResult("SpelarId saknas i requesten.", false);
+                    return Json(sr);
+                }
+
                 var pl = _db.Players.Find(vm.playerId);
 
                 if (pl == null)

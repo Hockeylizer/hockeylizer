@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using hockeylizer.Models;
-using hockeylizer.Data;
 using System.Linq;
 using System.IO;
 using System;
@@ -18,7 +17,7 @@ namespace hockeylizer.Services
     {
         private static readonly BlobUtility utility = new BlobUtility(BlobCredentials.AccountName, BlobCredentials.Key);
 
-        public async static Task<UploadFileResult> UploadVideo(IFormFile file, string containerName, string fileStart)
+        public static async Task<UploadFileResult> UploadVideo(IFormFile file, string containerName, string fileStart)
         {
             var fileName = fileStart + "-0";
             var filetype = file.ContentType.Split('/').LastOrDefault() ?? "mp4";
@@ -45,7 +44,7 @@ namespace hockeylizer.Services
             return new UploadFileResult();
         }
 
-        public async static Task<bool> DownloadBlob(string path, string blobname, string container)
+        public static async Task<bool> DownloadBlob(string path, string blobname, string container)
         {
             try
             {
