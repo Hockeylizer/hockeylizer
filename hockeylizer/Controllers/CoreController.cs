@@ -212,7 +212,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<JsonResult> CreateSession([FromForm]CreateSessionVm vm)
+        public async Task<JsonResult> CreateSession(CreateSessionVm vm)
         {
             SessionResult sr;
 
