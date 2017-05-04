@@ -323,11 +323,11 @@ namespace hockeylizer.Controllers
 
 				if (shot == null)
 				{
-					response = new GetFramesFromShotResult(false, "Skottet som skulle uppdateras kunde inte hittas.");
+					response = new GetFramesFromShotResult(false, "Skottet kunde inte hittas.");
 					return Json(response);
 				}
 
-                response = new GetFramesFromShotResult(true, "Skottets träffpunkt har uppdaterats!", shot.FramesToAnalyze.Select(frame => frame.FrameUrl).ToList());
+                response = new GetFramesFromShotResult(true, "Skottets träffpunkter har hämtats!", shot.FramesToAnalyze.Select(frame => frame.FrameUrl).ToList());
 				return Json(response);
 			}
 

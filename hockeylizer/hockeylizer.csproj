@@ -19,13 +19,22 @@
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+
   <ItemGroup>
+    <Content Include="bin\Debug\netcoreapp1.1\x64\hockeylizer.deps.json" />
+    <Content Include="bin\Debug\netcoreapp1.1\x64\hockeylizer.runtimeconfig.dev.json" />
+    <Content Include="bin\Debug\netcoreapp1.1\x64\hockeylizer.runtimeconfig.json" />
     <Content Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.deps.json" />
     <Content Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.runtimeconfig.dev.json" />
     <Content Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.runtimeconfig.json" />
-    <Content Include="bin\Release\netcoreapp1.1\x86\hockeylizer.deps.json" />
-    <Content Include="bin\Release\netcoreapp1.1\x86\hockeylizer.runtimeconfig.dev.json" />
-    <Content Include="bin\Release\netcoreapp1.1\x86\hockeylizer.runtimeconfig.json" />
+    <Content Include="bin\Release\netcoreapp1.1\x64\hockeylizer.deps.json" />
+    <Content Include="bin\Release\netcoreapp1.1\x64\hockeylizer.runtimeconfig.dev.json" />
+    <Content Include="bin\Release\netcoreapp1.1\x64\hockeylizer.runtimeconfig.json" />
     <Content Include="wwwroot\videos\VideoInfo.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -51,6 +60,8 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="bin\Debug\netcoreapp1.1\x64\hockeylizer.dll" />
+    <None Include="bin\Debug\netcoreapp1.1\x64\hockeylizer.pdb" />
     <None Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.dll" />
     <None Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.pdb" />
     <None Include="bin\Debug\netcoreapp1.1\x64\CppConversion.dll" />
@@ -60,8 +71,8 @@
     <None Include="bin\Debug\netcoreapp1.1\x64\opencv_world320d.dll" />
     <None Include="bin\Debug\netcoreapp1.1\x86\cvextern.dll" />
     <None Include="bin\Debug\netcoreapp1.1\x86\opencv_ffmpeg310.dll" />
-    <None Include="bin\Release\netcoreapp1.1\x86\hockeylizer.dll" />
-    <None Include="bin\Release\netcoreapp1.1\x86\hockeylizer.pdb" />
+    <None Include="bin\Release\netcoreapp1.1\x64\hockeylizer.dll" />
+    <None Include="bin\Release\netcoreapp1.1\x64\hockeylizer.pdb" />
     <None Include="bin\Release\netcoreapp1.1\x64\CppConversion.dll" />
     <None Include="bin\Release\netcoreapp1.1\x64\CppConversion.dll.ilk" />
     <None Include="bin\Release\netcoreapp1.1\x64\cvextern.dll" />
