@@ -319,7 +319,7 @@ namespace hockeylizer.Controllers
 					return Json(vm.gr);
 				}
 
-				var shot = session.Targets.FirstOrDefault(t => t.Order == vm.shot);
+				var shot = _db.Targets.FirstOrDefault(t => t.SessionId == session.SessionId && t.Order == vm.shot);
 
 				if (shot == null)
 				{
