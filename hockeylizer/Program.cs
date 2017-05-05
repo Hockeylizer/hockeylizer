@@ -11,6 +11,7 @@ namespace hockeylizer
     {
         public static void Main(string[] args)
         {
+            //var shots = Services.AnalysisBridge.DecodeFrames("C:\\Users\\holger\\mvk-sudo\\CppConversion\\IMG_8068.MOV", Services.BlobCredentials.AccountName, Services.BlobCredentials.Key, "holgers-test", new Models.DecodeInterval[1] { new Models.DecodeInterval(0, 6000) });
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())

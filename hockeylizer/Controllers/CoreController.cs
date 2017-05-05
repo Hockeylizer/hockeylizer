@@ -474,12 +474,6 @@ namespace hockeylizer.Controllers
 
                 var player = _db.Players.Find(session.PlayerId);
 
-                if (player == null)
-                {
-                    response = new GeneralResult(false, "Spelaren finns inte");
-                    return response;
-                }
-
                 var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
 
                 if (!download)
@@ -490,6 +484,7 @@ namespace hockeylizer.Controllers
 
                 // Logik för att choppa video
 
+                //Buggig?
                 var intervals = session.Targets.Select(t => new DecodeInterval {
                     startMs = (int?)t.TimestampStart ?? 0,
                     endMs = (int?)t.TimestampEnd ?? 0
