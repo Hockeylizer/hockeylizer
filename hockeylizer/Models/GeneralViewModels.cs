@@ -335,8 +335,8 @@ namespace hockeylizer.Models
 
     public class ShotTimestampVm
     {
-        public long Start { get; set; }
-        public long End { get; set; }
+        public long start { get; set; }
+        public long end { get; set; }
     }
 
     public class AddPlayerResult
