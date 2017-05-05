@@ -29,6 +29,33 @@
     <Content Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.deps.json" />
     <Content Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.runtimeconfig.dev.json" />
     <Content Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.runtimeconfig.json" />
+    <Content Include="boost_date_time-vc141-mt-1_64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="boost_system-vc141-mt-1_64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="CppConversion.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="cpprest_2_9.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LIBEAY32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="opencv_ffmpeg320_64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="opencv_world320.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SSLEAY32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wastorage.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="wwwroot\videos\VideoInfo.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -66,6 +93,17 @@
   <ItemGroup>
     <Compile Remove="Services\ImageHandler.cs" />
     <Compile Remove="Models\PlayerVideo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="boost_date_time-vc141-mt-1_64.dll" />
+    <None Remove="boost_system-vc141-mt-1_64.dll" />
+    <None Remove="CppConversion.dll" />
+    <None Remove="cpprest_2_9.dll" />
+    <None Remove="LIBEAY32.dll" />
+    <None Remove="opencv_ffmpeg320_64.dll" />
+    <None Remove="opencv_world320.dll" />
+    <None Remove="SSLEAY32.dll" />
+    <None Remove="wastorage.dll" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\Debug\netcoreapp1.1\x64\" />
