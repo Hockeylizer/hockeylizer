@@ -531,7 +531,10 @@ namespace hockeylizer.Controllers
             return response;
         }
 
-        //Daniels funktion 
+        /*
+         * DANIELS BILDGENERERANDE FUNKTIONER
+         */
+        //Daniels funktion
         [HttpPost]
         [AllowAnonymous]
         public JsonResult getHitsOverviewSVG(int videoId, string token)
@@ -539,36 +542,59 @@ namespace hockeylizer.Controllers
 
             // Just return a goddamn picture of the goal with no hits.
             // It's something.
-            var path = _hostingEnvironment.WebRootPath + "/images/hitsOverview.svg";
-
             var svgURL = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
-
-            string svgStr = System.IO.File.ReadAllText(path);
-
             return Json(svgURL);
+        }
 
-        //    GeneralResult response;
-        //    if (token == appkey)
-        //    {
-        //        var analysisList = db.AnalysisResults.Where(ar => ar.VideoId == videoId);
+        //TODO: THIS FUNCTION NEEDS TO BE using Svg;
+        [HttpPost]
+        [AllowAnonymous]
+        public VirtualFileResult getHitsOverviewPNG(int sessionId, string token)
+        {
+            // very TEMP
+            var pngPlaceholderPath = _hostingEnvironment.WebRootPath + "/images/hitsOverview.png";
+            return base.File(pngPlaceholderPath, "image/png");
 
-        //        // Lite osäker på om ett query utan resultat ger
-        //        // void eller en enumarable av längd noll.
-        //        if (analysisList == null || analysisList.Count() == 0)
-        //        {
-        //            response = new GeneralResult(false, "Analysen finns inte");
-        //            return Json(response);
-        //        }
+            //GeneralResult response;
+            //if (token == _appkey)
+            //{
+                
 
-        //        foreach (var analysis in analysisList)
-        //        {
-                    
-        //        }
+            //    var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
 
-        //    }
+            //    // Lite osäker på om ett query utan resultat ger
+            //    // void eller en enumarable av längd noll.
+            //    if (hitList == null || hitList.Count() == 0)
+            //    {
+            //        response = new GeneralResult(false, "Analysen finns inte");
+            //        return Json(response);
+            //    }
 
-        //    response = new GeneralResult(false, "Inkorrekt token");
-        //    return Json(response);
+            //    var svgPath = _hostingEnvironment.WebRootPath + "/images/hitsOverview.svg";
+                
+            //    string svgStr = System.IO.File.ReadAllText(svgPath);
+
+            //    // Svg stuff needs the svg-library, installable from nuget.
+            //    SvgDocument svgDocument = SvgDocument.FromSvg<SvgDocument>(svgStr);
+            //    foreach (var hit in hitList)
+            //    {
+            //        SvgCircle circle = new SvgCircle();
+            //        circle.CenterX = hit.XCoordinate;
+            //        circle.CenterY = hit.YCoordinate;
+            //        circle.Radius = 4;
+            //        circle.Fill = new SvgColourServer(System.Drawing.Color.Black);
+            //        svgDocument.Children.Add(circle);
+            //    }
+
+            //    using (var bitmap = svgDocument.Draw())
+            //    {
+            //        bitmap.Save(@"..\..\goal.png", ImageFormat.Png);
+            //    }
+
+            //}
+
+            //response = new GeneralResult(false, "Inkorrekt token");
+            //return Json(response);
         }
     }
 }
