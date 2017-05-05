@@ -355,9 +355,9 @@ namespace hockeylizer.Controllers
 					return Json(vm.gr);
 				}
 
-				var shot = session.Targets.FirstOrDefault(t => t.Order == vm.shot);
+				var shot = _db.Targets.FirstOrDefault(t => t.SessionId == session.SessionId && t.Order == vm.shot);
 
-				if (shot == null)
+                if (shot == null)
 				{
 					response = new GetDataFromShotResult(false, "Skottet som skulle uppdateras kunde inte hittas.");
 					return Json(response);
@@ -398,7 +398,7 @@ namespace hockeylizer.Controllers
 					return Json(vm.ur);
 				}
 
-                var shotToUpdate = session.Targets.FirstOrDefault(t => t.Order == vm.shot);
+                var shotToUpdate = _db.Targets.FirstOrDefault(t => t.SessionId == session.SessionId && t.Order == vm.shot);
 
                 if (shotToUpdate == null)
                 {
