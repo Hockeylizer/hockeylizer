@@ -299,7 +299,30 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-		[HttpPost]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> IsAnalyzed([FromBody]SessionVm vm)
+        {
+            IsAnalyzedResult response;
+            if (vm.token == _appkey)
+            {
+                var session = _db.Sessions.Find(vm.sessionId);
+
+                if (session == null)
+                {
+                    response = new IsAnalyzedResult(false, "Sessionen kunde inte hittas", false);
+                    return Json(response);
+                }
+
+                response = new IsAnalyzedResult(false, "Videoklippet kunde inte raderas", true);
+                return Json(response);
+            }
+
+            response = new IsAnalyzedResult(false, "Inkorrekt token", false);
+            return Json(response);
+        }
+
+        [HttpPost]
 		[AllowAnonymous]
 		public JsonResult GetFramesFromShot([FromBody]GetTargetFramesVm vm)
         {

@@ -89,7 +89,28 @@ namespace hockeylizer.Models
         public string Description { get; set; }
     }
 
-	public class GetFramesFromShotResult
+    public class IsAnalyzedResult
+    {
+        public IsAnalyzedResult()
+        {
+            this.Completed = false;
+            this.Description = "Okänt fel";
+            this.Analyzed = false;
+        }
+
+        public IsAnalyzedResult(bool comp, string desc, bool al)
+        {
+            this.Completed = comp;
+            this.Description = desc;
+            this.Analyzed = al;
+        }
+
+        public bool Completed { get; set; }
+        public string Description { get; set; }
+        public bool Analyzed { get; set; }
+    }
+
+    public class GetFramesFromShotResult
 	{
 		public GetFramesFromShotResult()
 		{
