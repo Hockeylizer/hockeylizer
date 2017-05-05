@@ -11,20 +11,21 @@ namespace hockeylizer.Models
             this.FramesToAnalyze = new HashSet<FrameToAnalyze>();
         }
 
-        public Target(int targetNumber, int order, long? tsStart, long? tsEnd, int? xc, int? yc)
+        public Target(int targetNumber, int order, long? tsStart, long? tsEnd, int? xc, int? yc, int? xcA, int? ycA)
         {
             this.TargetNumber = targetNumber;
             this.Order = order;
+
+            this.TimestampStart = tsStart;
+            this.TimestampEnd = tsEnd;
+
+            this.XCoordinate = xc;
+            this.YCoordinate = yc;
+
+            this.XCoordinateAnalyzed = xcA;
+            this.YCoordinateAnalyzed = ycA;
+
             this.FramesToAnalyze = new HashSet<FrameToAnalyze>();
-        }
-
-        public void AddFrames(List<string> urls)
-        {
-            foreach (var url in urls)
-            {
-                var frame = new FrameToAnalyze();
-
-            }
         }
 
         [Key]
@@ -37,6 +38,9 @@ namespace hockeylizer.Models
 
         public int? XCoordinate { get; set; }
         public int? YCoordinate { get; set; }
+
+        public int? XCoordinateAnalyzed { get; set; }
+        public int? YCoordinateAnalyzed { get; set; }
 
         [ForeignKey("RelatedSession")]
         public int SessionId { get; set; }

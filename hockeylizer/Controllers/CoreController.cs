@@ -327,7 +327,12 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-                response = new GetFramesFromShotResult(true, "Skottets träffpunkter har hämtats!", shot.FramesToAnalyze.Select(frame => frame.FrameUrl).ToList());
+                response = new GetFramesFromShotResult(true, "Skottets träffpunkter har hämtats!", _db.Frames.Where(f => f.TargetId == shot.TargetId).Select(f => f.FrameUrl).ToList())
+                {
+                    XCoordinate = shot.XCoordinateAnalyzed,
+                    YCoordinate = shot.XCoordinateAnalyzed
+                };
+
 				return Json(response);
 			}
 
@@ -432,7 +437,7 @@ namespace hockeylizer.Controllers
                 {
                     response = new GetFramesResult(true, "Alla frames hämtades", new List<string>());
 
-                    foreach (var t in session.Targets)
+                    foreach (var t in _db.Targets.Where(tar => tar.SessionId == session.SessionId))
                     {
                         response.Images.AddRange(t.FramesToAnalyze.Select(frame => frame.FrameUrl));
                     }

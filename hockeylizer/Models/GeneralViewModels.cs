@@ -107,6 +107,10 @@ namespace hockeylizer.Models
 
 		public bool Completed { get; set; }
 		public string Description { get; set; }
+
+	    public int? XCoordinate { get; set; }
+	    public int? YCoordinate { get; set; }
+
         public List<string> FrameUrls { get; set; }
 	}
 
@@ -434,6 +438,7 @@ namespace hockeylizer.Models
 
         public bool Completed { get; set; }
         public string Description { get; set; }
+
         public List<string> Images { get; set; }
     }
 
