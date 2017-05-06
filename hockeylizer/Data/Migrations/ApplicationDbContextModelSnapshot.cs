@@ -163,7 +163,11 @@ namespace hockeylizer.Data.Migrations
 
                     b.Property<int?>("XCoordinate");
 
+                    b.Property<int?>("XCoordinateAnalyzed");
+
                     b.Property<int?>("YCoordinate");
+
+                    b.Property<int?>("YCoordinateAnalyzed");
 
                     b.HasKey("TargetId");
 
