@@ -43,7 +43,7 @@ namespace hockeylizer
         {
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("Data Source=tcp:hockeylizer.database.windows.net,1433;Initial Catalog=hockeydb;User ID=hockeyadmin;Password=Hockey2017")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
