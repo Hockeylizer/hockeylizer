@@ -61,6 +61,9 @@ namespace hockeylizer
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
+
+            // Hangfire
+            services.AddHangfire(x => x.UseSqlServerStorage("Server=tcp:hockeydb.database.windows.net,1433;Initial Catalog=hockeydb;Persist Security Info=False;User ID=hockeyadmin;Password=Hockey2017;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -72,16 +75,13 @@ namespace hockeylizer
             app.UseDeveloperExceptionPage();
             app.UseDatabaseErrorPage();
 
-            // Hangfire
-            GlobalConfiguration.Configuration
-                .UseSqlServerStorage("<name or connection string>");
-
-            app.UseHangfireDashboard();
-            app.UseHangfireServer();
-
             app.UseStaticFiles();
 
             app.UseIdentity();
+
+            // Hangfire
+            app.UseHangfireServer();
+			app.UseHangfireDashboard();
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
 
