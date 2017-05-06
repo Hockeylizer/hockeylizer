@@ -67,7 +67,7 @@ namespace hockeylizer.Services
         }
 
         // Main entry point for analysing a single shot.
-        public static AnalysisResult AnalyzeShot(int firstFrame, int lastFrame,
+        public static AnalysisResult AnalyzeShot(long firstFrame, long lastFrame,
                                                  Point2i[] targetCoords,
                                                  double sizeX, double sizeY,
                                                  Point2d[] targetOffsetsInCm,
