@@ -12,85 +12,93 @@ using Microsoft.Extensions.Logging;
 using hockeylizer.Data;
 using hockeylizer.Models;
 using hockeylizer.Services;
-using Hangfire;
 using Microsoft.AspNetCore.Http.Features;
+using Hangfire;
 
 namespace hockeylizer
 {
-    public class Startup
-    {
-        public Startup(IHostingEnvironment env)
-        {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+	public class Startup
+	{
+		public Startup(IHostingEnvironment env)
+		{
+			var builder = new ConfigurationBuilder()
+				.SetBasePath(env.ContentRootPath)
+				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+				.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 
-            if (env.IsDevelopment())
-            {
-                // For more details on using the user secret store see https://go.microsoft.com/fwlink/?LinkID=532709
-                builder.AddUserSecrets<Startup>();
-            }
+			if (env.IsDevelopment())
+			{
+				// For more details on using the user secret store see https://go.microsoft.com/fwlink/?LinkID=532709
+				builder.AddUserSecrets<Startup>();
+			}
 
-            builder.AddEnvironmentVariables();
-            Configuration = builder.Build();
-        }
+			builder.AddEnvironmentVariables();
+			Configuration = builder.Build();
+		}
 
-        public IConfigurationRoot Configuration { get; }
+		public IConfigurationRoot Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-            // Add framework services.
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("Data Source=tcp:hockeylizer.database.windows.net,1433;Initial Catalog=hockeydb;User ID=hockeyadmin;Password=Hockey2017")));
+		// This method gets called by the runtime. Use this method to add services to the container.
+		public void ConfigureServices(IServiceCollection services)
+		{
+			// Add framework services.
+			services.AddDbContext<ApplicationDbContext>(options =>
+				options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+			services.AddIdentity<ApplicationUser, IdentityRole>()
+				.AddEntityFrameworkStores<ApplicationDbContext>()
+				.AddDefaultTokenProviders();
 
-            services.Configure<FormOptions>(x =>
-            {
-                x.ValueLengthLimit = int.MaxValue;
-                x.MultipartBodyLengthLimit = int.MaxValue;
-                x.MultipartHeadersLengthLimit = int.MaxValue;
-            });
+			services.Configure<FormOptions>(x =>
+			{
+				x.ValueLengthLimit = int.MaxValue;
+				x.MultipartBodyLengthLimit = int.MaxValue;
+				x.MultipartHeadersLengthLimit = int.MaxValue;
+			});
 
-            services.AddMvc();
+			services.AddMvc();
 
-            // Add application services.
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
+			// Add application services.
+			services.AddTransient<IEmailSender, AuthMessageSender>();
+			services.AddTransient<ISmsSender, AuthMessageSender>();
+
+			services.AddHangfire(hf => hf.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection")));
+		}
+
+		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+		{
+			loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+			loggerFactory.AddDebug();
+
+			app.UseDeveloperExceptionPage();
+			app.UseDatabaseErrorPage();
+			//if (env.IsDevelopment())
+			//{
+
+			//    //app.UseBrowserLink();
+			//}
+			//else
+			//{
+			//    app.UseExceptionHandler("/Home/Error");
+			//}
+
+			app.UseStaticFiles();
+
+			app.UseIdentity();
 
             // Hangfire
-            services.AddHangfire(x => x.UseSqlServerStorage("Server=tcp:hockeydb.database.windows.net,1433;Initial Catalog=hockeydb;Persist Security Info=False;User ID=hockeyadmin;Password=Hockey2017;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"));
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
-        {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
-            app.UseDeveloperExceptionPage();
-            app.UseDatabaseErrorPage();
-
-            app.UseStaticFiles();
-
-            app.UseIdentity();
-
-            // Hangfire
-            app.UseHangfireServer();
+			app.UseHangfireServer();
 			app.UseHangfireDashboard();
 
-            // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
+			// Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
-        }
-    }
+			app.UseMvc(routes =>
+			{
+				routes.MapRoute(
+					name: "default",
+					template: "{controller=Home}/{action=Index}/{id?}");
+			});
+		}
+	}
 }
