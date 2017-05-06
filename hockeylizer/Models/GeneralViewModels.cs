@@ -238,6 +238,12 @@ namespace hockeylizer.Models
         public string token { get; set; }
     }
 
+    public class AnalyzeVm
+    {
+        public int sessionId { get; set; }
+        public string filepath { get; set; }
+    }
+
     public class CreateTeamVm
     {
         public string token { get; set; }
@@ -276,7 +282,7 @@ namespace hockeylizer.Models
         public Guid? TeamId { get; set; }
 	}
 
-    public class CreateSessionVm
+    public class  CreateSessionVm
     {
         public bool Validate() 
         {
@@ -319,7 +325,13 @@ namespace hockeylizer.Models
                 return false;
             }
 
-			if (!this.targetOrder.Any())
+            if (this.timestamps.Any(t => t.start == null || t.end == null))
+            {
+                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
+                return false;
+            }
+
+            if (!this.targetOrder.Any())
 			{
 				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då skottordning saknas!", false);
                 return false;
@@ -356,8 +368,8 @@ namespace hockeylizer.Models
 
     public class ShotTimestampVm
     {
-        public long start { get; set; }
-        public long end { get; set; }
+        public int start { get; set; }
+        public int end { get; set; }
     }
 
     public class AddPlayerResult

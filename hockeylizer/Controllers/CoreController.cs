@@ -11,6 +11,7 @@ using System.Linq;
 using System.IO;
 using System;
     using System.Diagnostics;
+    using Hangfire;
 
 namespace hockeylizer.Controllers
 {
@@ -253,6 +254,14 @@ namespace hockeylizer.Controllers
                         _db.SaveChanges();
                         _db.Entry(savedSession).GetDatabaseValues();
 
+                        BackgroundJob.Enqueue(() => 
+                            this.ChopAlyzeSession(new SessionVm
+                            {
+                                sessionId = savedSession.SessionId,
+                                token = _appkey
+                            }
+                        ));
+
                         sr = new SessionResult("Videoklippet laddades upp!", true, savedSession.SessionId);
                     }
                 }
@@ -478,75 +487,93 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-        public async Task<GeneralResult> ChopVideo([FromBody]SessionVm vm)
+        // Chop and analyze session
+        private async void ChopAlyzeSession(SessionVm vm)
         {
-            GeneralResult response;
-            if (vm.token == _appkey)
+            if (vm.token != _appkey) return;
+            var session = _db.Sessions.Find(vm.sessionId);
+
+            if (session == null) return;
+
+            var blobname = session.FileName;
+            var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
+            path = Path.Combine(path, blobname);
+
+            var player = _db.Players.Find(session.PlayerId);
+            if (player == null) return;
+
+            var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
+            if (!download) return;
+
+            // Analyze the video
+            this.AnalyzeVideo(session, path);
+
+            var intervals = session.Targets.Select(t => new DecodeInterval
             {
-                var session = _db.Sessions.Find(vm.sessionId);
+                startMs = t.TimestampStart,
+                endMs = t.TimestampEnd
+            }).ToArray();
 
-                if (session == null)
+            var shots = AnalysisBridge.DecodeFrames(path, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
+            if (shots.Any())
+            {
+                foreach (var s in shots)
                 {
-                    response = new GeneralResult(false, "Videon finns inte");
-                    return response;
-                }
+                    var target = _db.Targets.FirstOrDefault(shot => shot.SessionId == session.SessionId && shot.Order == s.Shot);
 
-                var blobname = session.FileName;
-                var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
-                path = Path.Combine(path, blobname);
-
-                var player = _db.Players.Find(session.PlayerId);
-
-                var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-
-                if (!download)
-                {
-                    response = new GeneralResult(false, "Videon kunde inte laddas ned.");
-                    return response;
-                }
-
-                // Logik för att choppa video
-
-                //Buggig?
-                var intervals = session.Targets.Select(t => new DecodeInterval {
-                    startMs = (int?)t.TimestampStart ?? 0,
-                    endMs = (int?)t.TimestampEnd ?? 0
-                }).ToArray();
-
-                var shots = AnalysisBridge.DecodeFrames(path, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
-                if (shots.Any())
-                {
-                    foreach (var s in shots)
+                    if (target == null) continue;
+                    foreach (var frame in s.Uris)
                     {
-                        var target = session.Targets.FirstOrDefault(shot => shot.Order == s.Shot);
-
-                        if (target != null)
-                        {
-                            foreach (var frame in s.Uris)
-                            {
-                                var picture = new FrameToAnalyze(target.TargetId, frame);
-                                await _db.Frames.AddAsync(picture);
-                            }
-                        }
+                        var picture = new FrameToAnalyze(target.TargetId, frame);
+                        await _db.Frames.AddAsync(picture);
                     }
-                    
-                    await _db.SaveChangesAsync();
                 }
 
-                if (!System.IO.File.Exists(path))
-                {
-                    response = new GeneralResult(false, "Videon kunde inte raderas då den inte existerar.");
-                    return response;
-                }
-
-                System.IO.File.Delete(path);
-
-                response = new GeneralResult(true, "Allt fixat!");
-                return response;
+                await _db.SaveChangesAsync();
             }
 
-            response = new GeneralResult(false, "Inkorrekt token");
-            return response;
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
+        }
+
+        private void AnalyzeVideo(PlayerSession session, string path)
+        {
+            var targets = _db.Targets.Where(shot => shot.SessionId == session.SessionId).ToArray();
+
+            var points = new Point2i[] {};
+            var offsets = new Point2d[] { };
+
+            for (var hp = 0; hp < targets.Length; hp++)
+            {
+                points[hp] = new Point2i(targets[hp].XCoordinate ?? 0, targets[hp].YCoordinate ?? 0);
+
+                offsets[hp] = new Point2d(targets[hp].XCoordinate ?? 0, targets[hp].YCoordinate ?? 0);
+            }
+
+            const int width = 1;
+            const int height = 1;
+
+            foreach (var t in targets)
+            {
+                var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points, width, height,
+                    offsets, path);
+
+                if (analysis.WasErrors) continue;
+
+                var xHit = analysis.HitPoint.x;
+                var yHit = analysis.HitPoint.y;
+                var hit = analysis.DidHitGoal;
+
+                t.XCoordinateAnalyzed = xHit;
+                t.YCoordinateAnalyzed = yHit;
+                t.HitGoal = hit;
+            }
+
+            session.Analyzed = true;
+
+            _db.SaveChanges();
         }
 
         /*

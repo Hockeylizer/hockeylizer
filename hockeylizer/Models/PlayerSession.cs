@@ -8,14 +8,15 @@ namespace hockeylizer.Models
 {
 	public class PlayerSession
 	{
-		private PlayerSession()
+		public PlayerSession()
 		{
             this.Created = DateTime.Now;
 			this.Targets = new HashSet<Target>();
 
 			this.Deleted = false;
 			this.VideoRemoved = false;
-		}
+		    this.Analyzed = false;
+        }
 
 		// to = targetorder, ts = timestamps
 		public void AddTargets(List<int> to, List<TargetCoordsVm> coords, List<ShotTimestampVm> ts)
@@ -47,6 +48,7 @@ namespace hockeylizer.Models
 
 			this.Deleted = false;
 			this.VideoRemoved = false;
+		    this.Analyzed = false;
 
             this.Created = DateTime.Now;
 			this.Targets = new HashSet<Target>();
@@ -85,6 +87,7 @@ namespace hockeylizer.Models
 
 		public bool Deleted { get; set; }
 		public bool VideoRemoved { get; set; }
+        public bool Analyzed { get; set; }
 
 		public virtual ICollection<Target> Targets { get; set; }
 	}

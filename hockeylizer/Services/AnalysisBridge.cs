@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using hockeylizer.Models;
 using hockeylizer.Helpers;
@@ -7,7 +6,7 @@ using hockeylizer.Helpers;
 namespace hockeylizer.Services
 {
     // This class holds the entry points to the C++ analysis library
-    static class AnalysisBridge
+    class AnalysisBridge
     {
 
         // Decodes Frames and uploads them to blob storage
@@ -72,7 +71,7 @@ namespace hockeylizer.Services
                                                  Point2i[] targetCoords,
                                                  double sizeX, double sizeY,
                                                  Point2d[] targetOffsetsInCm,
-                                                 String videoName)
+                                                 string videoName)
         {
             if (targetCoords.Length != targetOffsetsInCm.Length)
             {

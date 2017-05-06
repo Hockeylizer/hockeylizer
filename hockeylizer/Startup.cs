@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using hockeylizer.Data;
 using hockeylizer.Models;
 using hockeylizer.Services;
+using Hangfire;
 using Microsoft.AspNetCore.Http.Features;
 
 namespace hockeylizer
@@ -70,15 +71,13 @@ namespace hockeylizer
 
             app.UseDeveloperExceptionPage();
             app.UseDatabaseErrorPage();
-            //if (env.IsDevelopment())
-            //{
-                
-            //    //app.UseBrowserLink();
-            //}
-            //else
-            //{
-            //    app.UseExceptionHandler("/Home/Error");
-            //}
+
+            // Hangfire
+            GlobalConfiguration.Configuration
+                .UseSqlServerStorage("<name or connection string>");
+
+            app.UseHangfireDashboard();
+            app.UseHangfireServer();
 
             app.UseStaticFiles();
 
