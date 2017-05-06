@@ -297,7 +297,7 @@ namespace hockeylizer.Models
 
             if (!allowedFileTypes.Contains(currentFileType))
             {
-                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon har fel feltyp! Kan ej ta emot filer av typ: " + currentFileType + ". Endast " + allowedFileTypes + " tas emot.", false);
+                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon har fel videotyp! Kan ej ta emot filer av typ: " + currentFileType + ". Endast " + allowedFileTypes + " tas emot.", false);
                 return false;
             }
 

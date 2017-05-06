@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using hockeylizer.Services;
 using hockeylizer.Helpers;
 using hockeylizer.Models;
+using System.Diagnostics;
 using hockeylizer.Data;
 using System.Linq;
 using System.IO;
+using Hangfire;
 using System;
-    using System.Diagnostics;
-    using Hangfire;
 
 namespace hockeylizer.Controllers
 {
@@ -543,22 +543,51 @@ namespace hockeylizer.Controllers
             var targets = _db.Targets.Where(shot => shot.SessionId == session.SessionId).ToArray();
 
             var points = new Point2i[] {};
-            var offsets = new Point2d[] { };
+            var offsets = new Point2d[] {};
+
+            var pointDict = new Dictionary<int, Point2d>();
+
+            pointDict.Add(1, new Point2d(10, 91));
+            pointDict.Add(2, new Point2d(10, 18));
+            pointDict.Add(3, new Point2d(173, 18));
+            pointDict.Add(4, new Point2d(173, 91));
+            pointDict.Add(5, new Point2d(91.5, 101));
+			
+            //Punkt 1: (10, 91)
+			//Punkt 2: (10, 18)
+			//Punkt 3: (173, 18)
+			//Punkt 4: (173, 91)
+			//Punkt 5: (91.5, 101)
 
             for (var hp = 0; hp < targets.Length; hp++)
             {
                 points[hp] = new Point2i(targets[hp].XCoordinate ?? 0, targets[hp].YCoordinate ?? 0);
 
-                offsets[hp] = new Point2d(targets[hp].XCoordinate ?? 0, targets[hp].YCoordinate ?? 0);
+                Point2d coordinates;
+                var shot = targets[hp].Order;
+
+                if (pointDict.ContainsKey(shot))
+                {
+                    coordinates = pointDict[shot];
+                }
+                else if (pointDict.ContainsKey(hp % 5))
+                {
+                    coordinates = pointDict[hp % 5];
+                }
+                else 
+                {
+                    coordinates = new Point2d(0, 0);
+                }
+
+                offsets[hp] = coordinates;
             }
 
-            const int width = 1;
-            const int height = 1;
+            const int width = 183;
+            const int height = 122;
 
             foreach (var t in targets)
             {
-                var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points, width, height,
-                    offsets, path);
+                var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points, width, height, offsets, path);
 
                 if (analysis.WasErrors) continue;
 
