@@ -323,7 +323,7 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                response = new IsAnalyzedResult(false, "Videoklippet kunde inte raderas", true);
+                response = new IsAnalyzedResult(false, "Videoklippet kollat", session.Analyzed);
                 return Json(response);
             }
 
@@ -488,22 +488,22 @@ namespace hockeylizer.Controllers
         }
 
         // Chop and analyze session
-        private async void ChopAlyzeSession(SessionVm vm)
+        public async Task<bool> ChopAlyzeSession(SessionVm vm)
         {
-            if (vm.token != _appkey) return;
+            if (vm.token != _appkey) return false;
             var session = _db.Sessions.Find(vm.sessionId);
 
-            if (session == null) return;
+            if (session == null) return false;
 
             var blobname = session.FileName;
             var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
             path = Path.Combine(path, blobname);
 
             var player = _db.Players.Find(session.PlayerId);
-            if (player == null) return;
+            if (player == null) return false;
 
             var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-            if (!download) return;
+            if (!download) return false;
 
             // Analyze the video
             this.AnalyzeVideo(session, path);
@@ -536,9 +536,11 @@ namespace hockeylizer.Controllers
             {
                 System.IO.File.Delete(path);
             }
+
+            return true;
         }
 
-        private void AnalyzeVideo(PlayerSession session, string path)
+        public void AnalyzeVideo(PlayerSession session, string path)
         {
             var targets = _db.Targets.Where(shot => shot.SessionId == session.SessionId).ToArray();
 
