@@ -1,22 +1,11 @@
-﻿using Hangfire.Dashboard;
-using hockeylizer.Data;
-using hockeylizer.Models;
-using hockeylizer.Services;
-using System;
-
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using hockeylizer.Services;
-using hockeylizer.Helpers;
 using hockeylizer.Models;
-using System.Diagnostics;
+using Hangfire.Dashboard;
 using hockeylizer.Data;
 using System.Linq;
 using System.IO;
-using Hangfire;
 using System;
 
 namespace hockeylizer.Helpers
