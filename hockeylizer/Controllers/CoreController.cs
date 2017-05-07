@@ -408,7 +408,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult ChopThis([FromBody] SessionVm vm)
+        public JsonResult ChopThis([FromBody]SessionVm vm)
         {
             GeneralResult response;
             if (vm.token == _appkey)
