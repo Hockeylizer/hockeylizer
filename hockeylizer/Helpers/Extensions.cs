@@ -47,116 +47,131 @@ namespace hockeylizer.Helpers
             this._hostingEnvironment = hostingEnvironment;
 		}
 
-		public async void ChopAlyzeSession(int sessionId)
+		public void ChopAlyzeSession(int sessionId)
 		{
 			var session = _db.Sessions.Find(sessionId);
 			if (session == null) throw new Exception("Session hittas inte");
 
-			var blobname = session.FileName;
-			var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
-			path = Path.Combine(path, blobname);
+            var blobname = session.FileName;
+            var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
+            path = Path.Combine(path, blobname);
 
-			var player = _db.Players.Find(session.PlayerId);
-			if (player == null) throw new Exception("Spelare hittas inte");
-
-			var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-			if (!download) throw new Exception("Videoklippet kunde inte laddas ned");
-
-			// Analyze the video
-
-			var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToArray();
-
-		    var pointDict = new Dictionary<int, Point2d>
+		    var count = 1;
+		    while (File.Exists(path))
 		    {
-		        {1, new Point2d(10, 91)},
-		        {2, new Point2d(10, 18)},
-		        {3, new Point2d(173, 18)},
-		        {4, new Point2d(173, 91)},
-		        {5, new Point2d(91.5, 101)}
-		    };
+		        var filetype = blobname.Split('.').LastOrDefault() ?? "mp4";
+		        var filestart = blobname.Split('-').FirstOrDefault() ?? "video";
 
-            var points = new Point2i[] { };
-			var offsets = new Point2d[] { };
+		        var filename = filestart + count + "." + filetype;
 
-		    for (var hp = 0; hp < targets.Length; hp++)
-			{
-				points[hp] = new Point2i(targets[hp].XCoordinate ?? 0, targets[hp].YCoordinate ?? 0);
+		        path = Path.Combine(path, filename);
+		        count++;
+		    }
 
-				Point2d coordinates;
-				var shot = targets[hp].Order;
 
-				if (pointDict.ContainsKey(shot))
-				{
-					coordinates = pointDict[shot];
-				}
-				else if (pointDict.ContainsKey(hp % 5))
-				{
-					coordinates = pointDict[hp % 5];
-				}
-				else
-				{
-					coordinates = new Point2d(0, 0);
-				}
+            var player = _db.Players.Find(session.PlayerId);
+            if (player == null) throw new Exception("Spelare hittas inte");
 
-				offsets[hp] = coordinates;
-			}
+            var download = FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName()).Result;
+            if (!download) throw new Exception("Videoklippet kunde inte laddas ned");
 
-			const int width = 183;
-			const int height = 122;
+            // Analyze the video
 
-			foreach (var t in targets)
-			{
-				var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points, width, height, offsets, path);
+            var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToArray();
 
-				if (analysis.WasErrors) continue;
+            var pointDict = new Dictionary<int, Point2d>
+            {
+                {1, new Point2d(10, 91)},
+                {2, new Point2d(10, 18)},
+                {3, new Point2d(173, 18)},
+                {4, new Point2d(173, 91)},
+                {5, new Point2d(91.5, 101)}
+            };
 
-				var xHit = analysis.HitPoint.x;
-				var yHit = analysis.HitPoint.y;
-				var hit = analysis.DidHitGoal;
+            var points = new List<Point2i>();
+            var offsets = new List<Point2d>();
 
-				t.XCoordinateAnalyzed = xHit;
-				t.YCoordinateAnalyzed = yHit;
-				t.HitGoal = hit;
-			}
+		    var iter = 1;
+		    foreach (var hp in targets)
+		    {
+		        points.Add(new Point2i(hp.XCoordinate ?? 0, hp.YCoordinate ?? 0));
 
-			session.Analyzed = true;
-		    await _db.SaveChangesAsync();
+                Point2d coordinates;
+		        var shot = hp.Order;
 
-			// End of analysis
+		        if (pointDict.ContainsKey(shot))
+		        {
+		            coordinates = pointDict[shot];
+		        }
+		        else if (pointDict.ContainsKey(iter % 5))
+		        {
+		            coordinates = pointDict[iter % 5];
+		        }
+		        else
+		        {
+		            coordinates = new Point2d(0, 0);
+		        }
 
-			var intervals = session.Targets.Select(t => new DecodeInterval
-			{
-				startMs = t.TimestampStart,
-				endMs = t.TimestampEnd
-			}).ToArray();
+		        offsets.Add(coordinates);
+		        iter++;
+		    }
 
-			var shots = AnalysisBridge.DecodeFrames(path, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
-			if (shots.Any())
-			{
-				foreach (var s in shots)
-				{
-					var target = _db.Targets.FirstOrDefault(shot => shot.SessionId == session.SessionId && shot.Order == s.Shot);
+            const int width = 183;
+            const int height = 122;
 
-					if (target == null) continue;
-					foreach (var frame in s.Uris)
-					{
-						var picture = new FrameToAnalyze(target.TargetId, frame);
-						await _db.Frames.AddAsync(picture);
-					}
-				}
+            foreach (var t in targets)
+            {
+                var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points.ToArray(), width, height, offsets.ToArray(), path);
 
-				await _db.SaveChangesAsync();
-			}
+                if (analysis.WasErrors) continue;
 
-			if (File.Exists(path))
-			{
-				File.Delete(path);
-			}
-		}
+                var xHit = analysis.HitPoint.x;
+                var yHit = analysis.HitPoint.y;
+                var hit = analysis.DidHitGoal;
+
+                t.XCoordinateAnalyzed = xHit;
+                t.YCoordinateAnalyzed = yHit;
+                t.HitGoal = hit;
+            }
+
+            session.Analyzed = false;
+		     _db.SaveChanges();
+
+            // End of analysis
+
+            var intervals = session.Targets.Select(t => new DecodeInterval
+            {
+                startMs = t.TimestampStart,
+                endMs = t.TimestampEnd
+            }).ToArray();
+
+            var shots = AnalysisBridge.DecodeFrames(path, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
+            if (shots.Any())
+            {
+                foreach (var s in shots)
+                {
+                    var target = _db.Targets.FirstOrDefault(shot => shot.SessionId == session.SessionId && shot.Order == s.Shot);
+
+                    if (target == null) continue;
+                    foreach (var frame in s.Uris)
+                    {
+                        var picture = new FrameToAnalyze(target.TargetId, frame);
+                        _db.Frames.Add(picture);
+                    }
+                }
+
+                _db.SaveChanges();
+            }
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
 	}
 
 	public interface IChopService
 	{
-        void ChopAlyzeSession(int sessionId);
+	    void ChopAlyzeSession(int sessionId);
 	}
 }

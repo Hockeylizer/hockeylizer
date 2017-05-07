@@ -12,7 +12,8 @@ using System.Linq;
 using System.IO;
 using Hangfire;
 using System;
-     
+     using System.Runtime.CompilerServices;
+
 
 namespace hockeylizer.Controllers
 {
@@ -302,6 +303,131 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> Analysis(int sessionId)
+        {
+            var session = _db.Sessions.Find(sessionId);
+            if (session == null) return Json("1");
+
+            var blobname = session.FileName;
+            var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
+            path = Path.Combine(path, blobname);
+
+            var count = 1;
+            while (System.IO.File.Exists(path))
+            {
+                var filetype = blobname.Split('.').LastOrDefault() ?? "mp4";
+                var filestart = blobname.Split('-').FirstOrDefault() ?? "video";
+
+                var filename = filestart + count + "." + filetype;
+
+                path = Path.Combine(path, filename);
+                count++;
+            }
+
+            var player = _db.Players.Find(session.PlayerId);
+            if (player == null) return Json("2");
+
+            var download = FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName()).Result;
+            if (!download) return Json("3");
+
+            // Analyze the video
+
+            var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToArray();
+
+            var pointDict = new Dictionary<int, Point2d>
+            {
+                {1, new Point2d(10, 91)},
+                {2, new Point2d(10, 18)},
+                {3, new Point2d(173, 18)},
+                {4, new Point2d(173, 91)},
+                {5, new Point2d(91.5, 101)}
+            };
+
+            var points = new List<Point2i>();
+            var offsets = new List<Point2d>();
+
+            var iter = 1;
+            foreach (var hp in targets)
+            {
+                points.Add(new Point2i(hp.XCoordinate ?? 0, hp.YCoordinate ?? 0));
+
+                Point2d coordinates;
+                var shot = hp.Order;
+
+                if (pointDict.ContainsKey(shot))
+                {
+                    coordinates = pointDict[shot];
+                }
+                else if (pointDict.ContainsKey(iter % 5))
+                {
+                    coordinates = pointDict[iter % 5];
+                }
+                else
+                {
+                    coordinates = new Point2d(0, 0);
+                }
+
+                offsets.Add(coordinates);
+                iter++;
+            }
+
+            const int width = 183;
+            const int height = 122;
+
+            foreach (var t in targets)
+            {
+                var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points.ToArray(), width, height, offsets.ToArray(), path);
+
+                if (analysis.WasErrors) continue;
+
+                var xHit = analysis.HitPoint.x;
+                var yHit = analysis.HitPoint.y;
+                var hit = analysis.DidHitGoal;
+
+                t.XCoordinateAnalyzed = xHit;
+                t.YCoordinateAnalyzed = yHit;
+                t.HitGoal = hit;
+            }
+
+            session.Analyzed = true;
+
+            // End of analysis
+
+            var intervals = session.Targets.Select(t => new DecodeInterval
+            {
+                startMs = t.TimestampStart,
+                endMs = t.TimestampEnd
+            }).ToArray();
+
+            var shots = AnalysisBridge.DecodeFrames(path, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
+            if (shots.Any())
+            {
+                foreach (var s in shots)
+                {
+                    var target = _db.Targets.FirstOrDefault(shot => shot.SessionId == session.SessionId && shot.Order == s.Shot);
+
+                    if (target == null) continue;
+                    foreach (var frame in s.Uris)
+                    {
+                        var picture = new FrameToAnalyze(target.TargetId, frame);
+                        await _db.Frames.AddAsync(picture);
+                    }
+                }
+
+                await _db.SaveChangesAsync();
+            }
+
+            await _db.SaveChangesAsync();
+
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
+
+            return Json("4");
+        }
 
         [HttpPost]
         [AllowAnonymous]
