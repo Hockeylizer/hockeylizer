@@ -707,7 +707,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult GetFramesFromSession([FromBody]SessionVm vm)
+        public async Task<JsonResult> GetFramesFromSession([FromBody]SessionVm vm)
         {
             GetFramesResult response;
             if (vm.token == _appkey)
@@ -720,7 +720,12 @@ namespace hockeylizer.Controllers
 
                     foreach (var t in _db.Targets.Where(tar => tar.SessionId == session.SessionId))
                     {
-                        response.Images.AddRange(t.FramesToAnalyze.Select(frame => frame.FrameUrl));
+                        foreach (var url in t.FramesToAnalyze.Select(frame => frame.FrameUrl))
+                        {
+                            var picture = await FileHandler.GetShareableBlobUrl(url);
+                            response.Images.Add(picture);
+                        }
+                        
                     }
                 }
                 else
