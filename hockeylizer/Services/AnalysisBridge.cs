@@ -40,6 +40,10 @@ namespace hockeylizer.Services
             {
                 Console.WriteLine("zero size");
             }
+            if (res == IntPtr.Zero)
+            {
+                throw new System.ArgumentException();
+            }
             FrameCollection[] decodedFrames = new FrameCollection[decodeIntervals.Length];
             flatIndex = 0;
             for (int i = 0; i < decodedFrames.Length; i++)
@@ -67,7 +71,7 @@ namespace hockeylizer.Services
         }
 
         // Main entry point for analysing a single shot.
-        public static AnalysisResult AnalyzeShot(int firstFrame, int lastFrame,
+        public static AnalysisResult AnalyzeShot(long firstFrame, long lastFrame,
                                                  Point2i[] targetCoords,
                                                  double sizeX, double sizeY,
                                                  Point2d[] targetOffsetsInCm,
