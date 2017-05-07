@@ -50,34 +50,35 @@ namespace hockeylizer.Helpers
 		public async void ChopAlyzeSession(int sessionId)
 		{
 			var session = _db.Sessions.Find(sessionId);
-			if (session == null) return;
+			if (session == null) throw new Exception("Session hittas inte");
 
 			var blobname = session.FileName;
 			var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
 			path = Path.Combine(path, blobname);
 
 			var player = _db.Players.Find(session.PlayerId);
-			if (player == null) return;
+			if (player == null) throw new Exception("Spelare hittas inte");
 
 			var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-			if (!download) return;
+			if (!download) throw new Exception("Videoklippet kunde inte laddas ned");
 
 			// Analyze the video
 
 			var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToArray();
 
-			var points = new Point2i[] { };
+		    var pointDict = new Dictionary<int, Point2d>
+		    {
+		        {1, new Point2d(10, 91)},
+		        {2, new Point2d(10, 18)},
+		        {3, new Point2d(173, 18)},
+		        {4, new Point2d(173, 91)},
+		        {5, new Point2d(91.5, 101)}
+		    };
+
+            var points = new Point2i[] { };
 			var offsets = new Point2d[] { };
 
-			var pointDict = new Dictionary<int, Point2d>();
-
-			pointDict.Add(1, new Point2d(10, 91));
-			pointDict.Add(2, new Point2d(10, 18));
-			pointDict.Add(3, new Point2d(173, 18));
-			pointDict.Add(4, new Point2d(173, 91));
-			pointDict.Add(5, new Point2d(91.5, 101));
-
-			for (var hp = 0; hp < targets.Length; hp++)
+		    for (var hp = 0; hp < targets.Length; hp++)
 			{
 				points[hp] = new Point2i(targets[hp].XCoordinate ?? 0, targets[hp].YCoordinate ?? 0);
 
@@ -119,6 +120,7 @@ namespace hockeylizer.Helpers
 			}
 
 			session.Analyzed = true;
+		    await _db.SaveChangesAsync();
 
 			// End of analysis
 
