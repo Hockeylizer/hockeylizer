@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using hockeylizer.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -12,85 +9,104 @@ using Microsoft.Extensions.Logging;
 using hockeylizer.Data;
 using hockeylizer.Models;
 using hockeylizer.Services;
-using Hangfire;
+using hockeylizer.Helpers;
 using Microsoft.AspNetCore.Http.Features;
+
+using Hangfire;
 
 namespace hockeylizer
 {
-    public class Startup
-    {
-        public Startup(IHostingEnvironment env)
-        {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+	public class Startup
+	{
+		public Startup(IHostingEnvironment env)
+		{
+			var builder = new ConfigurationBuilder()
+				.SetBasePath(env.ContentRootPath)
+				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+				.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 
-            if (env.IsDevelopment())
-            {
-                // For more details on using the user secret store see https://go.microsoft.com/fwlink/?LinkID=532709
-                builder.AddUserSecrets<Startup>();
-            }
+			if (env.IsDevelopment())
+			{
+				// For more details on using the user secret store see https://go.microsoft.com/fwlink/?LinkID=532709
+				builder.AddUserSecrets<Startup>();
+			}
 
-            builder.AddEnvironmentVariables();
-            Configuration = builder.Build();
-        }
+			builder.AddEnvironmentVariables();
+			Configuration = builder.Build();
+		}
 
-        public IConfigurationRoot Configuration { get; }
+		public IConfigurationRoot Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
+		// This method gets called by the runtime. Use this method to add services to the container.
+		public void ConfigureServices(IServiceCollection services)
+		{
+		    var cs = Configuration.GetConnectionString("DefaultConnection");
+
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+				options.UseSqlServer(cs));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+				.AddEntityFrameworkStores<ApplicationDbContext>()
+				.AddDefaultTokenProviders();
 
-            services.Configure<FormOptions>(x =>
-            {
-                x.ValueLengthLimit = int.MaxValue;
-                x.MultipartBodyLengthLimit = int.MaxValue;
-                x.MultipartHeadersLengthLimit = int.MaxValue;
-            });
+			services.Configure<FormOptions>(x =>
+			{
+				x.ValueLengthLimit = int.MaxValue;
+				x.MultipartBodyLengthLimit = int.MaxValue;
+				x.MultipartHeadersLengthLimit = int.MaxValue;
+			});
 
-            services.AddMvc();
+			services.AddMvc();
+
+            // Add services for hangfire
+		    services.AddTransient<CoreController, CoreController>();
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
-        }
+			services.AddTransient<ISmsSender, AuthMessageSender>();
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
-        {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+			services.AddHangfire(hf => hf.UseSqlServerStorage(cs));
+		}
 
-            app.UseDeveloperExceptionPage();
-            app.UseDatabaseErrorPage();
+		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+		{
+			loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+			loggerFactory.AddDebug();
 
-            // Hangfire
-            GlobalConfiguration.Configuration
-                .UseSqlServerStorage("<name or connection string>");
+			app.UseDeveloperExceptionPage();
+			app.UseDatabaseErrorPage();
 
-            app.UseHangfireDashboard();
-            app.UseHangfireServer();
+            //if (env.IsDevelopment())
+            //{
+
+            //    //app.UseBrowserLink();
+            //}
+            //else
+            //{
+            //    app.UseExceptionHandler("/Home/Error");
+            //}
 
             app.UseStaticFiles();
 
-            app.UseIdentity();
+			app.UseIdentity();
 
-            // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
+            // Hangfire
+			app.UseHangfireServer();
+			app.UseHangfireDashboard("/hangfire", new DashboardOptions
+			{
+                Authorization = new[] { new HangfireAuth() }
+			});
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
-        }
-    }
+			// Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
+
+			app.UseMvc(routes =>
+			{
+				routes.MapRoute(
+					name: "default",
+					template: "{controller=Home}/{action=Index}/{id?}");
+			});
+		}
+	}
 }

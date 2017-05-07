@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
+﻿﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using hockeylizer.Services;
 using hockeylizer.Helpers;
 using hockeylizer.Models;
-using System.Diagnostics;
 using hockeylizer.Data;
+using System.Xml.Linq;
 using System.Linq;
 using System.IO;
 using Hangfire;
@@ -254,15 +254,21 @@ namespace hockeylizer.Controllers
                         _db.SaveChanges();
                         _db.Entry(savedSession).GetDatabaseValues();
 
-                        BackgroundJob.Enqueue(() => 
-                            this.ChopAlyzeSession(new SessionVm
-                            {
-                                sessionId = savedSession.SessionId,
-                                token = _appkey
-                            }
-                        ));
+                        var sessionId = savedSession.SessionId;
 
-                        sr = new SessionResult("Videoklippet laddades upp!", true, savedSession.SessionId);
+                        // Chop video
+                        BackgroundJob.Enqueue<CoreController>
+						(
+                            service => service.ChopSession(sessionId)
+						);
+
+                        // Analyze video
+                        BackgroundJob.Enqueue<CoreController>
+                        (
+                            service => service.AnalyzeSession(sessionId)
+                        );
+
+                        sr = new SessionResult("Videoklippet laddades upp!", true, sessionId);
                     }
                 }
             }
@@ -272,6 +278,224 @@ namespace hockeylizer.Controllers
             }
 
             return Json(sr);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult AnalyzeThis([FromBody]SessionVm vm)
+        {
+            GeneralResult response;
+            if (vm.token == _appkey)
+            {
+                var session = _db.Sessions.Find(vm.sessionId);
+
+                if (session == null)
+                {
+                    response = new GeneralResult(false, "Sessionen kunde inte hittas");
+                    return Json(response);
+                }
+
+                BackgroundJob.Enqueue<CoreController>
+                (
+                    service => service.AnalyzeSession(vm.sessionId)
+                );
+
+                response = new GeneralResult(true, "Sessionen är inlagd för analys");
+                return Json(response);
+            }
+
+            response = new GeneralResult(false, "Fel token");
+            return Json(response);
+        }
+
+        public async Task<bool> AnalyzeSession(int sessionId)
+        {
+            var session = _db.Sessions.Find(sessionId);
+            if (session == null) throw new Exception("Kunde inte hitta session.");
+
+            var blobname = session.FileName;
+            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
+
+            var path = Path.Combine(startpath, blobname);
+
+            var count = 1;
+            while (System.IO.File.Exists(path))
+            {
+                var filetype = blobname.Split('.').LastOrDefault() ?? "mp4";
+                var filestart = blobname.Split('-').FirstOrDefault() ?? "video";
+
+                var filename = filestart + "-" + count + "." + filetype;
+
+                path = Path.Combine(startpath, filename);
+                count++;
+            }
+
+            var player = _db.Players.Find(session.PlayerId);
+            if (player == null) throw new Exception("Kunde inte hitta spelare.");
+
+            var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
+            if (!download) throw new Exception("Kunde inte ladda ned film.");
+
+            var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
+
+            var pointDict = new Dictionary<int, Point2d>
+            {
+                {1, new Point2d(10, 91)},
+                {2, new Point2d(10, 18)},
+                {3, new Point2d(173, 18)},
+                {4, new Point2d(173, 91)},
+                {5, new Point2d(91.5, 101)}
+            };
+
+            var points = new List<Point2i>();
+            var offsets = new List<Point2d>();
+
+            var iter = 1;
+            foreach (var hp in targets)
+            {
+                points.Add(new Point2i(hp.XCoordinate ?? 0, hp.YCoordinate ?? 0));
+
+                Point2d coordinates;
+                var shot = hp.Order;
+
+                if (pointDict.ContainsKey(shot))
+                {
+                    coordinates = pointDict[shot];
+                }
+                else if (pointDict.ContainsKey(iter % 5))
+                {
+                    coordinates = pointDict[iter % 5];
+                }
+                else
+                {
+                    coordinates = new Point2d(0, 0);
+                }
+
+                offsets.Add(coordinates);
+                iter++;
+            }
+
+            const int width = 183;
+            const int height = 122;
+
+            foreach (var t in targets)
+            {
+                var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points.ToArray(), width,
+                    height, offsets.ToArray(), path);
+
+                if (analysis.WasErrors) continue;
+
+                var xHit = analysis.HitPoint.x;
+                var yHit = analysis.HitPoint.y;
+                var hit = analysis.DidHitGoal;
+
+                t.XCoordinateAnalyzed = xHit;
+                t.YCoordinateAnalyzed = yHit;
+                t.HitGoal = hit;
+            }
+
+            session.Analyzed = true;
+
+            await _db.SaveChangesAsync();
+
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
+
+            return true;
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult ChopThis([FromBody]SessionVm vm)
+        {
+            GeneralResult response;
+            if (vm.token == _appkey)
+            {
+                var session = _db.Sessions.Find(vm.sessionId);
+
+                if (session == null)
+                {
+                    response = new GeneralResult(false, "Sessionen kunde inte hittas");
+                    return Json(response);
+                }
+
+                BackgroundJob.Enqueue<CoreController>
+                (
+                    service => service.ChopSession(vm.sessionId)
+                );
+
+                response = new GeneralResult(true, "Sessionen är inlagd för uppkapning");
+                return Json(response);
+            }
+
+            response = new GeneralResult(false, "Fel token");
+            return Json(response);
+        }
+
+        public async Task<bool> ChopSession(int sessionId)
+        {
+            var session = _db.Sessions.Find(sessionId);
+            if (session == null) throw new Exception("Kunde inte hitta session.");
+
+            if (session.Chopped) return true;
+
+            var blobname = session.FileName;
+            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
+
+            var path = Path.Combine(startpath, blobname);
+
+            var count = 1;
+            while (System.IO.File.Exists(path))
+            {
+                var filetype = blobname.Split('.').LastOrDefault() ?? "mp4";
+                var filestart = blobname.Split('-').FirstOrDefault() ?? "video";
+
+                var filename = filestart + "-" + count + "." + filetype;
+
+                path = Path.Combine(startpath, filename);
+                count++;
+            }
+
+            var player = _db.Players.Find(session.PlayerId);
+            if (player == null) throw new Exception("Kunde inte hitta spelare.");
+
+            var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
+            if (!download) throw new Exception("Kunde inte ladda ned film.");
+
+            var intervals = session.Targets.Select(t => new DecodeInterval
+            {
+                startMs = t.TimestampStart,
+                endMs = t.TimestampEnd
+            }).ToArray();
+
+            var shots = AnalysisBridge.DecodeFrames(path, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
+            if (shots.Any())
+            {
+                foreach (var s in shots)
+                {
+                    var target = _db.Targets.FirstOrDefault(shot => shot.SessionId == session.SessionId && shot.Order == s.Shot);
+
+                    if (target == null) continue;
+                    foreach (var frame in s.Uris)
+                    {
+                        var picture = new FrameToAnalyze(target.TargetId, frame);
+                        await _db.Frames.AddAsync(picture);
+                    }
+                }
+            }
+
+            session.Chopped = true;
+
+            await _db.SaveChangesAsync();
+
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
+
+            return true;
         }
 
         [HttpPost]
@@ -323,11 +547,34 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                response = new IsAnalyzedResult(false, "Videoklippet kunde inte raderas", true);
+                response = new IsAnalyzedResult(false, "Videoklippet kollat", session.Analyzed);
                 return Json(response);
             }
 
             response = new IsAnalyzedResult(false, "Inkorrekt token", false);
+            return Json(response);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> IsChopped([FromBody]SessionVm vm)
+        {
+            IsChoppedResult response;
+            if (vm.token == _appkey)
+            {
+                var session = _db.Sessions.Find(vm.sessionId);
+
+                if (session == null)
+                {
+                    response = new IsChoppedResult(false, "Sessionen kunde inte hittas", false);
+                    return Json(response);
+                }
+
+                response = new IsChoppedResult(false, "Videoklippet kollat", session.Chopped);
+                return Json(response);
+            }
+
+            response = new IsChoppedResult(false, "Inkorrekt token", false);
             return Json(response);
         }
 
@@ -405,7 +652,9 @@ namespace hockeylizer.Controllers
                     TargetNumber = shot.TargetNumber,
                     Order = shot.Order,
                     XCoordinate = shot.XCoordinate,
-                    YCoordinate = shot.YCoordinate
+                    YCoordinate = shot.YCoordinate,
+                    XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
+                    YCoordinateAnalyzed = shot.YCoordinateAnalyzed
                 };
 
 				return Json(response);
@@ -487,188 +736,79 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-        // Chop and analyze session
-        private async void ChopAlyzeSession(SessionVm vm)
-        {
-            if (vm.token != _appkey) return;
-            var session = _db.Sessions.Find(vm.sessionId);
-
-            if (session == null) return;
-
-            var blobname = session.FileName;
-            var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
-            path = Path.Combine(path, blobname);
-
-            var player = _db.Players.Find(session.PlayerId);
-            if (player == null) return;
-
-            var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-            if (!download) return;
-
-            // Analyze the video
-            this.AnalyzeVideo(session, path);
-
-            var intervals = session.Targets.Select(t => new DecodeInterval
-            {
-                startMs = t.TimestampStart,
-                endMs = t.TimestampEnd
-            }).ToArray();
-
-            var shots = AnalysisBridge.DecodeFrames(path, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
-            if (shots.Any())
-            {
-                foreach (var s in shots)
-                {
-                    var target = _db.Targets.FirstOrDefault(shot => shot.SessionId == session.SessionId && shot.Order == s.Shot);
-
-                    if (target == null) continue;
-                    foreach (var frame in s.Uris)
-                    {
-                        var picture = new FrameToAnalyze(target.TargetId, frame);
-                        await _db.Frames.AddAsync(picture);
-                    }
-                }
-
-                await _db.SaveChangesAsync();
-            }
-
-            if (System.IO.File.Exists(path))
-            {
-                System.IO.File.Delete(path);
-            }
-        }
-
-        private void AnalyzeVideo(PlayerSession session, string path)
-        {
-            var targets = _db.Targets.Where(shot => shot.SessionId == session.SessionId).ToArray();
-
-            var points = new Point2i[] {};
-            var offsets = new Point2d[] {};
-
-            var pointDict = new Dictionary<int, Point2d>();
-
-            pointDict.Add(1, new Point2d(10, 91));
-            pointDict.Add(2, new Point2d(10, 18));
-            pointDict.Add(3, new Point2d(173, 18));
-            pointDict.Add(4, new Point2d(173, 91));
-            pointDict.Add(5, new Point2d(91.5, 101));
-			
-            //Punkt 1: (10, 91)
-			//Punkt 2: (10, 18)
-			//Punkt 3: (173, 18)
-			//Punkt 4: (173, 91)
-			//Punkt 5: (91.5, 101)
-
-            for (var hp = 0; hp < targets.Length; hp++)
-            {
-                points[hp] = new Point2i(targets[hp].XCoordinate ?? 0, targets[hp].YCoordinate ?? 0);
-
-                Point2d coordinates;
-                var shot = targets[hp].Order;
-
-                if (pointDict.ContainsKey(shot))
-                {
-                    coordinates = pointDict[shot];
-                }
-                else if (pointDict.ContainsKey(hp % 5))
-                {
-                    coordinates = pointDict[hp % 5];
-                }
-                else 
-                {
-                    coordinates = new Point2d(0, 0);
-                }
-
-                offsets[hp] = coordinates;
-            }
-
-            const int width = 183;
-            const int height = 122;
-
-            foreach (var t in targets)
-            {
-                var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points, width, height, offsets, path);
-
-                if (analysis.WasErrors) continue;
-
-                var xHit = analysis.HitPoint.x;
-                var yHit = analysis.HitPoint.y;
-                var hit = analysis.DidHitGoal;
-
-                t.XCoordinateAnalyzed = xHit;
-                t.YCoordinateAnalyzed = yHit;
-                t.HitGoal = hit;
-            }
-
-            session.Analyzed = true;
-
-            _db.SaveChanges();
-        }
-
-        /*
-         * DANIELS BILDGENERERANDE FUNKTIONER
-         */
-        //Daniels funktion
+        // To be replaced by GetHitsOverviewSVG2. This returns an URL, the other an XML.
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult getHitsOverviewSVG(int videoId, string token)
+        public JsonResult GetHitsOverviewSvg(int sessionId, string token)
         {
+            var defaultSvgUrl = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
+            if (token != _appkey) return Json(defaultSvgUrl);
+            var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
+            if (hitList == null || !hitList.Any())
+            {
+                return Json(defaultSvgUrl);
+            }
 
-            // Just return a goddamn picture of the goal with no hits.
-            // It's something.
-            var svgURL = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
-            return Json(svgURL);
+            var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
+            var svgDoc = XDocument.Load(svgBaseDir + "hitsOverview.svg");
+            var xmlNs = svgDoc.Root.Name.Namespace;
+
+            var fill = new XAttribute("fill", "black");
+            var radius = new XAttribute("r", 4);
+
+            foreach (var hit in hitList)
+            {
+                if (hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
+                    hit.YCoordinate == null) continue;
+                var xCoord = hit.XCoordinate + hit.XCoordinateAnalyzed;
+                var yCoord = hit.YCoordinate + hit.YCoordinateAnalyzed;
+                svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
+            }
+
+            // Setup unique filename and write to it
+            var timeStr = DateTime.Now.ToString("ddhhmmss");
+            var guidStr = Guid.NewGuid().ToString().Substring(0, 7);
+            var fileName = "hits" + timeStr + "rnd" + guidStr + ".svg";
+
+            var fs = new FileStream(svgBaseDir + fileName, FileMode.Create);
+            svgDoc.Save(fs);
+
+            return Json(@"http://hockeylizer.azurewebsites.net/images/" + fileName);
         }
 
-        //TODO: THIS FUNCTION NEEDS TO BE using Svg;
+        // This is the real deal. When GetHitsOverviewSVG has been phased out
+        // in the app, this will replace it.
         [HttpPost]
         [AllowAnonymous]
-        public VirtualFileResult getHitsOverviewPNG(int sessionId, string token)
+        public ContentResult GetHitsOverviewSvg2(int sessionId, string token)
         {
-            // very TEMP
-            var pngPlaceholderPath = _hostingEnvironment.WebRootPath + "/images/hitsOverview.png";
-            return base.File(pngPlaceholderPath, "image/png");
+            if (token != _appkey) return Content("Token var fel");
 
-            //GeneralResult response;
-            //if (token == _appkey)
-            //{
-                
+            var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
+            var svgDoc = XDocument.Load(svgBaseDir + "hitsOverview.svg");
 
-            //    var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
+            var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
+            if (hitList == null || !hitList.Any())
+            {
+                return Content(svgDoc.ToString());
+            }
+                                
+            var xmlNs = svgDoc.Root.Name.Namespace;
+            var fill = new XAttribute("fill", "black");
+            var radius = new XAttribute("r", 4);
 
-            //    // Lite osäker på om ett query utan resultat ger
-            //    // void eller en enumarable av längd noll.
-            //    if (hitList == null || hitList.Count() == 0)
-            //    {
-            //        response = new GeneralResult(false, "Analysen finns inte");
-            //        return Json(response);
-            //    }
+            foreach (var hit in hitList)
+            {
+                if (hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
+                    hit.YCoordinate == null) continue;
 
-            //    var svgPath = _hostingEnvironment.WebRootPath + "/images/hitsOverview.svg";
-                
-            //    string svgStr = System.IO.File.ReadAllText(svgPath);
+                var xCoord = new XAttribute("cx", hit.XCoordinate + hit.XCoordinateAnalyzed);
+                var yCoord = new XAttribute("cy", hit.YCoordinate + hit.YCoordinateAnalyzed);
+                svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
+            }
 
-            //    // Svg stuff needs the svg-library, installable from nuget.
-            //    SvgDocument svgDocument = SvgDocument.FromSvg<SvgDocument>(svgStr);
-            //    foreach (var hit in hitList)
-            //    {
-            //        SvgCircle circle = new SvgCircle();
-            //        circle.CenterX = hit.XCoordinate;
-            //        circle.CenterY = hit.YCoordinate;
-            //        circle.Radius = 4;
-            //        circle.Fill = new SvgColourServer(System.Drawing.Color.Black);
-            //        svgDocument.Children.Add(circle);
-            //    }
-
-            //    using (var bitmap = svgDocument.Draw())
-            //    {
-            //        bitmap.Save(@"..\..\goal.png", ImageFormat.Png);
-            //    }
-
-            //}
-
-            //response = new GeneralResult(false, "Inkorrekt token");
-            //return Json(response);
+            return Content(svgDoc.ToString());
         }
+
     }
 }

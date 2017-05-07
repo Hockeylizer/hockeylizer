@@ -110,6 +110,27 @@ namespace hockeylizer.Models
         public bool Analyzed { get; set; }
     }
 
+    public class IsChoppedResult
+    {
+        public IsChoppedResult()
+        {
+            this.Completed = false;
+            this.Description = "Okänt fel";
+            this.Chopped = false;
+        }
+
+        public IsChoppedResult(bool comp, string desc, bool ch)
+        {
+            this.Completed = comp;
+            this.Description = desc;
+            this.Chopped = ch;
+        }
+
+        public bool Completed { get; set; }
+        public string Description { get; set; }
+        public bool Chopped { get; set; }
+    }
+
     public class GetFramesFromShotResult
 	{
 		public GetFramesFromShotResult()
@@ -148,7 +169,7 @@ namespace hockeylizer.Models
 		{
 			this.Completed = comp;
 			this.Description = desc;
-			this.FrameUrls = urls == null ? new List<string>() : urls;
+			this.FrameUrls = urls ?? new List<string>();
 		}
 
 		public int TargetNumber { get; set; }
@@ -157,7 +178,10 @@ namespace hockeylizer.Models
 		public int? XCoordinate { get; set; }
 		public int? YCoordinate { get; set; }
 
-		public bool Completed { get; set; }
+	    public int? XCoordinateAnalyzed { get; set; }
+	    public int? YCoordinateAnalyzed { get; set; }
+
+        public bool Completed { get; set; }
 		public string Description { get; set; }
 		public List<string> FrameUrls { get; set; }
 	}
@@ -325,11 +349,11 @@ namespace hockeylizer.Models
                 return false;
             }
 
-            if (this.timestamps.Any(t => t.start == null || t.end == null))
-            {
-                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
-                return false;
-            }
+            //if (this.timestamps.Any(t => t.start == null || t.end == null))
+            //{
+            //    this.sr = new SessionResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
+            //    return false;
+            //}
 
             if (!this.targetOrder.Any())
 			{

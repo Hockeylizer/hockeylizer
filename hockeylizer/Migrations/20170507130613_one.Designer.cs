@@ -5,12 +5,13 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using hockeylizer.Data;
 
-namespace hockeylizer.Data.Migrations
+namespace hockeylizer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170507130613_one")]
+    partial class one
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
@@ -142,6 +143,8 @@ namespace hockeylizer.Data.Migrations
                     b.Property<string>("VideoPath");
 
                     b.Property<bool>("VideoRemoved");
+
+                    b.Property<string>("test");
 
                     b.HasKey("SessionId");
 

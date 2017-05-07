@@ -8,9 +8,10 @@ using hockeylizer.Data;
 namespace hockeylizer.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170506195059_twentyone")]
+    partial class twentyone
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
@@ -120,8 +121,6 @@ namespace hockeylizer.Data.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<bool>("Analyzed");
-
-                    b.Property<bool>("Chopped");
 
                     b.Property<DateTime>("Created");
 

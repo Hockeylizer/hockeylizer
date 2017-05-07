@@ -15,7 +15,9 @@ namespace hockeylizer.Models
 
 			this.Deleted = false;
 			this.VideoRemoved = false;
+
 		    this.Analyzed = false;
+		    this.Chopped = false;
         }
 
 		// to = targetorder, ts = timestamps
@@ -48,7 +50,9 @@ namespace hockeylizer.Models
 
 			this.Deleted = false;
 			this.VideoRemoved = false;
-		    this.Analyzed = false;
+
+            this.Analyzed = false;
+            this.Chopped = false;
 
             this.Created = DateTime.Now;
 			this.Targets = new HashSet<Target>();
@@ -87,8 +91,10 @@ namespace hockeylizer.Models
 
 		public bool Deleted { get; set; }
 		public bool VideoRemoved { get; set; }
-        public bool Analyzed { get; set; }
 
-		public virtual ICollection<Target> Targets { get; set; }
+        public bool Analyzed { get; set; }
+	    public bool Chopped { get; set; }
+
+        public virtual ICollection<Target> Targets { get; set; }
 	}
 }
