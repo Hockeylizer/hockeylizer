@@ -259,13 +259,13 @@ namespace hockeylizer.Controllers
                         var sessionId = savedSession.SessionId;
 
                         // Chop video
-                        BackgroundJob.Enqueue<IChopService>
+                        BackgroundJob.Enqueue<CoreController>
 						(
                             service => service.ChopSession(sessionId)
 						);
 
                         // Analyze video
-                        BackgroundJob.Enqueue<IChopService>
+                        BackgroundJob.Enqueue<CoreController>
                         (
                             service => service.ChopSession(sessionId)
                         );
@@ -297,7 +297,7 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                BackgroundJob.Enqueue<IAnalyzeService>
+                BackgroundJob.Enqueue<CoreController>
                 (
                     service => service.AnalyzeSession(vm.sessionId)
                 );
@@ -308,6 +308,104 @@ namespace hockeylizer.Controllers
 
             response = new GeneralResult(false, "Fel token");
             return Json(response);
+        }
+
+        public async Task<bool> AnalyzeSession(int sessionId)
+        {
+            var session = _db.Sessions.Find(sessionId);
+            if (session == null) return false;
+
+            var blobname = session.FileName;
+            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
+
+            var path = Path.Combine(startpath, blobname);
+
+            var count = 1;
+            while (System.IO.File.Exists(path))
+            {
+                var filetype = blobname.Split('.').LastOrDefault() ?? "mp4";
+                var filestart = blobname.Split('-').FirstOrDefault() ?? "video";
+
+                var filename = filestart + count + "." + filetype;
+
+                path = Path.Combine(startpath, filename);
+                count++;
+            }
+
+            var player = _db.Players.Find(session.PlayerId);
+            if (player == null) return false;
+
+            var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
+            if (!download) return false;
+
+            var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
+
+            var pointDict = new Dictionary<int, Point2d>
+            {
+                {1, new Point2d(10, 91)},
+                {2, new Point2d(10, 18)},
+                {3, new Point2d(173, 18)},
+                {4, new Point2d(173, 91)},
+                {5, new Point2d(91.5, 101)}
+            };
+
+            var points = new List<Point2i>();
+            var offsets = new List<Point2d>();
+
+            var iter = 1;
+            foreach (var hp in targets)
+            {
+                points.Add(new Point2i(hp.XCoordinate ?? 0, hp.YCoordinate ?? 0));
+
+                Point2d coordinates;
+                var shot = hp.Order;
+
+                if (pointDict.ContainsKey(shot))
+                {
+                    coordinates = pointDict[shot];
+                }
+                else if (pointDict.ContainsKey(iter % 5))
+                {
+                    coordinates = pointDict[iter % 5];
+                }
+                else
+                {
+                    coordinates = new Point2d(0, 0);
+                }
+
+                offsets.Add(coordinates);
+                iter++;
+            }
+
+            const int width = 183;
+            const int height = 122;
+
+            foreach (var t in targets)
+            {
+                var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points.ToArray(), width,
+                    height, offsets.ToArray(), path);
+
+                if (analysis.WasErrors) continue;
+
+                var xHit = analysis.HitPoint.x;
+                var yHit = analysis.HitPoint.y;
+                var hit = analysis.DidHitGoal;
+
+                t.XCoordinateAnalyzed = xHit;
+                t.YCoordinateAnalyzed = yHit;
+                t.HitGoal = hit;
+            }
+
+            session.Analyzed = true;
+
+            await _db.SaveChangesAsync();
+
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
+
+            return true;
         }
 
         [HttpPost]
@@ -325,7 +423,7 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                BackgroundJob.Enqueue<IChopService>
+                BackgroundJob.Enqueue<CoreController>
                 (
                     service => service.ChopSession(vm.sessionId)
                 );
@@ -336,6 +434,67 @@ namespace hockeylizer.Controllers
 
             response = new GeneralResult(false, "Fel token");
             return Json(response);
+        }
+
+        public async Task<bool> ChopSession(int sessionId)
+        {
+            var session = _db.Sessions.Find(sessionId);
+            if (session == null) return false;
+
+            var blobname = session.FileName;
+            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
+
+            var path = Path.Combine(startpath, blobname);
+
+            var count = 1;
+            while (System.IO.File.Exists(path))
+            {
+                var filetype = blobname.Split('.').LastOrDefault() ?? "mp4";
+                var filestart = blobname.Split('-').FirstOrDefault() ?? "video";
+
+                var filename = filestart + count + "." + filetype;
+
+                path = Path.Combine(startpath, filename);
+                count++;
+            }
+
+            var player = _db.Players.Find(session.PlayerId);
+            if (player == null) return false;
+
+            var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
+            if (!download) return false;
+
+            var intervals = session.Targets.Select(t => new DecodeInterval
+            {
+                startMs = t.TimestampStart,
+                endMs = t.TimestampEnd
+            }).ToArray();
+
+            var shots = AnalysisBridge.DecodeFrames(path, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
+            if (shots.Any())
+            {
+                foreach (var s in shots)
+                {
+                    var target = _db.Targets.FirstOrDefault(shot => shot.SessionId == session.SessionId && shot.Order == s.Shot);
+
+                    if (target == null) continue;
+                    foreach (var frame in s.Uris)
+                    {
+                        var picture = new FrameToAnalyze(target.TargetId, frame);
+                        _db.Frames.Add(picture);
+                    }
+                }
+            }
+
+            session.Chopped = true;
+
+            await _db.SaveChangesAsync();
+
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
+            return true;
         }
 
         [HttpPost]

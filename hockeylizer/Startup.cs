@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using hockeylizer.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -43,11 +40,13 @@ namespace hockeylizer
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			// Add framework services.
-			services.AddDbContext<ApplicationDbContext>(options =>
-				options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+		    var cs = Configuration.GetConnectionString("DefaultConnection");
 
-			services.AddIdentity<ApplicationUser, IdentityRole>()
+            // Add framework services.
+            services.AddDbContext<ApplicationDbContext>(options =>
+				options.UseSqlServer(cs));
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders();
 
@@ -61,14 +60,13 @@ namespace hockeylizer
 			services.AddMvc();
 
             // Add services for hangfire
-            services.AddTransient<IChopService, ChopService>();
-		    services.AddTransient<IAnalyzeService, AnalyzeService>();
+		    services.AddTransient<CoreController, CoreController>();
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
 			services.AddTransient<ISmsSender, AuthMessageSender>();
 
-			services.AddHangfire(hf => hf.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection")));
+			services.AddHangfire(hf => hf.UseSqlServerStorage(cs));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
