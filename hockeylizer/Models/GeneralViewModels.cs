@@ -148,7 +148,7 @@ namespace hockeylizer.Models
 		{
 			this.Completed = comp;
 			this.Description = desc;
-			this.FrameUrls = urls == null ? new List<string>() : urls;
+			this.FrameUrls = urls ?? new List<string>();
 		}
 
 		public int TargetNumber { get; set; }
@@ -157,7 +157,10 @@ namespace hockeylizer.Models
 		public int? XCoordinate { get; set; }
 		public int? YCoordinate { get; set; }
 
-		public bool Completed { get; set; }
+	    public int? XCoordinateAnalyzed { get; set; }
+	    public int? YCoordinateAnalyzed { get; set; }
+
+        public bool Completed { get; set; }
 		public string Description { get; set; }
 		public List<string> FrameUrls { get; set; }
 	}

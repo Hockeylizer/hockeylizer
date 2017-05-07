@@ -265,7 +265,7 @@ namespace hockeylizer.Controllers
                         // Analyze video
                         BackgroundJob.Enqueue<CoreController>
                         (
-                            service => service.ChopSession(sessionId)
+                            service => service.AnalyzeSession(sessionId)
                         );
 
                         sr = new SessionResult("Videoklippet laddades upp!", true, sessionId);
@@ -311,7 +311,7 @@ namespace hockeylizer.Controllers
         public async Task<bool> AnalyzeSession(int sessionId)
         {
             var session = _db.Sessions.Find(sessionId);
-            if (session == null) return false;
+            if (session == null) throw new Exception("Kunde inte hitta session.");
 
             var blobname = session.FileName;
             var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
@@ -331,10 +331,10 @@ namespace hockeylizer.Controllers
             }
 
             var player = _db.Players.Find(session.PlayerId);
-            if (player == null) return false;
+            if (player == null) throw new Exception("Kunde inte hitta spelare.");
 
             var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-            if (!download) return false;
+            if (!download) throw new Exception("Kunde inte ladda ned film.");
 
             var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
 
@@ -437,7 +437,7 @@ namespace hockeylizer.Controllers
         public async Task<bool> ChopSession(int sessionId)
         {
             var session = _db.Sessions.Find(sessionId);
-            if (session == null) return false;
+            if (session == null) throw new Exception("Kunde inte hitta session.");
 
             var blobname = session.FileName;
             var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
@@ -457,10 +457,10 @@ namespace hockeylizer.Controllers
             }
 
             var player = _db.Players.Find(session.PlayerId);
-            if (player == null) return false;
+            if (player == null) throw new Exception("Kunde inte hitta spelare.");
 
             var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-            if (!download) return false;
+            if (!download) throw new Exception("Kunde inte ladda ned film.");
 
             var intervals = session.Targets.Select(t => new DecodeInterval
             {
@@ -479,7 +479,7 @@ namespace hockeylizer.Controllers
                     foreach (var frame in s.Uris)
                     {
                         var picture = new FrameToAnalyze(target.TargetId, frame);
-                        _db.Frames.Add(picture);
+                        await _db.Frames.AddAsync(picture);
                     }
                 }
             }
@@ -626,7 +626,9 @@ namespace hockeylizer.Controllers
                     TargetNumber = shot.TargetNumber,
                     Order = shot.Order,
                     XCoordinate = shot.XCoordinate,
-                    YCoordinate = shot.YCoordinate
+                    YCoordinate = shot.YCoordinate,
+                    XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
+                    YCoordinateAnalyzed = shot.YCoordinateAnalyzed
                 };
 
 				return Json(response);
