@@ -47,14 +47,15 @@ namespace hockeylizer.Helpers
             this._hostingEnvironment = hostingEnvironment;
 		}
 
-		public void ChopAlyzeSession(int sessionId)
+		public async void ChopAlyzeSession(int sessionId)
 		{
 			var session = _db.Sessions.Find(sessionId);
 			if (session == null) throw new Exception("Session hittas inte");
 
             var blobname = session.FileName;
-            var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
-            path = Path.Combine(path, blobname);
+		    var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
+
+		    var path = Path.Combine(startpath, blobname);
 
 		    var count = 1;
 		    while (File.Exists(path))
@@ -64,20 +65,19 @@ namespace hockeylizer.Helpers
 
 		        var filename = filestart + count + "." + filetype;
 
-		        path = Path.Combine(path, filename);
+		        path = Path.Combine(startpath, filename);
 		        count++;
 		    }
-
 
             var player = _db.Players.Find(session.PlayerId);
             if (player == null) throw new Exception("Spelare hittas inte");
 
-            var download = FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName()).Result;
+            var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
             if (!download) throw new Exception("Videoklippet kunde inte laddas ned");
 
             // Analyze the video
 
-            var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToArray();
+            var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
 
             var pointDict = new Dictionary<int, Point2d>
             {
@@ -134,8 +134,7 @@ namespace hockeylizer.Helpers
                 t.HitGoal = hit;
             }
 
-            session.Analyzed = false;
-		     _db.SaveChanges();
+            session.Analyzed = true;
 
             // End of analysis
 
@@ -159,9 +158,9 @@ namespace hockeylizer.Helpers
                         _db.Frames.Add(picture);
                     }
                 }
-
-                _db.SaveChanges();
             }
+
+		    await _db.SaveChangesAsync();
 
             if (File.Exists(path))
             {

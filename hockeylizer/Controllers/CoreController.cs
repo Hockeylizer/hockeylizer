@@ -311,8 +311,9 @@ namespace hockeylizer.Controllers
             if (session == null) return Json("1");
 
             var blobname = session.FileName;
-            var path = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
-            path = Path.Combine(path, blobname);
+            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
+
+            var path = Path.Combine(startpath, blobname);
 
             var count = 1;
             while (System.IO.File.Exists(path))
@@ -322,19 +323,19 @@ namespace hockeylizer.Controllers
 
                 var filename = filestart + count + "." + filetype;
 
-                path = Path.Combine(path, filename);
+                path = Path.Combine(startpath, filename);
                 count++;
             }
 
             var player = _db.Players.Find(session.PlayerId);
             if (player == null) return Json("2");
 
-            var download = FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName()).Result;
+            var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
             if (!download) return Json("3");
 
             // Analyze the video
 
-            var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToArray();
+            var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
 
             var pointDict = new Dictionary<int, Point2d>
             {
@@ -415,8 +416,6 @@ namespace hockeylizer.Controllers
                         await _db.Frames.AddAsync(picture);
                     }
                 }
-
-                await _db.SaveChangesAsync();
             }
 
             await _db.SaveChangesAsync();
