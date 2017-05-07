@@ -297,9 +297,9 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                BackgroundJob.Enqueue<IChopService>
+                BackgroundJob.Enqueue<IAnalyzeService>
                 (
-                    service => service.ChopSession(vm.sessionId)
+                    service => service.AnalyzeSession(vm.sessionId)
                 );
 
                 response = new GeneralResult(true, "Sessionen är inlagd för analys");

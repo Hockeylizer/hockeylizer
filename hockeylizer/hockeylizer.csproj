@@ -197,7 +197,6 @@
     <Compile Remove="Data\Migrations\20170506195720_one.cs" />
     <Compile Remove="Data\Migrations\20170506200111_two.Designer.cs" />
     <Compile Remove="Data\Migrations\20170506200111_two.cs" />
-    <Compile Remove="Data\Migrations\ApplicationDbContextModelSnapshot.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="boost_date_time-vc141-mt-1_64.dll" />

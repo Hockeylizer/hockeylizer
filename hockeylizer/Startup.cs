@@ -80,17 +80,17 @@ namespace hockeylizer
 			app.UseDeveloperExceptionPage();
 			app.UseDatabaseErrorPage();
 
-			//if (env.IsDevelopment())
-			//{
+            //if (env.IsDevelopment())
+            //{
 
-			//    //app.UseBrowserLink();
-			//}
-			//else
-			//{
-			//    app.UseExceptionHandler("/Home/Error");
-			//}
+            //    //app.UseBrowserLink();
+            //}
+            //else
+            //{
+            //    app.UseExceptionHandler("/Home/Error");
+            //}
 
-			app.UseStaticFiles();
+            app.UseStaticFiles();
 
 			app.UseIdentity();
 

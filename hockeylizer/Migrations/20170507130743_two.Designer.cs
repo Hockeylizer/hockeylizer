@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using hockeylizer.Data;
 
-namespace hockeylizer.Data.Migrations
+namespace hockeylizer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20170506201317_Init")]
-    partial class Init
+    [Migration("20170507130743_two")]
+    partial class two
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using hockeylizer.Data;
 
-namespace hockeylizer.Data.Migrations
+namespace hockeylizer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20170506200840_the")]
-    partial class the
+    [Migration("20170507130927_three")]
+    partial class three
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -121,6 +121,8 @@ namespace hockeylizer.Data.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<bool>("Analyzed");
+
+                    b.Property<bool>("Chopped");
 
                     b.Property<DateTime>("Created");
 
