@@ -40,6 +40,10 @@ namespace hockeylizer.Services
             {
                 Console.WriteLine("zero size");
             }
+            if (res == IntPtr.Zero)
+            {
+                throw new System.ArgumentException();
+            }
             FrameCollection[] decodedFrames = new FrameCollection[decodeIntervals.Length];
             flatIndex = 0;
             for (int i = 0; i < decodedFrames.Length; i++)
