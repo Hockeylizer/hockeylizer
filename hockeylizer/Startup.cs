@@ -12,7 +12,9 @@ using Microsoft.Extensions.Logging;
 using hockeylizer.Data;
 using hockeylizer.Models;
 using hockeylizer.Services;
+using hockeylizer.Helpers;
 using Microsoft.AspNetCore.Http.Features;
+
 using Hangfire;
 
 namespace hockeylizer
@@ -57,6 +59,7 @@ namespace hockeylizer
 			});
 
 			services.AddMvc();
+            services.AddTransient<IChopService, ChopAlyze>();
 
 			// Add application services.
 			services.AddTransient<IEmailSender, AuthMessageSender>();
@@ -73,6 +76,7 @@ namespace hockeylizer
 
 			app.UseDeveloperExceptionPage();
 			app.UseDatabaseErrorPage();
+
 			//if (env.IsDevelopment())
 			//{
 
@@ -89,7 +93,10 @@ namespace hockeylizer
 
             // Hangfire
 			app.UseHangfireServer();
-			app.UseHangfireDashboard();
+			app.UseHangfireDashboard("/hangfire", new DashboardOptions
+			{
+                Authorization = new[] { new HangfireAuth() }
+			});
 
 			// Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
 
