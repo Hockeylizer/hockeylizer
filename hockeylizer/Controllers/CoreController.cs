@@ -580,7 +580,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
 		[AllowAnonymous]
-		public JsonResult GetFramesFromShot([FromBody]GetTargetFramesVm vm)
+		public async Task<JsonResult> GetFramesFromShot([FromBody]GetTargetFramesVm vm)
         {
 			GetFramesFromShotResult response;
 			if (vm.token == _appkey)
@@ -606,7 +606,14 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-                response = new GetFramesFromShotResult(true, "Skottets träffpunkter har hämtats!", _db.Frames.Where(f => f.TargetId == shot.TargetId).Select(f => f.FrameUrl).ToList())
+			    var images = new List<string>();
+			    foreach (var url in shot.FramesToAnalyze.Select(frame => frame.FrameUrl))
+			    {
+			        var picture = await FileHandler.GetShareableBlobUrl(url);
+			        images.Add(picture);
+			    }
+
+                response = new GetFramesFromShotResult(true, "Skottets träffpunkter har hämtats!", images)
                 {
                     XCoordinate = shot.XCoordinateAnalyzed,
                     YCoordinate = shot.XCoordinateAnalyzed
@@ -621,7 +628,7 @@ namespace hockeylizer.Controllers
 
 		[HttpPost]
 		[AllowAnonymous]
-		public JsonResult GetDataFromShot([FromBody]GetTargetFramesVm vm)
+		public async Task<JsonResult> GetDataFromShot([FromBody]GetTargetFramesVm vm)
 		{
 			GetDataFromShotResult response;
 			if (vm.token == _appkey)
@@ -647,7 +654,14 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				response = new GetDataFromShotResult(true, "Skottets träffpunkt har uppdaterats!", shot.FramesToAnalyze.Select(frame => frame.FrameUrl).ToList())
+			    var images = new List<string>();
+			    foreach (var url in shot.FramesToAnalyze.Select(frame => frame.FrameUrl))
+			    {
+			        var picture = await FileHandler.GetShareableBlobUrl(url);
+                    images.Add(picture);
+			    }
+
+                response = new GetDataFromShotResult(true, "Skottets träffpunkt har uppdaterats!", images)
                 {
                     TargetNumber = shot.TargetNumber,
                     Order = shot.Order,
