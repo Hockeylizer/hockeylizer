@@ -310,10 +310,10 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-        public async void AnalyzeSession(int sessionId)
+        public async Task<bool> AnalyzeSession(int sessionId)
         {
             var session = _db.Sessions.Find(sessionId);
-            if (session == null) throw new Exception("Session hittas inte");
+            if (session == null) return false;
 
             var blobname = session.FileName;
             var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
@@ -333,12 +333,10 @@ namespace hockeylizer.Controllers
             }
 
             var player = _db.Players.Find(session.PlayerId);
-            if (player == null) throw new Exception("Spelare hittas inte");
+            if (player == null) return false;
 
             var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-            if (!download) throw new Exception("Videoklippet kunde inte laddas ned");
-
-            // Analyze the video
+            if (!download) return false;
 
             var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
 
@@ -406,6 +404,8 @@ namespace hockeylizer.Controllers
             {
                 System.IO.File.Delete(path);
             }
+
+            return true;
         }
 
         [HttpPost]
@@ -436,10 +436,10 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-        public async void ChopSession(int sessionId)
+        public async Task<bool> ChopSession(int sessionId)
         {
             var session = _db.Sessions.Find(sessionId);
-            if (session == null) throw new Exception("Session hittas inte");
+            if (session == null) return false;
 
             var blobname = session.FileName;
             var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
@@ -459,10 +459,10 @@ namespace hockeylizer.Controllers
             }
 
             var player = _db.Players.Find(session.PlayerId);
-            if (player == null) throw new Exception("Spelare hittas inte");
+            if (player == null) return false;
 
             var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-            if (!download) throw new Exception("Videoklippet kunde inte laddas ned");
+            if (!download) return false;
 
             var intervals = session.Targets.Select(t => new DecodeInterval
             {
@@ -494,6 +494,7 @@ namespace hockeylizer.Controllers
             {
                 System.IO.File.Delete(path);
             }
+            return true;
         }
 
         [HttpPost]
