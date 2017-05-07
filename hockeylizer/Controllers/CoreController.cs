@@ -710,6 +710,7 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+        // To be replaced by GetHitsOverviewSVG2. This returns an URL, the other an XML.
         [HttpPost]
         [AllowAnonymous]
         public JsonResult GetHitsOverviewSVG(int sessionId, string token)
@@ -753,55 +754,44 @@ namespace hockeylizer.Controllers
             return Json(defaultSvgURL);
         }
 
-        //TODO: THIS FUNCTION NEEDS TO BE using Svg;
+        // This is the real deal. When GetHitsOverviewSVG has been phased out
+        // in the app, this will replace it.
         [HttpPost]
         [AllowAnonymous]
-        public VirtualFileResult getHitsOverviewPNG(int sessionId, string token)
+        public ContentResult GetHitsOverviewSVG2(int sessionId, string token)
         {
-            // very TEMP
-            var pngPlaceholderPath = _hostingEnvironment.WebRootPath + "/images/hitsOverview.png";
-            return base.File(pngPlaceholderPath, "image/png");
+            var defaultSvgURL = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
+            if (token == _appkey)
+            {
+                var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
+                XDocument svgDoc = XDocument.Load(svgBaseDir + "hitsOverview.svg");
 
-            //GeneralResult response;
-            //if (token == _appkey)
-            //{
-                
+                var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
+                if (hitList == null || !hitList.Any())
+                {
+                    return Content(svgDoc.ToString());
+                }
+                                
+                XNamespace xmlNs = svgDoc.Root.Name.Namespace;
+                var fill = new XAttribute("fill", "black");
+                var radius = new XAttribute("r", 4);
 
-            //    var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
+                foreach (var hit in hitList)
+                {
+                    if (!(hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null || hit.YCoordinate == null))
+                    {
+                        var xCoord = hit.XCoordinate + hit.XCoordinateAnalyzed;
+                        var yCoord = hit.YCoordinate + hit.YCoordinateAnalyzed;
+                        svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
+                    }
+                }
 
-            //    // Lite osäker på om ett query utan resultat ger
-            //    // void eller en enumarable av längd noll.
-            //    if (hitList == null || hitList.Count() == 0)
-            //    {
-            //        response = new GeneralResult(false, "Analysen finns inte");
-            //        return Json(response);
-            //    }
+                return Content(svgDoc.ToString());
 
-            //    var svgPath = _hostingEnvironment.WebRootPath + "/images/hitsOverview.svg";
-                
-            //    string svgStr = System.IO.File.ReadAllText(svgPath);
+            }
 
-            //    // Svg stuff needs the svg-library, installable from nuget.
-            //    SvgDocument svgDocument = SvgDocument.FromSvg<SvgDocument>(svgStr);
-            //    foreach (var hit in hitList)
-            //    {
-            //        SvgCircle circle = new SvgCircle();
-            //        circle.CenterX = hit.XCoordinate;
-            //        circle.CenterY = hit.YCoordinate;
-            //        circle.Radius = 4;
-            //        circle.Fill = new SvgColourServer(System.Drawing.Color.Black);
-            //        svgDocument.Children.Add(circle);
-            //    }
-
-            //    using (var bitmap = svgDocument.Draw())
-            //    {
-            //        bitmap.Save(@"..\..\goal.png", ImageFormat.Png);
-            //    }
-
-            //}
-
-            //response = new GeneralResult(false, "Inkorrekt token");
-            //return Json(response);
+            return Content("Token var fel");
         }
+
     }
 }
