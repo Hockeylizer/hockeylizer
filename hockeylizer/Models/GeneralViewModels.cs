@@ -325,11 +325,11 @@ namespace hockeylizer.Models
                 return false;
             }
 
-            if (this.timestamps.Any(t => t.start == null || t.end == null))
-            {
-                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
-                return false;
-            }
+            //if (this.timestamps.Any(t => t.start == null || t.end == null))
+            //{
+            //    this.sr = new SessionResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
+            //    return false;
+            //}
 
             if (!this.targetOrder.Any())
 			{

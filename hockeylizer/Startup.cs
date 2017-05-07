@@ -59,10 +59,13 @@ namespace hockeylizer
 			});
 
 			services.AddMvc();
-            services.AddTransient<IChopService, ChopAlyze>();
 
-			// Add application services.
-			services.AddTransient<IEmailSender, AuthMessageSender>();
+            // Add services for hangfire
+            services.AddTransient<IChopService, ChopService>();
+		    services.AddTransient<IAnalyzeService, AnalyzeService>();
+
+            // Add application services.
+            services.AddTransient<IEmailSender, AuthMessageSender>();
 			services.AddTransient<ISmsSender, AuthMessageSender>();
 
 			services.AddHangfire(hf => hf.UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection")));
