@@ -73,7 +73,7 @@ namespace hockeylizer.Services
             return false;
         }
 
-        public static async Task<string> GetShareableVideoUrl(string vp)
+        public static async Task<string> GetShareableBlobUrl(string vp)
         {
             return await utility.GetBlobSas(vp);
         }
