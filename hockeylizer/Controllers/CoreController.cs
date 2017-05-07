@@ -758,10 +758,10 @@ namespace hockeylizer.Controllers
 
             foreach (var hit in hitList)
             {
-                if (hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
+                if ((!hit.HitGoal) || hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
                     hit.YCoordinate == null) continue;
-                var xCoord = hit.XCoordinate + hit.XCoordinateAnalyzed;
-                var yCoord = hit.YCoordinate + hit.YCoordinateAnalyzed;
+                var xCoord = new XAttribute("cx", hit.XCoordinateAnalyzed + hit.XCoordinate);
+                var yCoord = new XAttribute("cy", hit.YCoordinateAnalyzed - hit.YCoordinate);
                 svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
             }
 
@@ -799,15 +799,20 @@ namespace hockeylizer.Controllers
 
             foreach (var hit in hitList)
             {
-                if (hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
+                if ((!hit.HitGoal) || hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
                     hit.YCoordinate == null) continue;
 
-                var xCoord = new XAttribute("cx", hit.XCoordinate + hit.XCoordinateAnalyzed);
-                var yCoord = new XAttribute("cy", hit.YCoordinate + hit.YCoordinateAnalyzed);
+                var xCoord = new XAttribute("cx", hit.XCoordinateAnalyzed + hit.XCoordinate);
+                var yCoord = new XAttribute("cy", hit.YCoordinateAnalyzed - hit.YCoordinate);
                 svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
             }
 
-            return Content(svgDoc.ToString());
+            var strBuilder = new System.Text.StringBuilder();
+            using (TextWriter writer = new StringWriter(strBuilder))
+            {
+                svgDoc.Save(writer, SaveOptions.DisableFormatting);
+            }
+            return Content(strBuilder.ToString());
         }
 
     }
