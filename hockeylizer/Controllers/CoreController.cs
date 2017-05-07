@@ -280,33 +280,33 @@ namespace hockeylizer.Controllers
             return Json(sr);
         }
 
-        //[HttpPost]
-        //[AllowAnonymous]
-        //public JsonResult AnalyzeThis([FromBody]SessionVm vm)
-        //{
-        //    GeneralResult response;
-        //    if (vm.token == _appkey)
-        //    {
-        //        var session = _db.Sessions.Find(vm.sessionId);
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult AnalyzeThis([FromBody]SessionVm vm)
+        {
+            GeneralResult response;
+            if (vm.token == _appkey)
+            {
+                var session = _db.Sessions.Find(vm.sessionId);
 
-        //        if (session == null)
-        //        {
-        //            response = new GeneralResult(false, "Sessionen kunde inte hittas");
-        //            return Json(response);
-        //        }
+                if (session == null)
+                {
+                    response = new GeneralResult(false, "Sessionen kunde inte hittas");
+                    return Json(response);
+                }
 
-        //        BackgroundJob.Enqueue<CoreController>
-        //        (
-        //            service => service.AnalyzeSession(vm.sessionId)
-        //        );
+                BackgroundJob.Enqueue<CoreController>
+                (
+                    service => service.AnalyzeSession(vm.sessionId)
+                );
 
-        //        response = new GeneralResult(true, "Sessionen är inlagd för analys");
-        //        return Json(response);
-        //    }
+                response = new GeneralResult(true, "Sessionen är inlagd för analys");
+                return Json(response);
+            }
 
-        //    response = new GeneralResult(false, "Fel token");
-        //    return Json(response);
-        //}
+            response = new GeneralResult(false, "Fel token");
+            return Json(response);
+        }
 
         public async Task<bool> AnalyzeSession(int sessionId)
         {
@@ -324,7 +324,7 @@ namespace hockeylizer.Controllers
                 var filetype = blobname.Split('.').LastOrDefault() ?? "mp4";
                 var filestart = blobname.Split('-').FirstOrDefault() ?? "video";
 
-                var filename = filestart + count + "." + filetype;
+                var filename = filestart + "-" + count + "." + filetype;
 
                 path = Path.Combine(startpath, filename);
                 count++;
@@ -406,38 +406,40 @@ namespace hockeylizer.Controllers
             return true;
         }
 
-        //[HttpPost]
-        //[AllowAnonymous]
-        //public JsonResult ChopThis([FromBody] SessionVm vm)
-        //{
-        //    GeneralResult response;
-        //    if (vm.token == _appkey)
-        //    {
-        //        var session = _db.Sessions.Find(vm.sessionId);
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult ChopThis([FromBody] SessionVm vm)
+        {
+            GeneralResult response;
+            if (vm.token == _appkey)
+            {
+                var session = _db.Sessions.Find(vm.sessionId);
 
-        //        if (session == null)
-        //        {
-        //            response = new GeneralResult(false, "Sessionen kunde inte hittas");
-        //            return Json(response);
-        //        }
+                if (session == null)
+                {
+                    response = new GeneralResult(false, "Sessionen kunde inte hittas");
+                    return Json(response);
+                }
 
-        //        BackgroundJob.Enqueue<CoreController>
-        //        (
-        //            service => service.ChopSession(vm.sessionId)
-        //        );
+                BackgroundJob.Enqueue<CoreController>
+                (
+                    service => service.ChopSession(vm.sessionId)
+                );
 
-        //        response = new GeneralResult(true, "Sessionen är inlagd för uppkapning");
-        //        return Json(response);
-        //    }
+                response = new GeneralResult(true, "Sessionen är inlagd för uppkapning");
+                return Json(response);
+            }
 
-        //    response = new GeneralResult(false, "Fel token");
-        //    return Json(response);
-        //}
+            response = new GeneralResult(false, "Fel token");
+            return Json(response);
+        }
 
         public async Task<bool> ChopSession(int sessionId)
         {
             var session = _db.Sessions.Find(sessionId);
             if (session == null) throw new Exception("Kunde inte hitta session.");
+
+            if (session.Chopped) return true;
 
             var blobname = session.FileName;
             var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
@@ -450,7 +452,7 @@ namespace hockeylizer.Controllers
                 var filetype = blobname.Split('.').LastOrDefault() ?? "mp4";
                 var filestart = blobname.Split('-').FirstOrDefault() ?? "video";
 
-                var filename = filestart + count + "." + filetype;
+                var filename = filestart + "-" + count + "." + filetype;
 
                 path = Path.Combine(startpath, filename);
                 count++;
@@ -492,6 +494,7 @@ namespace hockeylizer.Controllers
             {
                 System.IO.File.Delete(path);
             }
+
             return true;
         }
 
