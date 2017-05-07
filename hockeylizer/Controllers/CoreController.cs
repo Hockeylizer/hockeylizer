@@ -284,7 +284,7 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult AnalyzeThis([FromBody] SessionVm vm)
+        public JsonResult AnalyzeThis([FromBody]SessionVm vm)
         {
             GeneralResult response;
             if (vm.token == _appkey)
