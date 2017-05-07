@@ -782,7 +782,6 @@ namespace hockeylizer.Controllers
         [AllowAnonymous]
         public ContentResult GetHitsOverviewSvg2(int sessionId, string token)
         {
-            var defaultSvgUrl = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
             if (token != _appkey) return Content("Token var fel");
 
             var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
