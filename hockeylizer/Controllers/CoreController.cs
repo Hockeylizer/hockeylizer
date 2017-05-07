@@ -464,7 +464,7 @@ namespace hockeylizer.Controllers
             var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
             if (!download) throw new Exception("Kunde inte ladda ned film.");
 
-            var intervals = session.Targets.Select(t => new DecodeInterval
+            var intervals = _db.Targets.Where(target => target.SessionId == sessionId).Select(t => new DecodeInterval
             {
                 startMs = t.TimestampStart,
                 endMs = t.TimestampEnd
