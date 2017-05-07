@@ -254,12 +254,14 @@ namespace hockeylizer.Controllers
                         _db.SaveChanges();
                         _db.Entry(savedSession).GetDatabaseValues();
 
+                        var sessionId = savedSession.SessionId;
+
                         BackgroundJob.Enqueue<IChopService>
 						(
-                                         service => service.ChopAlyzeSession(savedSession.SessionId, _hostingEnvironment, _db')'
+                            service => service.ChopAlyzeSession(sessionId)
 						);
 
-						sr = new SessionResult("Videoklippet laddades upp!", true, savedSession.SessionId);
+						sr = new SessionResult("Videoklippet laddades upp!", true, sessionId);
                     }
                 }
             }
@@ -270,6 +272,35 @@ namespace hockeylizer.Controllers
 
             return Json(sr);
         }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> AnalyzeThis([FromBody] SessionVm vm)
+        {
+            GeneralResult response;
+            if (vm.token == _appkey)
+            {
+                var session = _db.Sessions.Find(vm.sessionId);
+
+                if (session == null)
+                {
+                    response = new GeneralResult(false, "Sessionen kunde inte hittas");
+                    return Json(response);
+                }
+
+                BackgroundJob.Enqueue<IChopService>
+                (
+                    service => service.ChopAlyzeSession(vm.sessionId)
+                );
+
+                response = new GeneralResult(true, "Sessionen är inlagd för analys");
+                return Json(response);
+            }
+
+            response = new GeneralResult(false, "Fel token");
+            return Json(response);
+        }
+
 
         [HttpPost]
         [AllowAnonymous]

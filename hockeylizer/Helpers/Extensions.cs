@@ -58,7 +58,7 @@ namespace hockeylizer.Helpers
             this._hostingEnvironment = hostingEnvironment;
 		}
 
-		public async void ChopAlyzeSession(int sessionId, IHostingEnvironment _hostingEnvironment, ApplicationDbContext _db)
+		public async void ChopAlyzeSession(int sessionId)
 		{
 			var session = _db.Sessions.Find(sessionId);
 			if (session == null) return;
@@ -157,17 +157,15 @@ namespace hockeylizer.Helpers
 				await _db.SaveChangesAsync();
 			}
 
-			if (System.IO.File.Exists(path))
+			if (File.Exists(path))
 			{
-				System.IO.File.Delete(path);
+				File.Delete(path);
 			}
-
-			return;
 		}
 	}
 
 	public interface IChopService
 	{
-        void ChopAlyzeSession(int sessionId, IHostingEnvironment _hostingEnvironment, ApplicationDbContext _db);
+        void ChopAlyzeSession(int sessionId);
 	}
 }
