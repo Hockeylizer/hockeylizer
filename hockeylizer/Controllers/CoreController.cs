@@ -547,7 +547,7 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                response = new IsAnalyzedResult(false, "Videoklippet kollat", session.Analyzed);
+                response = new IsAnalyzedResult(true, "Videoklippet kollat", session.Analyzed);
                 return Json(response);
             }
 
@@ -570,7 +570,7 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                response = new IsChoppedResult(false, "Videoklippet kollat", session.Chopped);
+                response = new IsChoppedResult(true, "Videoklippet kollat", session.Chopped);
                 return Json(response);
             }
 
