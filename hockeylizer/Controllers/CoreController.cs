@@ -782,7 +782,6 @@ namespace hockeylizer.Controllers
         [AllowAnonymous]
         public ContentResult GetHitsOverviewSvg2(int sessionId, string token)
         {
-            var defaultSvgUrl = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
             if (token != _appkey) return Content("Token var fel");
 
             var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
@@ -803,8 +802,8 @@ namespace hockeylizer.Controllers
                 if (hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
                     hit.YCoordinate == null) continue;
 
-                var xCoord = hit.XCoordinate + hit.XCoordinateAnalyzed;
-                var yCoord = hit.YCoordinate + hit.YCoordinateAnalyzed;
+                var xCoord = new XAttribute("cx", hit.XCoordinate + hit.XCoordinateAnalyzed);
+                var yCoord = new XAttribute("cy", hit.YCoordinate + hit.YCoordinateAnalyzed);
                 svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
             }
 
