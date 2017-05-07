@@ -553,6 +553,29 @@ namespace hockeylizer.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> IsChopped([FromBody]SessionVm vm)
+        {
+            IsChoppedResult response;
+            if (vm.token == _appkey)
+            {
+                var session = _db.Sessions.Find(vm.sessionId);
+
+                if (session == null)
+                {
+                    response = new IsChoppedResult(false, "Sessionen kunde inte hittas", false);
+                    return Json(response);
+                }
+
+                response = new IsChoppedResult(false, "Videoklippet kollat", session.Chopped);
+                return Json(response);
+            }
+
+            response = new IsChoppedResult(false, "Inkorrekt token", false);
+            return Json(response);
+        }
+
+        [HttpPost]
 		[AllowAnonymous]
 		public JsonResult GetFramesFromShot([FromBody]GetTargetFramesVm vm)
         {

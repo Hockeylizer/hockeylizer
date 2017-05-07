@@ -110,6 +110,27 @@ namespace hockeylizer.Models
         public bool Analyzed { get; set; }
     }
 
+    public class IsChoppedResult
+    {
+        public IsChoppedResult()
+        {
+            this.Completed = false;
+            this.Description = "Okänt fel";
+            this.Chopped = false;
+        }
+
+        public IsChoppedResult(bool comp, string desc, bool ch)
+        {
+            this.Completed = comp;
+            this.Description = desc;
+            this.Chopped = ch;
+        }
+
+        public bool Completed { get; set; }
+        public string Description { get; set; }
+        public bool Chopped { get; set; }
+    }
+
     public class GetFramesFromShotResult
 	{
 		public GetFramesFromShotResult()
