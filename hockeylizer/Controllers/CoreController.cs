@@ -12,8 +12,6 @@ using System.Linq;
 using System.IO;
 using Hangfire;
 using System;
-     using System.Runtime.CompilerServices;
-
 
 namespace hockeylizer.Controllers
 {
@@ -282,33 +280,33 @@ namespace hockeylizer.Controllers
             return Json(sr);
         }
 
-        [HttpPost]
-        [AllowAnonymous]
-        public JsonResult AnalyzeThis([FromBody]SessionVm vm)
-        {
-            GeneralResult response;
-            if (vm.token == _appkey)
-            {
-                var session = _db.Sessions.Find(vm.sessionId);
+        //[HttpPost]
+        //[AllowAnonymous]
+        //public JsonResult AnalyzeThis([FromBody]SessionVm vm)
+        //{
+        //    GeneralResult response;
+        //    if (vm.token == _appkey)
+        //    {
+        //        var session = _db.Sessions.Find(vm.sessionId);
 
-                if (session == null)
-                {
-                    response = new GeneralResult(false, "Sessionen kunde inte hittas");
-                    return Json(response);
-                }
+        //        if (session == null)
+        //        {
+        //            response = new GeneralResult(false, "Sessionen kunde inte hittas");
+        //            return Json(response);
+        //        }
 
-                BackgroundJob.Enqueue<CoreController>
-                (
-                    service => service.AnalyzeSession(vm.sessionId)
-                );
+        //        BackgroundJob.Enqueue<CoreController>
+        //        (
+        //            service => service.AnalyzeSession(vm.sessionId)
+        //        );
 
-                response = new GeneralResult(true, "Sessionen är inlagd för analys");
-                return Json(response);
-            }
+        //        response = new GeneralResult(true, "Sessionen är inlagd för analys");
+        //        return Json(response);
+        //    }
 
-            response = new GeneralResult(false, "Fel token");
-            return Json(response);
-        }
+        //    response = new GeneralResult(false, "Fel token");
+        //    return Json(response);
+        //}
 
         public async Task<bool> AnalyzeSession(int sessionId)
         {
@@ -408,33 +406,33 @@ namespace hockeylizer.Controllers
             return true;
         }
 
-        [HttpPost]
-        [AllowAnonymous]
-        public JsonResult ChopThis([FromBody] SessionVm vm)
-        {
-            GeneralResult response;
-            if (vm.token == _appkey)
-            {
-                var session = _db.Sessions.Find(vm.sessionId);
+        //[HttpPost]
+        //[AllowAnonymous]
+        //public JsonResult ChopThis([FromBody] SessionVm vm)
+        //{
+        //    GeneralResult response;
+        //    if (vm.token == _appkey)
+        //    {
+        //        var session = _db.Sessions.Find(vm.sessionId);
 
-                if (session == null)
-                {
-                    response = new GeneralResult(false, "Sessionen kunde inte hittas");
-                    return Json(response);
-                }
+        //        if (session == null)
+        //        {
+        //            response = new GeneralResult(false, "Sessionen kunde inte hittas");
+        //            return Json(response);
+        //        }
 
-                BackgroundJob.Enqueue<CoreController>
-                (
-                    service => service.ChopSession(vm.sessionId)
-                );
+        //        BackgroundJob.Enqueue<CoreController>
+        //        (
+        //            service => service.ChopSession(vm.sessionId)
+        //        );
 
-                response = new GeneralResult(true, "Sessionen är inlagd för uppkapning");
-                return Json(response);
-            }
+        //        response = new GeneralResult(true, "Sessionen är inlagd för uppkapning");
+        //        return Json(response);
+        //    }
 
-            response = new GeneralResult(false, "Fel token");
-            return Json(response);
-        }
+        //    response = new GeneralResult(false, "Fel token");
+        //    return Json(response);
+        //}
 
         public async Task<bool> ChopSession(int sessionId)
         {
@@ -713,84 +711,76 @@ namespace hockeylizer.Controllers
         // To be replaced by GetHitsOverviewSVG2. This returns an URL, the other an XML.
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult GetHitsOverviewSVG(int sessionId, string token)
+        public JsonResult GetHitsOverviewSvg(int sessionId, string token)
         {
-            var defaultSvgURL = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
-            if (token == _appkey)
+            var defaultSvgUrl = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
+            if (token != _appkey) return Json(defaultSvgUrl);
+            var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
+            if (hitList == null || !hitList.Any())
             {
-                var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
-                if (hitList == null || !hitList.Any())
-                {
-                    return Json(defaultSvgURL);
-                }
-
-                var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
-                XDocument svgDoc = XDocument.Load(svgBaseDir + "hitsOverview.svg");
-                XNamespace xmlNs = svgDoc.Root.Name.Namespace;
-                var fill = new XAttribute("fill", "black");
-                var radius = new XAttribute("r", 4);
-
-                foreach (var hit in hitList)
-                {
-                    if (!(hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null || hit.YCoordinate == null))
-                    {
-                        var xCoord = hit.XCoordinate + hit.XCoordinateAnalyzed;
-                        var yCoord = hit.YCoordinate + hit.YCoordinateAnalyzed;
-                        svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
-                    }
-                }
-
-                // Setup unique filename and write to it
-                var timeStr = DateTime.Now.ToString("ddhhmmss");
-                var guidStr = Guid.NewGuid().ToString().Substring(0, 7);
-                var fileName = "hits" + timeStr + "rnd" + guidStr + ".svg";
-                FileStream fs = new FileStream(svgBaseDir + fileName, FileMode.Create);
-                svgDoc.Save(fs);
-
-                return Json(@"http://hockeylizer.azurewebsites.net/images/" + fileName);
-
+                return Json(defaultSvgUrl);
             }
 
-            return Json(defaultSvgURL);
+            var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
+            var svgDoc = XDocument.Load(svgBaseDir + "hitsOverview.svg");
+            var xmlNs = svgDoc.Root.Name.Namespace;
+
+            var fill = new XAttribute("fill", "black");
+            var radius = new XAttribute("r", 4);
+
+            foreach (var hit in hitList)
+            {
+                if (hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
+                    hit.YCoordinate == null) continue;
+                var xCoord = hit.XCoordinate + hit.XCoordinateAnalyzed;
+                var yCoord = hit.YCoordinate + hit.YCoordinateAnalyzed;
+                svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
+            }
+
+            // Setup unique filename and write to it
+            var timeStr = DateTime.Now.ToString("ddhhmmss");
+            var guidStr = Guid.NewGuid().ToString().Substring(0, 7);
+            var fileName = "hits" + timeStr + "rnd" + guidStr + ".svg";
+
+            var fs = new FileStream(svgBaseDir + fileName, FileMode.Create);
+            svgDoc.Save(fs);
+
+            return Json(@"http://hockeylizer.azurewebsites.net/images/" + fileName);
         }
 
         // This is the real deal. When GetHitsOverviewSVG has been phased out
         // in the app, this will replace it.
         [HttpPost]
         [AllowAnonymous]
-        public ContentResult GetHitsOverviewSVG2(int sessionId, string token)
+        public ContentResult GetHitsOverviewSvg2(int sessionId, string token)
         {
-            var defaultSvgURL = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
-            if (token == _appkey)
+            var defaultSvgUrl = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
+            if (token != _appkey) return Content("Token var fel");
+
+            var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
+            var svgDoc = XDocument.Load(svgBaseDir + "hitsOverview.svg");
+
+            var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
+            if (hitList == null || !hitList.Any())
             {
-                var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
-                XDocument svgDoc = XDocument.Load(svgBaseDir + "hitsOverview.svg");
-
-                var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
-                if (hitList == null || !hitList.Any())
-                {
-                    return Content(svgDoc.ToString());
-                }
-                                
-                XNamespace xmlNs = svgDoc.Root.Name.Namespace;
-                var fill = new XAttribute("fill", "black");
-                var radius = new XAttribute("r", 4);
-
-                foreach (var hit in hitList)
-                {
-                    if (!(hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null || hit.YCoordinate == null))
-                    {
-                        var xCoord = hit.XCoordinate + hit.XCoordinateAnalyzed;
-                        var yCoord = hit.YCoordinate + hit.YCoordinateAnalyzed;
-                        svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
-                    }
-                }
-
                 return Content(svgDoc.ToString());
+            }
+                                
+            var xmlNs = svgDoc.Root.Name.Namespace;
+            var fill = new XAttribute("fill", "black");
+            var radius = new XAttribute("r", 4);
 
+            foreach (var hit in hitList)
+            {
+                if (hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
+                    hit.YCoordinate == null) continue;
+
+                var xCoord = hit.XCoordinate + hit.XCoordinateAnalyzed;
+                var yCoord = hit.YCoordinate + hit.YCoordinateAnalyzed;
+                svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
             }
 
-            return Content("Token var fel");
+            return Content(svgDoc.ToString());
         }
 
     }
