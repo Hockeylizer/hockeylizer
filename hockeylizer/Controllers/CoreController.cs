@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using hockeylizer.Services;
 using hockeylizer.Helpers;
 using hockeylizer.Models;
-using System.Diagnostics;
 using hockeylizer.Data;
+using System.Xml.Linq;
 using System.Linq;
 using System.IO;
 using Hangfire;
 using System;
+     
 
 namespace hockeylizer.Controllers
 {
@@ -515,19 +516,47 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-        /*
-         * DANIELS BILDGENERERANDE FUNKTIONER
-         */
-        //Daniels funktion
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult getHitsOverviewSVG(int videoId, string token)
+        public JsonResult GetHitsOverviewSVG(int sessionId, string token)
         {
+            var defaultSvgURL = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
+            if (token == _appkey)
+            {
+                var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
+                if (hitList == null || !hitList.Any())
+                {
+                    return Json(defaultSvgURL);
+                }
 
-            // Just return a goddamn picture of the goal with no hits.
-            // It's something.
-            var svgURL = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
-            return Json(svgURL);
+                var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
+                XDocument svgDoc = XDocument.Load(svgBaseDir + "hitsOverview.svg");
+                XNamespace xmlNs = svgDoc.Root.Name.Namespace;
+                var fill = new XAttribute("fill", "black");
+                var radius = new XAttribute("r", 4);
+
+                foreach (var hit in hitList)
+                {
+                    if (!(hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null || hit.YCoordinate == null))
+                    {
+                        var xCoord = hit.XCoordinate + hit.XCoordinateAnalyzed;
+                        var yCoord = hit.YCoordinate + hit.YCoordinateAnalyzed;
+                        svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
+                    }
+                }
+
+                // Setup unique filename and write to it
+                var timeStr = DateTime.Now.ToString("ddhhmmss");
+                var guidStr = Guid.NewGuid().ToString().Substring(0, 7);
+                var fileName = "hits" + timeStr + "rnd" + guidStr + ".svg";
+                FileStream fs = new FileStream(svgBaseDir + fileName, FileMode.Create);
+                svgDoc.Save(fs);
+
+                return Json(@"http://hockeylizer.azurewebsites.net/images/" + fileName);
+
+            }
+
+            return Json(defaultSvgURL);
         }
 
         //TODO: THIS FUNCTION NEEDS TO BE using Svg;
