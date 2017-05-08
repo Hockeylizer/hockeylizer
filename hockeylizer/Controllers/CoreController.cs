@@ -706,8 +706,8 @@ namespace hockeylizer.Controllers
 					return Json(response);
                 }
 
-                shotToUpdate.XCoordinate = vm.x;
-                shotToUpdate.YCoordinate = vm.y;
+                shotToUpdate.XCoordinateAnalyzed = vm.x;
+                shotToUpdate.YCoordinateAnalyzed = vm.y;
 
                 await _db.SaveChangesAsync();
 
