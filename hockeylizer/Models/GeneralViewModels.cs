@@ -316,7 +316,7 @@ namespace hockeylizer.Models
                 return false;
             }
 
-            var allowedFileTypes = "msvideo ogg mp4 avi mpeg quicktime 3gpp 3gpp2";
+            var allowedFileTypes = "mp4 avi mpeg mov";
             var currentFileType = this.video.ContentType.Split('/').LastOrDefault();
 
             if (!allowedFileTypes.Contains(currentFileType))
