@@ -774,12 +774,15 @@ namespace hockeylizer.Controllers
             var fill = new XAttribute("fill", "black");
             var radius = new XAttribute("r", 4);
 
+            // Målpunkternas koordinater hårdkodade. Borde egentligen beräknas.
+            var tCoords = new double[5, 2] { { 10, 91 }, { 10, 18 }, { 173, 18 }, { 173, 91 }, { 91.5, 101 } };
+
             foreach (var hit in hitList)
             {
                 if ((!hit.HitGoal) || hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
                     hit.YCoordinate == null) continue;
-                var xCoord = new XAttribute("cx", hit.XCoordinateAnalyzed + hit.XCoordinate);
-                var yCoord = new XAttribute("cy", hit.YCoordinateAnalyzed - hit.YCoordinate);
+                var xCoord = new XAttribute("cx", hit.XCoordinateAnalyzed + tCoords[hit.TargetNumber, 0]);
+                var yCoord = new XAttribute("cy", hit.YCoordinateAnalyzed + tCoords[hit.TargetNumber, 1]);
                 svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
             }
 
@@ -815,13 +818,16 @@ namespace hockeylizer.Controllers
             var fill = new XAttribute("fill", "black");
             var radius = new XAttribute("r", 4);
 
+            // Målpunkternas koordinater hårdkodade. Borde egentligen beräknas.
+            var tCoords = new double[5, 2]{ {10, 91}, {10, 18}, {173, 18}, {173, 91}, {91.5, 101} };
+
             foreach (var hit in hitList)
             {
                 if ((!hit.HitGoal) || hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
                     hit.YCoordinate == null) continue;
 
-                var xCoord = new XAttribute("cx", hit.XCoordinateAnalyzed + hit.XCoordinate);
-                var yCoord = new XAttribute("cy", hit.YCoordinateAnalyzed - hit.YCoordinate);
+                var xCoord = new XAttribute("cx", hit.XCoordinateAnalyzed + tCoords[hit.TargetNumber, 0]);
+                var yCoord = new XAttribute("cy", hit.YCoordinateAnalyzed + tCoords[hit.TargetNumber, 1]);
                 svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
             }
 
