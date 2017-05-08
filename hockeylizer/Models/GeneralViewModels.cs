@@ -316,19 +316,18 @@ namespace hockeylizer.Models
                 return false;
             }
 
-            var allowedFileTypes = "mp4 avi mpeg mov";
+            const string allowedFileTypes = "mp4 avi mpeg mov";
             string currentFileType;
 
             var firstAlt = this.video.ContentType.Split('/').LastOrDefault();
-            var secondAlt = this.video.ContentType.Split('/').FirstOrDefault();
 
             if (allowedFileTypes.Contains(firstAlt))
             {
                 currentFileType = firstAlt;
             }
-            else if (allowedFileTypes.Contains(secondAlt))
+            else if (this.video.ContentType.Contains("mov"))
             {
-                currentFileType = secondAlt;
+                currentFileType = "mov";
             }
             else
             {
