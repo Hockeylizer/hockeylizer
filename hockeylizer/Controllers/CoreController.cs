@@ -607,7 +607,7 @@ namespace hockeylizer.Controllers
 				}
 
 			    var images = new List<string>();
-			    foreach (var url in shot.FramesToAnalyze.Select(frame => frame.FrameUrl))
+			    foreach (var url in _db.Frames.Where(fr => fr.TargetId == shot.TargetId).Select(frame => frame.FrameUrl).ToList())
 			    {
 			        var picture = await FileHandler.GetShareableBlobUrl(url);
 			        images.Add(picture);
@@ -655,7 +655,7 @@ namespace hockeylizer.Controllers
 				}
 
 			    var images = new List<string>();
-			    foreach (var url in shot.FramesToAnalyze.Select(frame => frame.FrameUrl))
+			    foreach (var url in _db.Frames.Where(fr => fr.TargetId == shot.TargetId).Select(frame => frame.FrameUrl).ToList())
 			    {
 			        var picture = await FileHandler.GetShareableBlobUrl(url);
                     images.Add(picture);
@@ -732,14 +732,13 @@ namespace hockeylizer.Controllers
                 {
                     response = new GetFramesResult(true, "Alla frames hämtades", new List<string>());
 
-                    foreach (var t in _db.Targets.Where(tar => tar.SessionId == session.SessionId))
+                    foreach (var t in _db.Targets.Where(tar => tar.SessionId == session.SessionId).ToList())
                     {
-                        foreach (var url in t.FramesToAnalyze.Select(frame => frame.FrameUrl))
+                        foreach (var url in _db.Frames.Where(fr => fr.TargetId == t.TargetId).Select(frame => frame.FrameUrl).ToList())
                         {
                             var picture = await FileHandler.GetShareableBlobUrl(url);
                             response.Images.Add(picture);
-                        }
-                        
+                        }  
                     }
                 }
                 else
