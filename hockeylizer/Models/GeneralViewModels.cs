@@ -317,7 +317,24 @@ namespace hockeylizer.Models
             }
 
             var allowedFileTypes = "mp4 avi mpeg mov";
-            var currentFileType = this.video.ContentType.Split('/').LastOrDefault();
+            string currentFileType;
+
+            var firstAlt = this.video.ContentType.Split('/').LastOrDefault();
+            var secondAlt = this.video.ContentType.Split('/').FirstOrDefault();
+
+            if (allowedFileTypes.Contains(firstAlt))
+            {
+                currentFileType = firstAlt;
+            }
+            else if (allowedFileTypes.Contains(secondAlt))
+            {
+                currentFileType = secondAlt;
+            }
+            else
+            {
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon har fel videotyp! Kan ej ta emot filer av typ. Endast " + allowedFileTypes + " tas emot.", false);
+				return false;
+            }
 
             if (!allowedFileTypes.Contains(currentFileType))
             {
