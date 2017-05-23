@@ -5,29 +5,17 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using hockeylizer.Data;
 
-namespace hockeylizer.Data.Migrations
+namespace hockeylizer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20170501101529_fifteem")]
-    partial class fifteem
+    [Migration("20170523135808_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("hockeylizer.Models.AnalysisResult", b =>
-                {
-                    b.Property<int>("AnalysisId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<bool>("HitGoal");
-
-                    b.HasKey("AnalysisId");
-
-                    b.ToTable("AnalysisResults");
-                });
 
             modelBuilder.Entity("hockeylizer.Models.ApplicationUser", b =>
                 {
@@ -89,6 +77,24 @@ namespace hockeylizer.Data.Migrations
                     b.ToTable("AppTeams");
                 });
 
+            modelBuilder.Entity("hockeylizer.Models.FrameToAnalyze", b =>
+                {
+                    b.Property<int>("FrameId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("Analyzed");
+
+                    b.Property<string>("FrameUrl");
+
+                    b.Property<int>("TargetId");
+
+                    b.HasKey("FrameId");
+
+                    b.HasIndex("TargetId");
+
+                    b.ToTable("Frames");
+                });
+
             modelBuilder.Entity("hockeylizer.Models.Player", b =>
                 {
                     b.Property<int>("PlayerId")
@@ -109,10 +115,16 @@ namespace hockeylizer.Data.Migrations
                     b.ToTable("Players");
                 });
 
-            modelBuilder.Entity("hockeylizer.Models.PlayerVideo", b =>
+            modelBuilder.Entity("hockeylizer.Models.PlayerSession", b =>
                 {
-                    b.Property<int>("VideoId")
+                    b.Property<int>("SessionId")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("Analyzed");
+
+                    b.Property<bool>("Chopped");
+
+                    b.Property<DateTime>("Created");
 
                     b.Property<bool>("Deleted");
 
@@ -132,11 +144,11 @@ namespace hockeylizer.Data.Migrations
 
                     b.Property<bool>("VideoRemoved");
 
-                    b.HasKey("VideoId");
+                    b.HasKey("SessionId");
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("Videos");
+                    b.ToTable("Sessions");
                 });
 
             modelBuilder.Entity("hockeylizer.Models.Target", b =>
@@ -144,23 +156,31 @@ namespace hockeylizer.Data.Migrations
                     b.Property<int>("TargetId")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int?>("FrameHit");
+
+                    b.Property<bool>("HitGoal");
+
                     b.Property<int>("Order");
+
+                    b.Property<int>("SessionId");
 
                     b.Property<int>("TargetNumber");
 
-                    b.Property<long?>("TimestampEnd");
+                    b.Property<int>("TimestampEnd");
 
-                    b.Property<long?>("TimestampStart");
-
-                    b.Property<int>("VideoId");
+                    b.Property<int>("TimestampStart");
 
                     b.Property<int?>("XCoordinate");
 
+                    b.Property<int?>("XCoordinateAnalyzed");
+
                     b.Property<int?>("YCoordinate");
+
+                    b.Property<int?>("YCoordinateAnalyzed");
 
                     b.HasKey("TargetId");
 
-                    b.HasIndex("VideoId");
+                    b.HasIndex("SessionId");
 
                     b.ToTable("Targets");
                 });
@@ -272,6 +292,14 @@ namespace hockeylizer.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("hockeylizer.Models.FrameToAnalyze", b =>
+                {
+                    b.HasOne("hockeylizer.Models.Target", "Target")
+                        .WithMany("FramesToAnalyze")
+                        .HasForeignKey("TargetId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("hockeylizer.Models.Player", b =>
                 {
                     b.HasOne("hockeylizer.Models.AppTeam", "Team")
@@ -279,19 +307,19 @@ namespace hockeylizer.Data.Migrations
                         .HasForeignKey("TeamId");
                 });
 
-            modelBuilder.Entity("hockeylizer.Models.PlayerVideo", b =>
+            modelBuilder.Entity("hockeylizer.Models.PlayerSession", b =>
                 {
                     b.HasOne("hockeylizer.Models.Player", "Player")
-                        .WithMany("Videos")
+                        .WithMany("Sessions")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("hockeylizer.Models.Target", b =>
                 {
-                    b.HasOne("hockeylizer.Models.PlayerVideo", "RelatedVideo")
+                    b.HasOne("hockeylizer.Models.PlayerSession", "RelatedSession")
                         .WithMany("Targets")
-                        .HasForeignKey("VideoId")
+                        .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
