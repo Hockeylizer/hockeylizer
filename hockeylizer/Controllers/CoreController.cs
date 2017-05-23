@@ -668,7 +668,8 @@ namespace hockeylizer.Controllers
                     XCoordinate = shot.XCoordinate,
                     YCoordinate = shot.YCoordinate,
                     XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
-                    YCoordinateAnalyzed = shot.YCoordinateAnalyzed
+                    YCoordinateAnalyzed = shot.YCoordinateAnalyzed,
+                    HitTarget = shot.HitGoal
                 };
 
 				return Json(response);
