@@ -385,13 +385,10 @@ namespace hockeylizer.Controllers
 
                 if (analysis.WasErrors) continue;
 
-                var xHit = analysis.HitPoint.x;
-                var yHit = analysis.HitPoint.y;
-                var hit = analysis.DidHitGoal;
-
-                t.XCoordinateAnalyzed = xHit;
-                t.YCoordinateAnalyzed = yHit;
-                t.HitGoal = hit;
+                t.XCoordinateAnalyzed = analysis.HitPoint.x;
+                t.YCoordinateAnalyzed = analysis.HitPoint.y;
+                t.HitGoal = analysis.DidHitGoal;
+                t.FrameHit = analysis.FrameNr;
             }
 
             session.Analyzed = true;
@@ -669,7 +666,8 @@ namespace hockeylizer.Controllers
                     YCoordinate = shot.YCoordinate,
                     XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
                     YCoordinateAnalyzed = shot.YCoordinateAnalyzed,
-                    HitTarget = shot.HitGoal
+                    HitTarget = shot.HitGoal,
+                    FrameHit = shot.FrameHit
                 };
 
 				return Json(response);

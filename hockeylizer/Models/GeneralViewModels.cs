@@ -187,6 +187,8 @@ namespace hockeylizer.Models
 		public string Description { get; set; }
 
         public bool? HitTarget { get; set; }
+        public int? FrameHit { get; set; }
+
 		public List<string> FrameUrls { get; set; }
 	}
 
