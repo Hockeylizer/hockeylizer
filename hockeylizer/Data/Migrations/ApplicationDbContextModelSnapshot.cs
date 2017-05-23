@@ -155,6 +155,8 @@ namespace hockeylizer.Data.Migrations
                     b.Property<int>("TargetId")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int?>("FrameHit");
+
                     b.Property<bool>("HitGoal");
 
                     b.Property<int>("Order");

@@ -8,8 +8,8 @@ using hockeylizer.Data;
 namespace hockeylizer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20170507130743_two")]
-    partial class two
+    [Migration("20170523131321_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -122,6 +122,8 @@ namespace hockeylizer.Migrations
 
                     b.Property<bool>("Analyzed");
 
+                    b.Property<bool>("Chopped");
+
                     b.Property<DateTime>("Created");
 
                     b.Property<bool>("Deleted");
@@ -153,6 +155,8 @@ namespace hockeylizer.Migrations
                 {
                     b.Property<int>("TargetId")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("FrameHit");
 
                     b.Property<bool>("HitGoal");
 
