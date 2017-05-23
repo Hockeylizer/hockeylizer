@@ -759,7 +759,7 @@ namespace hockeylizer.Controllers
         [AllowAnonymous]
         public JsonResult GetHitsOverviewSvg(int sessionId, string token)
         {
-            var defaultSvgUrl = @"http://hockeylizer.azurewebsites.net/images/hitsOverview.svg";
+            var defaultSvgUrl = @"http://hockeylizer.azurewebsites.net/images/goal_template.svg";
             if (token != _appkey) return Json(defaultSvgUrl);
             var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
             if (hitList == null || !hitList.Any())
@@ -768,7 +768,7 @@ namespace hockeylizer.Controllers
             }
 
             var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
-            var svgDoc = XDocument.Load(svgBaseDir + "hitsOverview.svg");
+            var svgDoc = XDocument.Load(svgBaseDir + "goal_template.svg");
             var xmlNs = svgDoc.Root.Name.Namespace;
 
             var fill = new XAttribute("fill", "black");
@@ -806,7 +806,7 @@ namespace hockeylizer.Controllers
             if (token != _appkey) return Content("Token var fel");
 
             var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
-            var svgDoc = XDocument.Load(svgBaseDir + "hitsOverview.svg");
+            var svgDoc = XDocument.Load(svgBaseDir + "goal_template.svg");
 
             var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
             if (hitList == null || !hitList.Any())
