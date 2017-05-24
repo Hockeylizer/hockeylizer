@@ -804,43 +804,28 @@ namespace hockeylizer.Controllers
         {
             if (token != _appkey) return Content("Token var fel");
 
-            var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
-            var svgDoc = XDocument.Load(svgBaseDir + "goal_template.svg");
+            var svgTemplatePath = _hostingEnvironment.WebRootPath + "/images/goal_template.svg";
 
-            var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
-            if (hitList == null || !hitList.Any())
-            {
-                return Content(svgDoc.ToString());
-            }
-                                
-            var xmlNs = svgDoc.Root.Name.Namespace;
-            var fill = new XAttribute("fill", "black");
-            var radius = new XAttribute("r", 4);
+            var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal);
+            if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(svgTemplatePath));
 
             // Målpunkternas koordinater hårdkodade. Borde egentligen beräknas.
-            var tCoords = new double[5, 2]{ {10, 91}, {10, 18}, {173, 18}, {173, 91}, {91.5, 101} };
+            var tCoords = new double[5, 2] { { 10, 91 }, { 10, 18 }, { 173, 18 }, { 173, 91 }, { 91.5, 101 } };
 
-            foreach (var hit in hitList)
-            {
-                if ((!hit.HitGoal) || hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
-                    hit.YCoordinate == null) continue;
+            // Waiting for the cm coords to end up in the db. When they do, generate the absolute
+            // coords in cm here. NOTE THAT THE CURRENT hit.XCoordinate IS A PLACEHOLDER.
+            // TODO: switch from XCoordinate and YCoordinate.
+            List<double[]> coords = hitList.Select(hit => new double[] { (double)hit.XCoordinate, (double)hit.YCoordinate }).ToList();
 
-                var xCoord = new XAttribute("cx", hit.XCoordinateAnalyzed + tCoords[hit.TargetNumber, 0]);
-                var yCoord = new XAttribute("cy", hit.YCoordinateAnalyzed + tCoords[hit.TargetNumber, 1]);
-                svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
-            }
+            // Currently not needed, but in the future points may be colour coded according to target.
+            // List<int> targets = hitList.Select(hit => hit.TargetId).ToList();
 
-            var strBuilder = new System.Text.StringBuilder();
-            using (TextWriter writer = new StringWriter(strBuilder))
-            {
-                svgDoc.Save(writer, SaveOptions.DisableFormatting);
-            }
-            return Content(strBuilder.ToString());
+            return Content(SvgGeneration.generateAllHitsSVG(coords, svgTemplatePath));
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public ContentResult GetBoxPlots(int sessionId, string token)
+        public ContentResult GetBoxPlotsSVG(int sessionId, string token)
         {
             if (token != _appkey) return Content("Token var fel");
 
