@@ -162,6 +162,7 @@ namespace hockeylizer.Models
 		{
 			this.Completed = false;
 			this.Description = "Okänt fel";
+            this.HitTarget = false;
 			this.FrameUrls = new List<string>();
 		}
 
@@ -169,6 +170,7 @@ namespace hockeylizer.Models
 		{
 			this.Completed = comp;
 			this.Description = desc;
+            this.HitTarget = false;
 			this.FrameUrls = urls ?? new List<string>();
 		}
 
@@ -183,6 +185,10 @@ namespace hockeylizer.Models
 
         public bool Completed { get; set; }
 		public string Description { get; set; }
+
+        public bool? HitTarget { get; set; }
+        public int? FrameHit { get; set; }
+
 		public List<string> FrameUrls { get; set; }
 	}
 

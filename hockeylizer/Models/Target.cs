@@ -25,8 +25,8 @@ namespace hockeylizer.Models
 
             this.XCoordinateAnalyzed = xcA;
             this.YCoordinateAnalyzed = ycA;
-            this.HitGoal = false;
 
+            this.HitGoal = false;
             this.FramesToAnalyze = new HashSet<FrameToAnalyze>();
         }
 
@@ -43,6 +43,8 @@ namespace hockeylizer.Models
 
         public int? XCoordinateAnalyzed { get; set; }
         public int? YCoordinateAnalyzed { get; set; }
+
+        public int? FrameHit { get; set; }
         public bool HitGoal { get; set; }
 
         [ForeignKey("RelatedSession")]
