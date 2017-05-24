@@ -838,5 +838,29 @@ namespace hockeylizer.Controllers
             return Content(strBuilder.ToString());
         }
 
+        [HttpPost]
+        [AllowAnonymous]
+        public ContentResult GetBoxPlots(int sessionId, string token)
+        {
+            if (token != _appkey) return Content("Token var fel");
+
+            var svgTemplatePath = _hostingEnvironment.WebRootPath + "/images/goal_template.svg";
+            
+
+            var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal);
+            if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(svgTemplatePath));
+
+            // Målpunkternas koordinater hårdkodade. Borde egentligen beräknas.
+            var tCoords = new double[5, 2] { { 10, 91 }, { 10, 18 }, { 173, 18 }, { 173, 91 }, { 91.5, 101 } };
+
+            // Waiting for the cm coords to end up in the db. When they do, generate the absolute
+            // coords in cm here. NOTE THAT THE CURRENT hit.XCoordinate IS A PLACEHOLDER.
+            // TODO: switch from XCoordinate and YCoordinate.
+            List<double[]> coords = hitList.Select(hit => new double[] { (double)hit.XCoordinate, (double)hit.YCoordinate }).ToList();
+            List<int> targets = hitList.Select(hit => hit.TargetId).ToList();
+
+            return Content(SvgGeneration.generateBoxplotsSVG(coords, targets, svgTemplatePath));
+        }
+
     }
 }
