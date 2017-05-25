@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace hockeylizer.Migrations
 {
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -224,10 +224,12 @@ namespace hockeylizer.Migrations
                     TargetNumber = table.Column<int>(nullable: false),
                     TimestampEnd = table.Column<int>(nullable: false),
                     TimestampStart = table.Column<int>(nullable: false),
-                    XCoordinate = table.Column<int>(nullable: true),
-                    XCoordinateAnalyzed = table.Column<int>(nullable: true),
-                    YCoordinate = table.Column<int>(nullable: true),
-                    YCoordinateAnalyzed = table.Column<int>(nullable: true)
+                    XCoordinate = table.Column<double>(nullable: true),
+                    XCoordinateAnalyzed = table.Column<double>(nullable: true),
+                    XOffset = table.Column<double>(nullable: true),
+                    YCoordinate = table.Column<double>(nullable: true),
+                    YCoordinateAnalyzed = table.Column<double>(nullable: true),
+                    YOffset = table.Column<double>(nullable: true)
                 },
                 constraints: table =>
                 {

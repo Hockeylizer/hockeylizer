@@ -533,7 +533,7 @@ namespace hockeylizer.Controllers
             IsAnalyzedResult response;
             if (vm.token == _appkey)
             {
-                var session = _db.Sessions.Find(vm.sessionId);
+                var session = await _db.Sessions.FindAsync(vm.sessionId);
 
                 if (session == null)
                 {
@@ -556,7 +556,7 @@ namespace hockeylizer.Controllers
             IsChoppedResult response;
             if (vm.token == _appkey)
             {
-                var session = _db.Sessions.Find(vm.sessionId);
+                var session = await _db.Sessions.FindAsync(vm.sessionId);
 
                 if (session == null)
                 {

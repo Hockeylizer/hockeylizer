@@ -8,8 +8,8 @@ using hockeylizer.Data;
 namespace hockeylizer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20170525113349_two")]
-    partial class two
+    [Migration("20170525125133_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
