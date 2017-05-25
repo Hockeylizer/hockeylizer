@@ -308,6 +308,7 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
         public async Task<bool> AnalyzeSession(int sessionId)
         {
             var session = _db.Sessions.Find(sessionId);
@@ -428,6 +429,7 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
         public async Task<bool> ChopSession(int sessionId)
         {
             var session = _db.Sessions.Find(sessionId);
