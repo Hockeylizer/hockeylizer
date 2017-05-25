@@ -659,6 +659,8 @@ namespace hockeylizer.Controllers
                 {
                     TargetNumber = shot.TargetNumber,
                     Order = shot.Order,
+                    XOffset = shot.XOffset,
+                    YOffset = shot.YOffset,
                     XCoordinate = shot.XCoordinate,
                     YCoordinate = shot.YCoordinate,
                     XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
@@ -710,7 +712,10 @@ namespace hockeylizer.Controllers
 
                 var offsets = new Point2d((double)vm.x, (double)vm.y);
 
-                var convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, Points.HitPointsInCm()[shotToUpdate.TargetNumber], session.Targets.Select(t => new Point2d(t.XCoordinate ?? 0, t.YCoordinate ?? 0)).ToArray(), Points.HitPointsInCm().Values.ToArray());
+                var convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, 
+                    Points.HitPointsInCm()[shotToUpdate.TargetNumber], 
+                    session.Targets.Select(t => new Point2d(t.XCoordinate ?? 0, t.YCoordinate ?? 0)).ToArray(), 
+                    Points.HitPointsInCm().Values.ToArray());
 
                 shotToUpdate.XOffset = convertedPoints.x;
                 shotToUpdate.YOffset = convertedPoints.y;
@@ -718,6 +723,7 @@ namespace hockeylizer.Controllers
                 shotToUpdate.XCoordinateAnalyzed = vm.x;
                 shotToUpdate.YCoordinateAnalyzed = vm.y;
 
+                shotToUpdate.HitGoal = true;
                 await _db.SaveChangesAsync();
 
                 response = new GeneralResult(true, "Skottets träffpunkt har uppdaterats!");
@@ -760,6 +766,36 @@ namespace hockeylizer.Controllers
                 response = new GetFramesResult(false, "Token var inkorrekt", new List<string>());
             }
 
+            return Json(response);
+        }
+
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> ValidateEmail([FromBody]ValidateEmailVm vm)
+        {
+            GeneralResult response;
+            if (vm.token == _appkey)
+            {
+                if (string.IsNullOrEmpty(vm.email))
+                {
+                    response = new GeneralResult(false, "Email är tom eller saknas.");
+                    return Json(response);
+                }
+
+                var chk = await Mailgun.ValidateEmail(vm.email);
+
+                if (!chk.Valid)
+                {
+                    response = new GeneralResult(false, "Mailadressen " + vm.email + " var ogiltig.");
+                    return Json(response);
+                }
+
+                response = new GeneralResult(true, "Mailadressen var giltig.");
+                return Json(response);
+            }
+
+            response = new GeneralResult(false, "Token var inkorrekt");
             return Json(response);
         }
 

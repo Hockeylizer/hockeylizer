@@ -20,9 +20,27 @@ namespace hockeylizer.Services
         public static async Task<UploadFileResult> UploadVideo(IFormFile file, string containerName, string fileStart)
         {
             var fileName = fileStart + "-0";
-            var filetype = file.ContentType.Split('/').LastOrDefault() ?? "mp4";
 
-            while (await utility.BlobExistsOnCloud(containerName, fileName + "." + filetype))
+            const string allowedFileTypes = "mp4 avi mpeg mov";
+            string fileType;
+
+            var firstAlt = file.ContentType.Split('/').LastOrDefault();
+
+            if (allowedFileTypes.Contains(firstAlt))
+            {
+                fileType = firstAlt;
+            }
+            else if (file.ContentType.Contains("quicktime"))
+            {
+                fileType = "mov";
+            }
+            else
+            {
+                fileType = file.ContentType.Split('/').LastOrDefault() ?? "mp4";
+            }
+            
+
+            while (await utility.BlobExistsOnCloud(containerName, fileName + "." + fileType))
             {
                 var ids = fileName.Split('-');
                 var lastDigit = int.Parse(ids.Last());
@@ -31,7 +49,7 @@ namespace hockeylizer.Services
                 fileName = fileStart + "-" + lastDigit;
             }
 
-            fileName = fileName + "." + filetype;
+            fileName = fileName + "." + fileType;
             var imageStream = file.OpenReadStream();
 
             var result = await utility.UploadBlob(fileName, containerName, imageStream);

@@ -24,6 +24,12 @@ namespace hockeylizer.Models
         public string FileName { get; set; }
     }
 
+    public class ValidateEmailVm
+    {
+        public string token { get; set; }
+        public string email { get; set; }
+    }
+
     public class UpdateNameVm
     {
         public bool Validate() 
@@ -176,6 +182,9 @@ namespace hockeylizer.Models
 
 		public int TargetNumber { get; set; }
 		public int Order { get; set; }
+
+        public double? XOffset{ get; set; }
+        public double? YOffset { get; set; }
 
         public double? XCoordinate { get; set; }
 		public double? YCoordinate { get; set; }
@@ -331,13 +340,13 @@ namespace hockeylizer.Models
             {
                 currentFileType = firstAlt;
             }
-            else if (this.video.ContentType.Contains("mov"))
+            else if (this.video.ContentType.Contains("quicktime"))
             {
                 currentFileType = "mov";
             }
             else
             {
-				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon har fel videotyp! Kan ej ta emot filer av typ. Endast " + allowedFileTypes + " tas emot.", false);
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon har fel videotyp! Endast " + allowedFileTypes + " tas emot. Error 1. " + this.video.ContentType, false);
 				return false;
             }
 
