@@ -620,7 +620,35 @@ namespace hockeylizer.Controllers
 			return Json(response);
         }
 
-		[HttpPost]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> GetDataFromSession([FromBody]SessionVm vm)
+        {
+            GetDataFromSessionResult response;
+            if (vm.token == _appkey)
+            {
+                var session = _db.Sessions.Find(vm.sessionId);
+
+                if (session == null)
+                {
+                    response = new GetDataFromSessionResult(false, "Sessionen kunde inte hittas");
+                    return Json(response);
+                }
+
+                var targets = _db.Targets.Where(t => t.SessionId == vm.sessionId).Select(t => t.HitGoal).ToList();
+                var ratio = targets.Count(t => !t) + "/" + targets.Count;
+
+                response = new GetDataFromSessionResult(true, "Sessionen hittades.");
+                response.HitRatio = ratio;
+
+                return Json(response);
+            }
+
+            response = new GetDataFromSessionResult(false, "Token var inkorrekt.");
+            return Json(response);
+        }
+
+        [HttpPost]
 		[AllowAnonymous]
 		public async Task<JsonResult> GetDataFromShot([FromBody]GetTargetFramesVm vm)
 		{

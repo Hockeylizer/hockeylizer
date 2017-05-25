@@ -54,17 +54,18 @@ namespace hockeylizer.Services
 
         public static async void SendMessage(string email)
         {
-            RestRequest request = new RestRequest
-            {
-                Resource = "{domain}/messages"
-            };
-
-            request.AddParameter("domain", "sandboxef2625f2f544472cb4b3d3311b8149b8.mailgun.org", ParameterType.UrlSegment);
+            RestRequest request = new RestRequest();
+            request.AddParameter("domain", "YOUR_DOMAIN_NAME", ParameterType.UrlSegment);
             request.Resource = "{domain}/messages";
-            request.AddParameter("from", "Mailgun Sandbox <postmaster@sandboxef2625f2f544472cb4b3d3311b8149b8.mailgun.org>");
-            request.AddParameter("to", "Lennart Hammarström <" + email + ">");
-            request.AddParameter("subject", "Hello Lennart Hammarström");
-            request.AddParameter("text", "Congratulations Lennart Hammarström, you just sent an email with Mailgun!  You are truly awesome!");
+            request.AddParameter("from", "Excited User <YOU@YOUR_DOMAIN_NAME>");
+            request.AddParameter("to", "foo@example.com");
+            request.AddParameter("subject", "Hello");
+            request.AddParameter("text", "Testing some Mailgun awesomness!");
+            request.AddParameter("html",
+                                  "<html>HTML version of the body</html>");
+            //request.AddFile("attachment", Path.Combine("files", "test.jpg"));
+            //request.AddFile("attachment", Path.Combine("files", "test.txt"));
+            request.Method = Method.POST;
 
             await Mailgun.ExecuteRequest<object>(request);
         }

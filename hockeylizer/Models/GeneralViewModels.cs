@@ -162,7 +162,27 @@ namespace hockeylizer.Models
         public List<string> FrameUrls { get; set; }
 	}
 
-	public class GetDataFromShotResult
+    public class GetDataFromSessionResult
+    {
+        public GetDataFromSessionResult()
+        {
+            this.Completed = false;
+            this.Description = "Okänt fel";
+        }
+
+        public GetDataFromSessionResult(bool comp, string desc)
+        {
+            this.Completed = comp;
+            this.Description = desc;
+        }
+
+        public bool Completed { get; set; }
+        public string Description { get; set; }
+
+        public string HitRatio { get; set; }
+    }
+
+    public class GetDataFromShotResult
 	{
 		public GetDataFromShotResult()
 		{
