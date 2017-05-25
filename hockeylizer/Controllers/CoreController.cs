@@ -338,14 +338,7 @@ namespace hockeylizer.Controllers
 
             var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
 
-            var pointDict = new Dictionary<int, Point2d>
-            {
-                {1, new Point2d(10, 91)},
-                {2, new Point2d(10, 18)},
-                {3, new Point2d(173, 18)},
-                {4, new Point2d(173, 91)},
-                {5, new Point2d(91.5, 101)}
-            };
+            var pointDict = Points.HitPointsInCm();
 
             var points = new List<Point2i>();
             var offsets = new List<Point2d>();
@@ -353,7 +346,7 @@ namespace hockeylizer.Controllers
             var iter = 1;
             foreach (var hp in targets)
             {
-                points.Add(new Point2i(hp.XCoordinate ?? 0, hp.YCoordinate ?? 0));
+                points.Add(new Point2i((int)(hp.XCoordinate ?? 0), (int)(hp.YCoordinate ?? 0)));
 
                 Point2d coordinates;
                 var shot = hp.Order;
@@ -375,8 +368,8 @@ namespace hockeylizer.Controllers
                 iter++;
             }
 
-            const int width = 183;
-            const int height = 122;
+            var width = Points.ClothWidth;
+            var height = Points.ClothHeight;
 
             foreach (var t in targets)
             {
@@ -387,6 +380,10 @@ namespace hockeylizer.Controllers
 
                 t.XCoordinateAnalyzed = analysis.HitPoint.x;
                 t.YCoordinateAnalyzed = analysis.HitPoint.y;
+
+                t.XOffset = analysis.OffsetFromTarget.x;
+                t.YOffset = analysis.OffsetFromTarget.y;
+
                 t.HitGoal = analysis.DidHitGoal;
                 t.FrameHit = analysis.FrameNr;
             }
@@ -704,6 +701,19 @@ namespace hockeylizer.Controllers
 					response = new GeneralResult(false, "Skottet som skulle uppdateras kunde inte hittas.");
 					return Json(response);
                 }
+
+				if (vm.x == null || vm.y == null)
+				{
+					response = new GeneralResult(false, "Posten måste innehålla korrekta värden för x och y.");
+					return Json(response);
+				}
+
+                var offsets = new Point2d((double)vm.x, (double)vm.y);
+
+                var convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, Points.HitPointsInCm()[shotToUpdate.TargetNumber], session.Targets.Select(t => new Point2d(t.XCoordinate ?? 0, t.YCoordinate ?? 0)).ToArray(), Points.HitPointsInCm().Values.ToArray());
+
+                shotToUpdate.XOffset = convertedPoints.x;
+                shotToUpdate.YOffset = convertedPoints.y;
 
                 shotToUpdate.XCoordinateAnalyzed = vm.x;
                 shotToUpdate.YCoordinateAnalyzed = vm.y;

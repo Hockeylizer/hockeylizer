@@ -150,8 +150,8 @@ namespace hockeylizer.Models
 		public bool Completed { get; set; }
 		public string Description { get; set; }
 
-	    public int? XCoordinate { get; set; }
-	    public int? YCoordinate { get; set; }
+	    public double? XCoordinate { get; set; }
+	    public double? YCoordinate { get; set; }
 
         public List<string> FrameUrls { get; set; }
 	}
@@ -177,11 +177,11 @@ namespace hockeylizer.Models
 		public int TargetNumber { get; set; }
 		public int Order { get; set; }
 
-		public int? XCoordinate { get; set; }
-		public int? YCoordinate { get; set; }
+        public double? XCoordinate { get; set; }
+		public double? YCoordinate { get; set; }
 
-	    public int? XCoordinateAnalyzed { get; set; }
-	    public int? YCoordinateAnalyzed { get; set; }
+	    public double? XCoordinateAnalyzed { get; set; }
+	    public double? YCoordinateAnalyzed { get; set; }
 
         public bool Completed { get; set; }
 		public string Description { get; set; }
@@ -227,8 +227,8 @@ namespace hockeylizer.Models
 
         public int? sessionId { get; set; }
         public int? shot { get; set; }
-        public int? x { get; set; }
-        public int? y { get; set; }
+        public double? x { get; set; }
+        public double? y { get; set; }
         public string token { get; set; }
 
         public GeneralResult ur { get; set; }
