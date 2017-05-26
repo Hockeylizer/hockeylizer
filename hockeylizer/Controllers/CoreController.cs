@@ -882,21 +882,13 @@ namespace hockeylizer.Controllers
 
             var svgTemplatePath = _hostingEnvironment.WebRootPath + "/images/goal_template.svg";
 
-            var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal);
+            var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
             if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(svgTemplatePath));
 
-            // Målpunkternas koordinater hårdkodade. Borde egentligen beräknas.
-            var tCoords = new double[5, 2] { { 10, 91 }, { 10, 18 }, { 173, 18 }, { 173, 91 }, { 91.5, 101 } };
+            List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
+            List<int> targets = hitList.Select(hit => hit.TargetId).ToList();
 
-            // Waiting for the cm coords to end up in the db. When they do, generate the absolute
-            // coords in cm here. NOTE THAT THE CURRENT hit.XCoordinate IS A PLACEHOLDER.
-            // TODO: switch from XCoordinate and YCoordinate.
-            List<double[]> coords = hitList.Select(hit => new double[] { (double)hit.XCoordinate, (double)hit.YCoordinate }).ToList();
-
-            // Currently not needed, but in the future points may be colour coded according to target.
-            // List<int> targets = hitList.Select(hit => hit.TargetId).ToList();
-
-            return Content(SvgGeneration.generateAllHitsSVG(coords, svgTemplatePath));
+            return Content(SvgGeneration.generateAllHitsSVG(coords, targets, svgTemplatePath));
         }
 
         [HttpPost]
@@ -906,18 +898,11 @@ namespace hockeylizer.Controllers
             if (token != _appkey) return Content("Token var fel");
 
             var svgTemplatePath = _hostingEnvironment.WebRootPath + "/images/goal_template.svg";
-            
 
-            var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal);
+            var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
             if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(svgTemplatePath));
 
-            // Målpunkternas koordinater hårdkodade. Borde egentligen beräknas.
-            var tCoords = new double[5, 2] { { 10, 91 }, { 10, 18 }, { 173, 18 }, { 173, 91 }, { 91.5, 101 } };
-
-            // Waiting for the cm coords to end up in the db. When they do, generate the absolute
-            // coords in cm here. NOTE THAT THE CURRENT hit.XCoordinate IS A PLACEHOLDER.
-            // TODO: switch from XCoordinate and YCoordinate.
-            List<double[]> coords = hitList.Select(hit => new double[] { (double)hit.XCoordinate, (double)hit.YCoordinate }).ToList();
+            List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
             List<int> targets = hitList.Select(hit => hit.TargetId).ToList();
 
             return Content(SvgGeneration.generateBoxplotsSVG(coords, targets, svgTemplatePath));

@@ -8,6 +8,9 @@ namespace hockeylizer.Helpers
 {
     public static class SvgGeneration
     {
+
+        private static readonly double[,] _targetCoords = new double[5, 2] { { 10, 91 }, { 10, 18 }, { 173, 18 }, { 173, 91 }, { 91.5, 101 } };
+        
         // A black circle to mark indivdual hits.
         private static XElement svgCircle(XNamespace ns, double cx, double cy)
         {
@@ -93,13 +96,27 @@ namespace hockeylizer.Helpers
             return strBuilder.ToString();
         }
 
+        private static List<double[]> offsetToAbsolute(List<double[]> offsets, List<int> targets)
+        {
+            var absoluteCoords = new List<double[]> { };
+            for (int ii = 0; ii < offsets.Count; ii++) {
+                double x = _targetCoords[targets[ii], 0] + offsets[ii][0];
+                double y = _targetCoords[targets[ii], 1] + offsets[ii][1];
+                absoluteCoords.Add(new double[] { x, y });
+            }
+            return absoluteCoords;
+        }
+
         /// <summary>
         /// Takes a list of hit coordinates, and puts them as black dots on a simple svg of the goal.
         /// </summary>
         /// <param name="points">List of elements {x_double, y_double}.</param>
         /// <param name="svg_template_path">Path to the template that the back dots are added to.</param>
-        public static string generateAllHitsSVG(List<double[]> points, string svg_template_path)
+        public static string generateAllHitsSVG(List<double[]> offsets, List<int> targets, string svg_template_path)
         {
+            // Calculate absolute cm coords from offset + target coords.
+            List<double[]> points = offsetToAbsolute(offsets, targets);
+
             XDocument svgCode = XDocument.Load(svg_template_path);
             XNamespace ns = svgCode.Root.Name.Namespace;
 
@@ -120,8 +137,12 @@ namespace hockeylizer.Helpers
         /// <param name="svg_template_path">
         /// File path to the svg goal template.
         /// </param>
-        public static string generateBoxplotsSVG(List<double[]> points, List<int> targets, string svg_template_path)
+        public static string generateBoxplotsSVG(List<double[]> offsets, List<int> targets, string svg_template_path)
         {
+
+            // Calculate absolute cm coords from offset + target coords.
+            List<double[]> points = offsetToAbsolute(offsets, targets);
+
             // Hardcoded switch to change between average and median as mean for the cross.
             bool use_median_not_average = false;
             // This is the minimal number of shots against a target that will trigger
