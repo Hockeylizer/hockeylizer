@@ -26,10 +26,11 @@ namespace hockeylizer.Models
 			var index = 1;
 			for (var t = 0; t < to.Count; t++)
 			{
-				var target = new Target(to[t], index, ts[t].start, ts[t].end, coords[t].xCoord, coords[t].yCoord, null, null)
+                var target = new Target(to[t % to.Count], index, ts[t].start, ts[t].end, coords[t].xCoord, coords[t].yCoord, null, null)
 				{
 					RelatedSession = this
 				};
+
 				index++;
 
 				this.Targets.Add(target);

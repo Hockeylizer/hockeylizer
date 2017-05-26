@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
+﻿﻿﻿﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
@@ -638,7 +638,7 @@ namespace hockeylizer.Controllers
                 }
 
                 var targets = _db.Targets.Where(t => t.SessionId == vm.sessionId).Select(t => t.HitGoal).ToList();
-                var ratio = targets.Count(t => !t) + "/" + targets.Count;
+                var ratio = targets.Count(t => t) + "/" + targets.Count;
 
                 response = new GetDataFromSessionResult(true, "Sessionen hittades.");
                 response.HitRatio = ratio;

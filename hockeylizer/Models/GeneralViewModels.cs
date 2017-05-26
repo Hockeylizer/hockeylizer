@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿﻿using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -412,12 +412,10 @@ namespace hockeylizer.Models
                 return false;
 			}
 
-
-            var to = this.targetOrder.Count;
             var tc = this.targetCoords.Count;
             var ts = this.timestamps.Count;
 
-            if (!(to == tc && to == ts && tc == ts))
+            if (!(tc == ts))
             {
                 this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet listor inte stämmer överens!", false);
                 return false;
