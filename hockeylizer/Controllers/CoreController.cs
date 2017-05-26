@@ -908,5 +908,14 @@ namespace hockeylizer.Controllers
             return Content(SvgGeneration.generateBoxplotsSVG(coords, targets, svgTemplatePath));
         }
 
+        [HttpPost]
+        [AllowAnonymous]
+        public ContentResult getTestSVG(string token)
+        {
+            if (token != _appkey) return Content("Token var fel");
+
+            var svgTemplatePath = _hostingEnvironment.WebRootPath + "/images/goal_template.svg";
+            return Content(SvgGeneration.emptyGoalSvg(svgTemplatePath));
+        }
     }
 }
