@@ -10,7 +10,7 @@ namespace hockeylizer.Services
     public static class BlobCredentials
     {
         public static readonly string AccountName = "hockeydata";
-        public static readonly string Key = "QmoOoi3h8htf3+Luqz7GhVe9WZavcDvn/DHqEzc25f9/Ii4zKeqTwuP+x9M9UbZWSVTGKnNW2rF89X/D6yza+A==";
+        public static readonly string Key = "0KDxpIRz6u5M6VechBj8YOAGnDlG9dz11X/CyzmEE5tBesbiaa8+oEJZjpu3AUA5aQdyi3RK1Q264DgNYk3Tvw==";
     }
 
     public static class FileHandler
@@ -20,9 +20,27 @@ namespace hockeylizer.Services
         public static async Task<UploadFileResult> UploadVideo(IFormFile file, string containerName, string fileStart)
         {
             var fileName = fileStart + "-0";
-            var filetype = file.ContentType.Split('/').LastOrDefault() ?? "mp4";
 
-            while (await utility.BlobExistsOnCloud(containerName, fileName + "." + filetype))
+            const string allowedFileTypes = "mp4 avi mpeg mov";
+            string fileType;
+
+            var firstAlt = file.ContentType.Split('/').LastOrDefault();
+
+            if (allowedFileTypes.Contains(firstAlt))
+            {
+                fileType = firstAlt;
+            }
+            else if (file.ContentType.Contains("quicktime"))
+            {
+                fileType = "mov";
+            }
+            else
+            {
+                fileType = file.ContentType.Split('/').LastOrDefault() ?? "mp4";
+            }
+            
+
+            while (await utility.BlobExistsOnCloud(containerName, fileName + "." + fileType))
             {
                 var ids = fileName.Split('-');
                 var lastDigit = int.Parse(ids.Last());
@@ -31,7 +49,7 @@ namespace hockeylizer.Services
                 fileName = fileStart + "-" + lastDigit;
             }
 
-            fileName = fileName + "." + filetype;
+            fileName = fileName + "." + fileType;
             var imageStream = file.OpenReadStream();
 
             var result = await utility.UploadBlob(fileName, containerName, imageStream);

@@ -38,11 +38,14 @@ namespace hockeylizer.Models
         public int TimestampStart { get; set; }
         public int TimestampEnd { get; set; }
 
-        public int? XCoordinate { get; set; }
-        public int? YCoordinate { get; set; }
+        public double? XCoordinate { get; set; }
+        public double? YCoordinate { get; set; }
 
-        public int? XCoordinateAnalyzed { get; set; }
-        public int? YCoordinateAnalyzed { get; set; }
+        public double? XOffset { get; set; }
+        public double? YOffset { get; set; }
+
+        public double? XCoordinateAnalyzed { get; set; }
+        public double? YCoordinateAnalyzed { get; set; }
 
         public int? FrameHit { get; set; }
         public bool HitGoal { get; set; }

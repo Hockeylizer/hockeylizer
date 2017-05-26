@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
+﻿﻿﻿﻿﻿﻿﻿﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
@@ -308,6 +308,7 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
         public async Task<bool> AnalyzeSession(int sessionId)
         {
             var session = _db.Sessions.Find(sessionId);
@@ -338,14 +339,7 @@ namespace hockeylizer.Controllers
 
             var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
 
-            var pointDict = new Dictionary<int, Point2d>
-            {
-                {1, new Point2d(10, 91)},
-                {2, new Point2d(10, 18)},
-                {3, new Point2d(173, 18)},
-                {4, new Point2d(173, 91)},
-                {5, new Point2d(91.5, 101)}
-            };
+            var pointDict = Points.HitPointsInCm();
 
             var points = new List<Point2i>();
             var offsets = new List<Point2d>();
@@ -353,7 +347,7 @@ namespace hockeylizer.Controllers
             var iter = 1;
             foreach (var hp in targets)
             {
-                points.Add(new Point2i(hp.XCoordinate ?? 0, hp.YCoordinate ?? 0));
+                points.Add(new Point2i((int)(hp.XCoordinate ?? 0), (int)(hp.YCoordinate ?? 0)));
 
                 Point2d coordinates;
                 var shot = hp.Order;
@@ -375,8 +369,8 @@ namespace hockeylizer.Controllers
                 iter++;
             }
 
-            const int width = 183;
-            const int height = 122;
+            var width = Points.ClothWidth;
+            var height = Points.ClothHeight;
 
             foreach (var t in targets)
             {
@@ -387,6 +381,10 @@ namespace hockeylizer.Controllers
 
                 t.XCoordinateAnalyzed = analysis.HitPoint.x;
                 t.YCoordinateAnalyzed = analysis.HitPoint.y;
+
+                t.XOffset = analysis.OffsetFromTarget.x;
+                t.YOffset = analysis.OffsetFromTarget.y;
+
                 t.HitGoal = analysis.DidHitGoal;
                 t.FrameHit = analysis.FrameNr;
             }
@@ -431,6 +429,7 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
+        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
         public async Task<bool> ChopSession(int sessionId)
         {
             var session = _db.Sessions.Find(sessionId);
@@ -536,7 +535,7 @@ namespace hockeylizer.Controllers
             IsAnalyzedResult response;
             if (vm.token == _appkey)
             {
-                var session = _db.Sessions.Find(vm.sessionId);
+                var session = await _db.Sessions.FindAsync(vm.sessionId);
 
                 if (session == null)
                 {
@@ -559,7 +558,7 @@ namespace hockeylizer.Controllers
             IsChoppedResult response;
             if (vm.token == _appkey)
             {
-                var session = _db.Sessions.Find(vm.sessionId);
+                var session = await _db.Sessions.FindAsync(vm.sessionId);
 
                 if (session == null)
                 {
@@ -623,7 +622,35 @@ namespace hockeylizer.Controllers
 			return Json(response);
         }
 
-		[HttpPost]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> GetDataFromSession([FromBody]SessionVm vm)
+        {
+            GetDataFromSessionResult response;
+            if (vm.token == _appkey)
+            {
+                var session = _db.Sessions.Find(vm.sessionId);
+
+                if (session == null)
+                {
+                    response = new GetDataFromSessionResult(false, "Sessionen kunde inte hittas");
+                    return Json(response);
+                }
+
+                var targets = _db.Targets.Where(t => t.SessionId == vm.sessionId).Select(t => t.HitGoal).ToList();
+                var ratio = targets.Count(t => t) + "/" + targets.Count;
+
+                response = new GetDataFromSessionResult(true, "Sessionen hittades.");
+                response.HitRatio = ratio;
+
+                return Json(response);
+            }
+
+            response = new GetDataFromSessionResult(false, "Token var inkorrekt.");
+            return Json(response);
+        }
+
+        [HttpPost]
 		[AllowAnonymous]
 		public async Task<JsonResult> GetDataFromShot([FromBody]GetTargetFramesVm vm)
 		{
@@ -662,6 +689,8 @@ namespace hockeylizer.Controllers
                 {
                     TargetNumber = shot.TargetNumber,
                     Order = shot.Order,
+                    XOffset = shot.XOffset,
+                    YOffset = shot.YOffset,
                     XCoordinate = shot.XCoordinate,
                     YCoordinate = shot.YCoordinate,
                     XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
@@ -705,9 +734,26 @@ namespace hockeylizer.Controllers
 					return Json(response);
                 }
 
+				if (vm.x == null || vm.y == null)
+				{
+					response = new GeneralResult(false, "Posten måste innehålla korrekta värden för x och y.");
+					return Json(response);
+				}
+
+                var offsets = new Point2d((double)vm.x, (double)vm.y);
+
+                var convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, 
+                    Points.HitPointsInCm()[shotToUpdate.TargetNumber], 
+                    session.Targets.Select(t => new Point2d(t.XCoordinate ?? 0, t.YCoordinate ?? 0)).ToArray(), 
+                    Points.HitPointsInCm().Values.ToArray());
+
+                shotToUpdate.XOffset = convertedPoints.x;
+                shotToUpdate.YOffset = convertedPoints.y;
+
                 shotToUpdate.XCoordinateAnalyzed = vm.x;
                 shotToUpdate.YCoordinateAnalyzed = vm.y;
 
+                shotToUpdate.HitGoal = true;
                 await _db.SaveChangesAsync();
 
                 response = new GeneralResult(true, "Skottets träffpunkt har uppdaterats!");
@@ -750,6 +796,36 @@ namespace hockeylizer.Controllers
                 response = new GetFramesResult(false, "Token var inkorrekt", new List<string>());
             }
 
+            return Json(response);
+        }
+
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> ValidateEmail([FromBody]ValidateEmailVm vm)
+        {
+            GeneralResult response;
+            if (vm.token == _appkey)
+            {
+                if (string.IsNullOrEmpty(vm.email))
+                {
+                    response = new GeneralResult(false, "Email är tom eller saknas.");
+                    return Json(response);
+                }
+
+                var chk = await Mailgun.ValidateEmail(vm.email);
+
+                if (!chk.Valid)
+                {
+                    response = new GeneralResult(false, "Mailadressen " + vm.email + " var ogiltig.");
+                    return Json(response);
+                }
+
+                response = new GeneralResult(true, "Mailadressen var giltig.");
+                return Json(response);
+            }
+
+            response = new GeneralResult(false, "Token var inkorrekt");
             return Json(response);
         }
 

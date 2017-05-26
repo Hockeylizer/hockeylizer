@@ -8,8 +8,8 @@ using hockeylizer.Data;
 namespace hockeylizer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20170523135808_init")]
-    partial class init
+    [Migration("20170525125133_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -170,13 +170,17 @@ namespace hockeylizer.Migrations
 
                     b.Property<int>("TimestampStart");
 
-                    b.Property<int?>("XCoordinate");
+                    b.Property<double?>("XCoordinate");
 
-                    b.Property<int?>("XCoordinateAnalyzed");
+                    b.Property<double?>("XCoordinateAnalyzed");
 
-                    b.Property<int?>("YCoordinate");
+                    b.Property<double?>("XOffset");
 
-                    b.Property<int?>("YCoordinateAnalyzed");
+                    b.Property<double?>("YCoordinate");
+
+                    b.Property<double?>("YCoordinateAnalyzed");
+
+                    b.Property<double?>("YOffset");
 
                     b.HasKey("TargetId");
 
