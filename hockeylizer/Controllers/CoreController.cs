@@ -629,7 +629,7 @@ namespace hockeylizer.Controllers
             GetDataFromSessionResult response;
             if (vm.token == _appkey)
             {
-                var session = _db.Sessions.Find(vm.sessionId);
+                var session = await _db.Sessions.FindAsync(vm.sessionId);
 
                 if (session == null)
                 {
@@ -657,7 +657,7 @@ namespace hockeylizer.Controllers
 			GetDataFromShotResult response;
 			if (vm.token == _appkey)
 			{
-				var session = _db.Sessions.Find(vm.sessionId);
+				var session = await _db.Sessions.FindAsync(vm.sessionId);
 
 				if (session == null)
 				{
