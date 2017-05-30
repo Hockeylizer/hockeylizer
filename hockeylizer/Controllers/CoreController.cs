@@ -471,7 +471,7 @@ namespace hockeylizer.Controllers
             {
                 foreach (var s in shots)
                 {
-                    var target = _db.Targets.FirstOrDefault(shot => shot.SessionId == session.SessionId && shot.Order == s.Shot);
+                    var target = _db.Targets.FirstOrDefault(shot => shot.SessionId == session.SessionId && shot.Order == (s.Shot + 1));
 
                     if (target == null) continue;
                     foreach (var frame in s.Uris)
