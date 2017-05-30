@@ -24,9 +24,11 @@ namespace hockeylizer.Models
 		public void AddTargets(List<int> to, List<TargetCoordsVm> coords, List<ShotTimestampVm> ts)
 		{
 			var index = 1;
+            var co = coords.Count;
+
 			for (var t = 0; t < to.Count; t++)
 			{
-                var target = new Target(to[t % to.Count], index, ts[t].start, ts[t].end, coords[t].xCoord, coords[t].yCoord, null, null)
+                var target = new Target(to[t % to.Count], index, ts[t].start, ts[t].end, coords[t % co].xCoord, coords[t % co].yCoord, null, null)
 				{
 					RelatedSession = this
 				};
