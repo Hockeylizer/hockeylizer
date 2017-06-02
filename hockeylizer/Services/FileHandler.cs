@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using hockeylizer.Models;
 using System.Linq;
@@ -62,19 +63,19 @@ namespace hockeylizer.Services
             return new UploadFileResult();
         }
 
-        public static async Task<bool> DownloadBlob(string path, string blobname, string container)
+        public static async Task<KeyValuePair<bool, string>> DownloadBlob(string path, string blobname, string container)
         {
             try
             {
                 var blob = utility.DownloadBlob(blobname, container);
                 await blob.DownloadToFileAsync(path, FileMode.Create);
 
-                return true;
+                return new KeyValuePair<bool, string>(true, "Lyckades.");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return false;
+                return new KeyValuePair<bool, string>(true, e.Message);
             }
         }
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System.Globalization;
 using hockeylizer.Services;
 using hockeylizer.Helpers;
 using hockeylizer.Models;
@@ -12,7 +13,7 @@ using System.Linq;
 using System.IO;
 using Hangfire;
 using System;
-using System.Globalization;
+using System.Text;
 
 namespace hockeylizer.Controllers
 {
@@ -336,7 +337,7 @@ namespace hockeylizer.Controllers
             if (player == null) throw new Exception("Kunde inte hitta spelare.");
 
             var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-            if (!download) throw new Exception("Kunde inte ladda ned film.");
+            if (!download.Key) throw new Exception("Kunde inte ladda ned film för att: " + download.Value);
 
             var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
 
@@ -459,7 +460,7 @@ namespace hockeylizer.Controllers
             if (player == null) throw new Exception("Kunde inte hitta spelare.");
 
             var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-            if (!download) throw new Exception("Kunde inte ladda ned film.");
+            if (!download.Key) throw new Exception("Kunde inte ladda ned film för att: " + download.Value);
 
             var intervals = _db.Targets.Where(target => target.SessionId == sessionId).Select(t => new DecodeInterval
             {
@@ -858,15 +859,45 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var player = session.Player;
+                var player = await _db.Players.FindAsync(session.PlayerId);
                 if (player == null)
                 {
                     response = new GeneralResult(false, "Något gick snett när spelaren skulle hämtas.");
                     return Json(response);
                 }
 
-                var sendMail = await Mailgun.SendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)");
-                if (sendMail.Message.Contains("failed"))
+                var csv = new StringBuilder();
+                for (var i = 0; i < 12; i++)
+                {
+                    var first = 1;
+                    var second = 2;
+
+                    csv.AppendLine(string.Format("{0},{1}", first, second));
+                }
+
+                var filestart = "file";
+                var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
+                var path = Path.Combine(startpath, filestart + "-1.csv");
+
+                var count = 1;
+                while (System.IO.File.Exists(path))
+                {
+                    var filename = filestart + "-" + count + ".csv";
+
+                    path = Path.Combine(startpath, filename);
+                    count++;
+                }
+
+                System.IO.File.WriteAllText(path, csv.ToString());
+
+                var sendMail = await Mailgun.SendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)", path);
+
+                if (System.IO.File.Exists(path))
+                {
+                    System.IO.File.Delete(path);
+                }
+
+                if (sendMail.Message.Contains("failed") || sendMail.Message.Contains("missing"))
                 {
                     response = new GeneralResult(false, "Något gick snett när mailet skulle skickas. Fel från server: " + sendMail.Message);
                     return Json(response);
