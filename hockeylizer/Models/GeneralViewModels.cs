@@ -30,6 +30,13 @@ namespace hockeylizer.Models
         public string email { get; set; }
     }
 
+    public class EmailVm
+    {
+        public string token { get; set; }
+        public int? sessionId { get; set; }
+        public string email { get; set; }
+    }
+
     public class UpdateNameVm
     {
         public bool Validate() 

@@ -12,6 +12,7 @@ using System.Linq;
 using System.IO;
 using Hangfire;
 using System;
+using System.Globalization;
 
 namespace hockeylizer.Controllers
 {
@@ -822,6 +823,56 @@ namespace hockeylizer.Controllers
                 }
 
                 response = new GeneralResult(true, "Mailadressen var giltig.");
+                return Json(response);
+            }
+
+            response = new GeneralResult(false, "Token var inkorrekt");
+            return Json(response);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> SendEmail([FromBody]EmailVm vm)
+        {
+            GeneralResult response;
+            if (vm.token == _appkey)
+            {
+                if (string.IsNullOrEmpty(vm.email))
+                {
+                    response = new GeneralResult(false, "Email är tom eller saknas.");
+                    return Json(response);
+                }
+
+                var chk = await Mailgun.ValidateEmail(vm.email);
+
+                if (!chk.Valid)
+                {
+                    response = new GeneralResult(false, "Mailadressen " + vm.email + " var ogiltig.");
+                    return Json(response);
+                }
+
+                var session = await _db.Sessions.FindAsync(vm.sessionId);
+                if (session == null)
+                {
+                    response = new GeneralResult(false, "Sessionen med id: " + vm.sessionId + " kunde inte hittas.");
+                    return Json(response);
+                }
+
+                var player = session.Player;
+                if (player == null)
+                {
+                    response = new GeneralResult(false, "Något gick snett när spelaren skulle hämtas.");
+                    return Json(response);
+                }
+
+                var sendMail = await Mailgun.SendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)");
+                if (sendMail.Message.Contains("failed"))
+                {
+                    response = new GeneralResult(false, "Något gick snett när mailet skulle skickas. Fel från server: " + sendMail.Message);
+                    return Json(response);
+                }
+
+                response = new GeneralResult(true, "Skickade mail till den angivna adressen.");
                 return Json(response);
             }
 

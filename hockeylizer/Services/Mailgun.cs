@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RestSharp;
+using System.IO;
 using System;
 
 namespace hockeylizer.Services
@@ -52,23 +53,34 @@ namespace hockeylizer.Services
             return await Mailgun.ExecuteRequest<EmailValidationResult>(request);
         }
 
-        public static async void SendMessage(string email)
+        public static async Task<SendMessageResult> SendMessage(string email, string subject, string text)
         {
-            RestRequest request = new RestRequest();
-            request.AddParameter("domain", "YOUR_DOMAIN_NAME", ParameterType.UrlSegment);
-            request.Resource = "{domain}/messages";
-            request.AddParameter("from", "Excited User <YOU@YOUR_DOMAIN_NAME>");
-            request.AddParameter("to", "foo@example.com");
-            request.AddParameter("subject", "Hello");
-            request.AddParameter("text", "Testing some Mailgun awesomness!");
-            request.AddParameter("html",
-                                  "<html>HTML version of the body</html>");
-            //request.AddFile("attachment", Path.Combine("files", "test.jpg"));
-            //request.AddFile("attachment", Path.Combine("files", "test.txt"));
-            request.Method = Method.POST;
+            RestRequest request = new RestRequest
+            {
+                Method = Method.POST
+            };
 
-            await Mailgun.ExecuteRequest<object>(request);
+            request.AddParameter("domain", "sandboxef2625f2f544472cb4b3d3311b8149b8.mailgun.org", ParameterType.UrlSegment);
+            request.Resource = "{domain}/messages";
+
+            request.AddParameter("to", email);
+            request.AddParameter("subject", subject);
+            request.AddParameter("text", text);
+
+            // CSV-file link
+            //request.AddFile("attachment", Path.Combine("files", "test.jpg"));
+
+            return await Mailgun.ExecuteRequest<SendMessageResult>(request);
         }
+    }
+
+    public class SendMessageResult
+    {
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("id")]
+        public string MessageId { get; set; }
     }
 
     public class EmailValidationResult
