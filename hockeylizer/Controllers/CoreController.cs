@@ -963,7 +963,7 @@ namespace hockeylizer.Controllers
         public ContentResult GetHitsOverviewSvg2(int sessionId, string token, string returnType)
         {
             if (token != _appkey) return Content("Token var fel");
-            bool return_link = returnType.Equals("link");
+            bool return_link = returnType == "link";
 
             var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
             if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
@@ -979,7 +979,7 @@ namespace hockeylizer.Controllers
         public ContentResult GetBoxPlotsSVG(int sessionId, string token, string returnType)
         {
             if (token != _appkey) return Content("Token var fel");
-            bool return_link = returnType.Equals("link");
+            bool return_link = returnType == "link";
 
             var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
             if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
@@ -995,7 +995,7 @@ namespace hockeylizer.Controllers
         public ContentResult getTestSVG(string token, string returnType)
         {
             if (token != _appkey) return Content("Token var fel");
-            bool return_link = returnType.Equals("link");
+            bool return_link = returnType == "link";
 
             return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
         }
