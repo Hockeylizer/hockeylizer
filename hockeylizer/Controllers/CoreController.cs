@@ -1001,5 +1001,40 @@ namespace hockeylizer.Controllers
 
             return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
         }
+
+        // This is supposed to be a way of doing simple debugs via HTTP while debugging.
+        // does .ToString() on database results. Hopefully that just works.
+        [HttpPost]
+        [AllowAnonymous]
+        public ContentResult queryDB(string token, int sessionId, int playerId, string table)
+        {
+            if (token != _appkey) return Content("Token var fel");
+
+            string res;
+            switch (table)
+            {
+                case "Players":
+                    if (playerId == null) res = _db.Players.ToString();
+                    else res = _db.Players.Where(player => player.PlayerId == playerId).ToString();
+                    break;
+                case "Sessions":
+                    if (sessionId != null) res = _db.Sessions.Where(session => session.SessionId == sessionId).ToString();
+                    else if (playerId != null) res = _db.Sessions.Where(session => session.PlayerId == playerId).ToString();
+                    else res = _db.Sessions.ToString();
+                    break;
+                case "Targets":
+                    if (sessionId != null) res = _db.Targets.Where(target => target.SessionId == sessionId).ToString();
+                    else if (playerId != null) res = _db.Targets.Where(target => _db.Sessions.Where(sess => sess.SessionId == target.SessionId).First().PlayerId == playerId).ToString();
+                    else res = _db.Targets.ToString();
+                    break;
+                default:
+                    res = "parameter 'table' must be onte of 'Players', 'Sessions', 'Targets'";
+                    break;
+            }
+
+            return Content(res);
+
+        }
+
     }
 }
