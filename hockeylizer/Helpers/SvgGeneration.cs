@@ -96,6 +96,20 @@ namespace hockeylizer.Helpers
             return strBuilder.ToString();
         }
 
+        // Creates and saves svg-file to disk, and returns link.
+        private static string svgToLink(XDocument svgCode, String whereToPutFile)
+        {
+            // Setup unique filename and write to it
+            var timeStr = DateTime.Now.ToString("ddhhmmss");
+            var guidStr = Guid.NewGuid().ToString().Substring(0, 7);
+            var fileName = "date" + timeStr + "rnd" + guidStr + ".svg";
+
+            var fs = new FileStream(whereToPutFile + @"/" + fileName, FileMode.Create);
+            svgCode.Save(fs);
+
+            return @"http://hockeylizer.azurewebsites.net/images/" + fileName;
+        }
+
         private static List<double[]> offsetToAbsolute(List<double[]> offsets, List<int> targets)
         {
             var absoluteCoords = new List<double[]> { };
@@ -112,17 +126,20 @@ namespace hockeylizer.Helpers
         /// </summary>
         /// <param name="points">List of elements {x_double, y_double}.</param>
         /// <param name="svg_template_path">Path to the template that the back dots are added to.</param>
-        public static string generateAllHitsSVG(List<double[]> offsets, List<int> targets, string svg_template_path)
+        public static string generateAllHitsSVG(List<double[]> offsets, List<int> targets, string svg_dir, bool return_link)
         {
+            if (!offsets.Any()) return emptyGoalSvg(svg_dir, return_link);
+
             // Calculate absolute cm coords from offset + target coords.
             List<double[]> points = offsetToAbsolute(offsets, targets);
-
+            
+            var svg_template_path = svg_dir + "/goal_template.svg";
             XDocument svgCode = XDocument.Load(svg_template_path);
             XNamespace ns = svgCode.Root.Name.Namespace;
-
+           
             foreach (double[] point in points) svgCode.Root.Add(svgCircle(ns, point[0], point[1]));
-
-            return svgToString(svgCode);
+            
+            return (return_link ? svgToLink(svgCode, svg_dir) : svgToString(svgCode));
         }
 
         /// <summary>
@@ -137,12 +154,14 @@ namespace hockeylizer.Helpers
         /// <param name="svg_template_path">
         /// File path to the svg goal template.
         /// </param>
-        public static string generateBoxplotsSVG(List<double[]> offsets, List<int> targets, string svg_template_path)
+        public static string generateBoxplotsSVG(List<double[]> offsets, List<int> targets, string svg_dir, bool return_link)
         {
+            if (!offsets.Any()) return emptyGoalSvg(svg_dir, return_link);
 
             // Calculate absolute cm coords from offset + target coords.
             List<double[]> points = offsetToAbsolute(offsets, targets);
 
+            var svg_template_path = svg_dir + "/goal_template.svg";
             // Hardcoded switch to change between average and median as mean for the cross.
             bool use_median_not_average = false;
             // This is the minimal number of shots against a target that will trigger
@@ -188,12 +207,14 @@ namespace hockeylizer.Helpers
                     }
                 }
             }
-            return svgToString(svgCode);
+            return (return_link ? svgToLink(svgCode, svg_dir) : svgToString(svgCode));
         }
 
-        public static string emptyGoalSvg(string svg_template_path)
+        public static string emptyGoalSvg(string svg_dir, bool return_link)
         {
-            return svgToString(XDocument.Load(svg_template_path));
+            var svg_template_path = svg_dir + "/goal_template.svg";
+            if (return_link) return @"http://hockeylizer.azurewebsites.net/images/goal_template.svg";
+            else return svgToString(XDocument.Load(svg_template_path));
         }
 
     }

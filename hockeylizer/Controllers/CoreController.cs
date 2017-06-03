@@ -22,12 +22,14 @@ namespace hockeylizer.Controllers
         private readonly string _appkey;
         private readonly ApplicationDbContext _db;
         private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly string _svgDir;
 
         public CoreController(ApplicationDbContext db, IHostingEnvironment hostingEnvironment)
         {
             _appkey = "langY6fgXWossV9o";
             this._db = db;
             this._hostingEnvironment = hostingEnvironment;
+            this._svgDir = _hostingEnvironment.WebRootPath + "/images";
         }
 
 		[HttpPost]
@@ -958,46 +960,44 @@ namespace hockeylizer.Controllers
         // in the app, this will replace it.
         [HttpPost]
         [AllowAnonymous]
-        public ContentResult GetHitsOverviewSvg2(int sessionId, string token)
+        public ContentResult GetHitsOverviewSvg2(int sessionId, string token, string returnType)
         {
             if (token != _appkey) return Content("Token var fel");
-
-            var svgTemplatePath = _hostingEnvironment.WebRootPath + "/images/goal_template.svg";
+            bool return_link = returnType.Equals("link");
 
             var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
-            if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(svgTemplatePath));
+            if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
 
             List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
             List<int> targets = hitList.Select(hit => hit.TargetId).ToList();
 
-            return Content(SvgGeneration.generateAllHitsSVG(coords, targets, svgTemplatePath));
+            return Content(SvgGeneration.generateAllHitsSVG(coords, targets, _svgDir, return_link));
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public ContentResult GetBoxPlotsSVG(int sessionId, string token)
+        public ContentResult GetBoxPlotsSVG(int sessionId, string token, string returnType)
         {
             if (token != _appkey) return Content("Token var fel");
-
-            var svgTemplatePath = _hostingEnvironment.WebRootPath + "/images/goal_template.svg";
+            bool return_link = returnType.Equals("link");
 
             var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
-            if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(svgTemplatePath));
+            if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
 
             List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
             List<int> targets = hitList.Select(hit => hit.TargetId).ToList();
 
-            return Content(SvgGeneration.generateBoxplotsSVG(coords, targets, svgTemplatePath));
+            return Content(SvgGeneration.generateBoxplotsSVG(coords, targets, _svgDir, return_link));
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public ContentResult getTestSVG(string token)
+        public ContentResult getTestSVG(string token, string returnType)
         {
             if (token != _appkey) return Content("Token var fel");
+            bool return_link = returnType.Equals("link");
 
-            var svgTemplatePath = _hostingEnvironment.WebRootPath + "/images/goal_template.svg";
-            return Content(SvgGeneration.emptyGoalSvg(svgTemplatePath));
+            return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
         }
     }
 }
