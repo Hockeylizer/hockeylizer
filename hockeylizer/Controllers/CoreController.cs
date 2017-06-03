@@ -1014,7 +1014,7 @@ namespace hockeylizer.Controllers
             switch (table)
             {
                 case "Players":
-                    if (playerId == null) res = _db.Players.ToString();
+                    if (playerId == null) res = _db.Players.ToList().ToString();
                     else res = _db.Players.Where(player => player.PlayerId == playerId).ToString();
                     break;
                 case "Sessions":
@@ -1028,7 +1028,7 @@ namespace hockeylizer.Controllers
                     else res = _db.Targets.ToString();
                     break;
                 default:
-                    res = "parameter 'table' must be onte of 'Players', 'Sessions', 'Targets'";
+                    res = "parameter 'table' must be one of 'Players', 'Sessions', 'Targets'";
                     break;
             }
 
