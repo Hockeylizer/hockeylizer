@@ -916,44 +916,46 @@ namespace hockeylizer.Controllers
         // To be replaced by GetHitsOverviewSVG2. This returns an URL, the other an XML.
         [HttpPost]
         [AllowAnonymous]
-        public JsonResult GetHitsOverviewSvg(int sessionId, string token)
+        public ContentResult GetHitsOverviewSvg(int sessionId, string token, string returnType)
         {
-            var defaultSvgUrl = @"http://hockeylizer.azurewebsites.net/images/goal_template.svg";
-            if (token != _appkey) return Json(defaultSvgUrl);
-            var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
-            if (hitList == null || !hitList.Any())
-            {
-                return Json(defaultSvgUrl);
-            }
+            return GetHitsOverviewSvg2(sessionId, token, returnType);
 
-            var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
-            var svgDoc = XDocument.Load(svgBaseDir + "goal_template.svg");
-            var xmlNs = svgDoc.Root.Name.Namespace;
+            //var defaultSvgUrl = @"http://hockeylizer.azurewebsites.net/images/goal_template.svg";
+            //if (token != _appkey) return Json(defaultSvgUrl);
+            //var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
+            //if (hitList == null || !hitList.Any())
+            //{
+            //    return Json(defaultSvgUrl);
+            //}
 
-            var fill = new XAttribute("fill", "black");
-            var radius = new XAttribute("r", 4);
+            //var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
+            //var svgDoc = XDocument.Load(svgBaseDir + "goal_template.svg");
+            //var xmlNs = svgDoc.Root.Name.Namespace;
 
-            // Målpunkternas koordinater hårdkodade. Borde egentligen beräknas.
-            var tCoords = new double[5, 2] { { 10, 91 }, { 10, 18 }, { 173, 18 }, { 173, 91 }, { 91.5, 101 } };
+            //var fill = new XAttribute("fill", "black");
+            //var radius = new XAttribute("r", 4);
 
-            foreach (var hit in hitList)
-            {
-                if ((!hit.HitGoal) || hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
-                    hit.YCoordinate == null) continue;
-                var xCoord = new XAttribute("cx", hit.XCoordinateAnalyzed + tCoords[hit.TargetNumber, 0]);
-                var yCoord = new XAttribute("cy", hit.YCoordinateAnalyzed + tCoords[hit.TargetNumber, 1]);
-                svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
-            }
+            //// Målpunkternas koordinater hårdkodade. Borde egentligen beräknas.
+            //var tCoords = new double[5, 2] { { 10, 91 }, { 10, 18 }, { 173, 18 }, { 173, 91 }, { 91.5, 101 } };
 
-            // Setup unique filename and write to it
-            var timeStr = DateTime.Now.ToString("ddhhmmss");
-            var guidStr = Guid.NewGuid().ToString().Substring(0, 7);
-            var fileName = "hits" + timeStr + "rnd" + guidStr + ".svg";
+            //foreach (var hit in hitList)
+            //{
+            //    if ((!hit.HitGoal) || hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
+            //        hit.YCoordinate == null) continue;
+            //    var xCoord = new XAttribute("cx", hit.XCoordinateAnalyzed + tCoords[hit.TargetNumber, 0]);
+            //    var yCoord = new XAttribute("cy", hit.YCoordinateAnalyzed + tCoords[hit.TargetNumber, 1]);
+            //    svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
+            //}
 
-            var fs = new FileStream(svgBaseDir + fileName, FileMode.Create);
-            svgDoc.Save(fs);
+            //// Setup unique filename and write to it
+            //var timeStr = DateTime.Now.ToString("ddhhmmss");
+            //var guidStr = Guid.NewGuid().ToString().Substring(0, 7);
+            //var fileName = "hits" + timeStr + "rnd" + guidStr + ".svg";
 
-            return Json(@"http://hockeylizer.azurewebsites.net/images/" + fileName);
+            //var fs = new FileStream(svgBaseDir + fileName, FileMode.Create);
+            //svgDoc.Save(fs);
+
+            //return Json(@"http://hockeylizer.azurewebsites.net/images/" + fileName);
         }
 
         // This is the real deal. When GetHitsOverviewSVG has been phased out
