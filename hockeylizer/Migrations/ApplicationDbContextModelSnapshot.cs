@@ -8,10 +8,9 @@ using hockeylizer.Data;
 namespace hockeylizer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20170507130743_two")]
-    partial class two
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")
@@ -122,6 +121,8 @@ namespace hockeylizer.Migrations
 
                     b.Property<bool>("Analyzed");
 
+                    b.Property<bool>("Chopped");
+
                     b.Property<DateTime>("Created");
 
                     b.Property<bool>("Deleted");
@@ -154,6 +155,8 @@ namespace hockeylizer.Migrations
                     b.Property<int>("TargetId")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int?>("FrameHit");
+
                     b.Property<bool>("HitGoal");
 
                     b.Property<int>("Order");
@@ -166,13 +169,17 @@ namespace hockeylizer.Migrations
 
                     b.Property<int>("TimestampStart");
 
-                    b.Property<int?>("XCoordinate");
+                    b.Property<double?>("XCoordinate");
 
-                    b.Property<int?>("XCoordinateAnalyzed");
+                    b.Property<double?>("XCoordinateAnalyzed");
 
-                    b.Property<int?>("YCoordinate");
+                    b.Property<double?>("XOffset");
 
-                    b.Property<int?>("YCoordinateAnalyzed");
+                    b.Property<double?>("YCoordinate");
+
+                    b.Property<double?>("YCoordinateAnalyzed");
+
+                    b.Property<double?>("YOffset");
 
                     b.HasKey("TargetId");
 

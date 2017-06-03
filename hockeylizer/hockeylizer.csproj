@@ -105,6 +105,7 @@
     <Content Include="wastorage.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="wwwroot\files\Info.txt" />
     <Content Include="wwwroot\videos\VideoInfo.txt" />
     <Content Include="zlib1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -124,6 +125,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="1.1.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.1" />
+    <PackageReference Include="RestSharp.NetCore" Version="105.2.3" />
     <PackageReference Include="WindowsAzure.Storage" Version="8.1.1" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.6.12" />
   </ItemGroup>
@@ -226,7 +228,5 @@
   <ItemGroup>
     <Folder Include="bin\Debug\netcoreapp1.1\x64\" />
     <Folder Include="bin\Release\netcoreapp1.1\x64\" />
-    <Folder Include="Properties\PublishProfiles\" />
-    <Folder Include="wwwroot\imagesfromvideo\" />
   </ItemGroup>
 </Project>

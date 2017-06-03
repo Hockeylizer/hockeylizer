@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="243" xmlns="http://www.w3.org/2000/svg" viewBox="-30 -30 243 182" version="1.1" height="182">
+  <!-- Daniels bakgrundstest, ta bort för genomskinlig bakgrund -->
+  <rect fill="#fff" height="182" width="243" y="-30" x="-30"/>
+  <!-- Slut test -->
+  <rect height="132" width="213" stroke="#90ee90" y="-15" x="-15" fill="none" fill-opacity="0"/>
+  <path stroke="red" stroke-width="4" d="m-2 122v-116a8 8 0 0 1 8 -8h171a8 8 0 0 1 8 8v116" fill="none"/>
+  <line x2="212" y1="122" stroke="#000" x1="-30" y2="122"/>
+  <circle r="4.25" stroke="red" cy="91" cx="10" stroke-width="1.5" fill="none" fill-opacity="0"/>
+  <circle r="4.25" stroke="red" cy="18" cx="10" stroke-width="1.5" fill="none" fill-opacity="0"/>
+  <circle r="4.25" stroke="red" cy="18" cx="173" stroke-width="1.5" fill="none" fill-opacity="0"/>
+  <circle r="4.25" stroke="red" cy="91" cx="173" stroke-width="1.5" fill="none" fill-opacity="0"/>
+  <circle r="4.25" stroke="red" cy="101" cx="91.5" stroke-width="1.5" fill="none" fill-opacity="0"/>
+  <circle r="1.25" stroke="red" cy="91" cx="10" stroke-width="0" fill="red"/>
+  <circle r="1.25" stroke="red" cy="18" cx="10" stroke-width="0" fill="red"/>
+  <circle r="1.25" stroke="red" cy="18" cx="173" stroke-width="0" fill="red"/>
+  <circle r="1.25" stroke="red" cy="91" cx="173" stroke-width="0" fill="red"/>
+  <circle r="1.25" stroke="red" cy="101" cx="91.5" stroke-width="0" fill="red"/>
+</svg>

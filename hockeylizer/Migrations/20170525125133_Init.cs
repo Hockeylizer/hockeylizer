@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace hockeylizer.Data.Migrations
+namespace hockeylizer.Migrations
 {
-    public partial class one : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -188,6 +188,7 @@ namespace hockeylizer.Data.Migrations
                     SessionId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Analyzed = table.Column<bool>(nullable: false),
+                    Chopped = table.Column<bool>(nullable: false),
                     Created = table.Column<DateTime>(nullable: false),
                     Deleted = table.Column<bool>(nullable: false),
                     FileName = table.Column<string>(nullable: true),
@@ -216,16 +217,19 @@ namespace hockeylizer.Data.Migrations
                 {
                     TargetId = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    FrameHit = table.Column<int>(nullable: true),
                     HitGoal = table.Column<bool>(nullable: false),
                     Order = table.Column<int>(nullable: false),
                     SessionId = table.Column<int>(nullable: false),
                     TargetNumber = table.Column<int>(nullable: false),
-                    TimestampEnd = table.Column<int>(nullable: true),
-                    TimestampStart = table.Column<int>(nullable: true),
-                    XCoordinate = table.Column<int>(nullable: true),
-                    XCoordinateAnalyzed = table.Column<int>(nullable: true),
-                    YCoordinate = table.Column<int>(nullable: true),
-                    YCoordinateAnalyzed = table.Column<int>(nullable: true)
+                    TimestampEnd = table.Column<int>(nullable: false),
+                    TimestampStart = table.Column<int>(nullable: false),
+                    XCoordinate = table.Column<double>(nullable: true),
+                    XCoordinateAnalyzed = table.Column<double>(nullable: true),
+                    XOffset = table.Column<double>(nullable: true),
+                    YCoordinate = table.Column<double>(nullable: true),
+                    YCoordinateAnalyzed = table.Column<double>(nullable: true),
+                    YOffset = table.Column<double>(nullable: true)
                 },
                 constraints: table =>
                 {

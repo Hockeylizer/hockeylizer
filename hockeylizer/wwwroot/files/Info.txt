@@ -1,0 +1,1 @@
+﻿Här läggs alla filer som har med csv och dylikt att göra

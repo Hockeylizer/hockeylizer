@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿﻿using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -22,6 +22,19 @@ namespace hockeylizer.Models
 
         public string FilePath { get; set; }
         public string FileName { get; set; }
+    }
+
+    public class ValidateEmailVm
+    {
+        public string token { get; set; }
+        public string email { get; set; }
+    }
+
+    public class EmailVm
+    {
+        public string token { get; set; }
+        public int? sessionId { get; set; }
+        public string email { get; set; }
     }
 
     public class UpdateNameVm
@@ -150,18 +163,39 @@ namespace hockeylizer.Models
 		public bool Completed { get; set; }
 		public string Description { get; set; }
 
-	    public int? XCoordinate { get; set; }
-	    public int? YCoordinate { get; set; }
+	    public double? XCoordinate { get; set; }
+	    public double? YCoordinate { get; set; }
 
         public List<string> FrameUrls { get; set; }
 	}
 
-	public class GetDataFromShotResult
+    public class GetDataFromSessionResult
+    {
+        public GetDataFromSessionResult()
+        {
+            this.Completed = false;
+            this.Description = "Okänt fel";
+        }
+
+        public GetDataFromSessionResult(bool comp, string desc)
+        {
+            this.Completed = comp;
+            this.Description = desc;
+        }
+
+        public bool Completed { get; set; }
+        public string Description { get; set; }
+
+        public string HitRatio { get; set; }
+    }
+
+    public class GetDataFromShotResult
 	{
 		public GetDataFromShotResult()
 		{
 			this.Completed = false;
 			this.Description = "Okänt fel";
+            this.HitTarget = false;
 			this.FrameUrls = new List<string>();
 		}
 
@@ -169,20 +203,28 @@ namespace hockeylizer.Models
 		{
 			this.Completed = comp;
 			this.Description = desc;
+            this.HitTarget = false;
 			this.FrameUrls = urls ?? new List<string>();
 		}
 
 		public int TargetNumber { get; set; }
 		public int Order { get; set; }
 
-		public int? XCoordinate { get; set; }
-		public int? YCoordinate { get; set; }
+        public double? XOffset{ get; set; }
+        public double? YOffset { get; set; }
 
-	    public int? XCoordinateAnalyzed { get; set; }
-	    public int? YCoordinateAnalyzed { get; set; }
+        public double? XCoordinate { get; set; }
+		public double? YCoordinate { get; set; }
+
+	    public double? XCoordinateAnalyzed { get; set; }
+	    public double? YCoordinateAnalyzed { get; set; }
 
         public bool Completed { get; set; }
 		public string Description { get; set; }
+
+        public bool? HitTarget { get; set; }
+        public int? FrameHit { get; set; }
+
 		public List<string> FrameUrls { get; set; }
 	}
 
@@ -221,8 +263,8 @@ namespace hockeylizer.Models
 
         public int? sessionId { get; set; }
         public int? shot { get; set; }
-        public int? x { get; set; }
-        public int? y { get; set; }
+        public double? x { get; set; }
+        public double? y { get; set; }
         public string token { get; set; }
 
         public GeneralResult ur { get; set; }
@@ -325,13 +367,13 @@ namespace hockeylizer.Models
             {
                 currentFileType = firstAlt;
             }
-            else if (this.video.ContentType.Contains("mov"))
+            else if (this.video.ContentType.Contains("quicktime"))
             {
                 currentFileType = "mov";
             }
             else
             {
-				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon har fel videotyp! Kan ej ta emot filer av typ. Endast " + allowedFileTypes + " tas emot.", false);
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då videon har fel videotyp! Endast " + allowedFileTypes + " tas emot. Error 1. " + this.video.ContentType, false);
 				return false;
             }
 
@@ -365,28 +407,17 @@ namespace hockeylizer.Models
                 return false;
             }
 
-            //if (this.timestamps.Any(t => t.start == null || t.end == null))
-            //{
-            //    this.sr = new SessionResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
-            //    return false;
-            //}
+            if (this.timestamps.Any(t => t.start == null || t.end == null))
+            {
+                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
+                return false;
+            }
 
             if (!this.targetOrder.Any())
 			{
 				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då skottordning saknas!", false);
                 return false;
 			}
-
-
-            var to = this.targetOrder.Count;
-            var tc = this.targetCoords.Count;
-            var ts = this.timestamps.Count;
-
-            if (!(to == tc && to == ts && tc == ts))
-            {
-                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet listor inte stämmer överens!", false);
-                return false;
-            }
 
             this.sr = new SessionResult("Videoklippet laddades upp!", true);
 			return true;
