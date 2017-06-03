@@ -62,10 +62,6 @@ namespace hockeylizer
             // Add services for hangfire
 		    services.AddTransient<CoreController, CoreController>();
 
-            // Add application services.
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-			services.AddTransient<ISmsSender, AuthMessageSender>();
-
 			services.AddHangfire(hf => hf.UseSqlServerStorage(cs));
 		}
 
