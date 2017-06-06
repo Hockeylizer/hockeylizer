@@ -114,8 +114,8 @@ namespace hockeylizer.Helpers
         {
             var absoluteCoords = new List<double[]> { };
             for (int ii = 0; ii < offsets.Count; ii++) {
-                double x = _targetCoords[targets[ii], 0] + offsets[ii][0];
-                double y = _targetCoords[targets[ii], 1] + offsets[ii][1];
+                double x = _targetCoords[targets[ii]-1, 0] + offsets[ii][0];
+                double y = _targetCoords[targets[ii]-1, 1] + offsets[ii][1];
                 absoluteCoords.Add(new double[] { x, y });
             }
             return absoluteCoords;
