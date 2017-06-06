@@ -966,6 +966,8 @@ namespace hockeylizer.Controllers
         {
             if (token != _appkey) return Content("Token var fel");
             bool return_link = returnType == "link";
+            // temp while we figure out why sending returnType = "link" doesn't work.
+            return_link = returnType != "svg";
 
             var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
             if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
@@ -982,6 +984,8 @@ namespace hockeylizer.Controllers
         {
             if (token != _appkey) return Content("Token var fel");
             bool return_link = returnType == "link";
+            // temp while we figure out why sending returnType = "link" doesn't work.
+            return_link = returnType != "svg";
 
             var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
             if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
