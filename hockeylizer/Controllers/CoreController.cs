@@ -971,7 +971,7 @@ namespace hockeylizer.Controllers
             if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
 
             List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
-            List<int> targets = hitList.Select(hit => hit.TargetId).ToList();
+            List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
 
             return Content(SvgGeneration.generateAllHitsSVG(coords, targets, _svgDir, return_link));
         }
@@ -987,7 +987,7 @@ namespace hockeylizer.Controllers
             if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
 
             List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
-            List<int> targets = hitList.Select(hit => hit.TargetId).ToList();
+            List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
 
             return Content(SvgGeneration.generateBoxplotsSVG(coords, targets, _svgDir, return_link));
         }

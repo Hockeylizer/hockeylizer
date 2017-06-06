@@ -113,11 +113,14 @@ namespace hockeylizer.Helpers
         private static List<double[]> offsetToAbsolute(List<double[]> offsets, List<int> targets)
         {
             var absoluteCoords = new List<double[]> { };
-            for (int ii = 0; ii < offsets.Count; ii++) {
-                double x = _targetCoords[targets[ii]-1, 0] + offsets[ii][0];
-                double y = _targetCoords[targets[ii]-1, 1] + offsets[ii][1];
+
+            for (int ii = 0; ii < offsets.Count; ii++)
+            {
+                double x = _targetCoords[targets[ii] - 1, 0] + offsets[ii][0];
+                double y = _targetCoords[targets[ii] - 1, 1] + offsets[ii][1];
                 absoluteCoords.Add(new double[] { x, y });
             }
+
             return absoluteCoords;
         }
 
