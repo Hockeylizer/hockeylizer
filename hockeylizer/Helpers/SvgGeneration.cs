@@ -193,7 +193,7 @@ namespace hockeylizer.Helpers
                 int quantileLowerIndex = (int)Math.Ceiling(0.25 * (count - 1));
                 int quantileUpperIndex = (int)Math.Floor(0.75 * (count - 1));
 
-                if (target_pts.Count == 1)  svgCode.Add(svgCircle(ns, xs[0], ys[0]));
+                if (target_pts.Count == 1)  svgCode.Root.Add(svgCircle(ns, xs[0], ys[0]));
                 else if (2 <= target_pts.Count && target_pts.Count < boxplot_limit )
                 {
                     var crossPlot = svgCrossPlot(ns, xMin, xMean, xMax, yMin, yMean, yMax);
