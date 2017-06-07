@@ -26,9 +26,9 @@ namespace hockeylizer.Models
 			var index = 1;
             var co = coords.Count;
 
-			for (var t = 0; t < to.Count; t++)
+			for (var t = 0; t < ts.Count; t++)
 			{
-                var target = new Target(to[t % to.Count], index, ts[t].start, ts[t].end, coords[t % co].xCoord, coords[t % co].yCoord, null, null)
+                var target = new Target(to[t % to.Count], index, ts[t].start, ts[t].end, coords[t % (co - 1)].xCoord, coords[t % (co - 1)].yCoord, null, null)
 				{
 					RelatedSession = this
 				};
@@ -56,6 +56,9 @@ namespace hockeylizer.Models
 
             this.Analyzed = false;
             this.Chopped = false;
+
+			this.SomethingFailed = false;
+            this.DeleteFailed = false;
 
             this.Created = DateTime.Now;
 			this.Targets = new HashSet<Target>();
@@ -97,6 +100,12 @@ namespace hockeylizer.Models
 
         public bool Analyzed { get; set; }
 	    public bool Chopped { get; set; }
+
+        public bool SomethingFailed { get; set; }
+        public string WhySomethingFailed { get; set; }
+
+        public bool DeleteFailed { get; set; }
+        public string DeleteFailedWhere { get; set; }
 
         public virtual ICollection<Target> Targets { get; set; }
 	}

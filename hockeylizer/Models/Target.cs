@@ -26,6 +26,9 @@ namespace hockeylizer.Models
             this.XCoordinateAnalyzed = xcA;
             this.YCoordinateAnalyzed = ycA;
 
+            this.AnalysisFailed = false;
+            this.ChopFailed = false;
+
             this.HitGoal = false;
             this.FramesToAnalyze = new HashSet<FrameToAnalyze>();
         }
@@ -49,6 +52,12 @@ namespace hockeylizer.Models
 
         public int? FrameHit { get; set; }
         public bool HitGoal { get; set; }
+
+		public bool AnalysisFailed { get; set; }
+		public string AnalysisFailedReason { get; set; }
+
+		public bool ChopFailed { get; set; }
+		public string ChopFailedReason { get; set; }
 
         [ForeignKey("RelatedSession")]
         public int SessionId { get; set; }

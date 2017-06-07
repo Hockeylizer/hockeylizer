@@ -175,17 +175,20 @@ namespace hockeylizer.Models
         {
             this.Completed = false;
             this.Description = "Okänt fel";
+            this.Analyzed = false;
         }
 
         public GetDataFromSessionResult(bool comp, string desc)
         {
             this.Completed = comp;
             this.Description = desc;
+            this.Analyzed = false;
         }
 
         public bool Completed { get; set; }
         public string Description { get; set; }
 
+        public bool Analyzed { get; set; }
         public string HitRatio { get; set; }
     }
 
@@ -196,6 +199,7 @@ namespace hockeylizer.Models
 			this.Completed = false;
 			this.Description = "Okänt fel";
             this.HitTarget = false;
+            this.Analyzed = false;
 			this.FrameUrls = new List<string>();
 		}
 
@@ -204,6 +208,7 @@ namespace hockeylizer.Models
 			this.Completed = comp;
 			this.Description = desc;
             this.HitTarget = false;
+            this.Analyzed = false;
 			this.FrameUrls = urls ?? new List<string>();
 		}
 
@@ -224,6 +229,8 @@ namespace hockeylizer.Models
 
         public bool? HitTarget { get; set; }
         public int? FrameHit { get; set; }
+
+        public bool Analyzed { get; set; }
 
 		public List<string> FrameUrls { get; set; }
 	}
@@ -417,6 +424,12 @@ namespace hockeylizer.Models
 			{
 				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då skottordning saknas!", false);
                 return false;
+			}
+
+            if (this.targetCoords.Count() != (this.rounds * this.shots))
+			{
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet koordinater inte stämmer överens med antalet skott!", false);
+				return false;
 			}
 
             this.sr = new SessionResult("Videoklippet laddades upp!", true);

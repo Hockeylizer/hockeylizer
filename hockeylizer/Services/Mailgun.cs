@@ -78,10 +78,10 @@ namespace hockeylizer.Services
             RestRequest request = new RestRequest
             {
                 Method = Method.POST,
-                Resource = "/sandboxef2625f2f544472cb4b3d3311b8149b8.mailgun.org/messages"
+                Resource = "/mg.dispono.nu/messages"
             };
 
-            request.AddParameter("domain", "sandboxef2625f2f544472cb4b3d3311b8149b8.mailgun.org", ParameterType.UrlSegment);
+            request.AddParameter("domain", "mg.dispono.nu", ParameterType.UrlSegment);
 
             request.AddParameter("to", email);
             request.AddParameter("from", "noreply@drhockey.com");

@@ -356,7 +356,7 @@ namespace hockeylizer.Controllers
                 Point2d coordinates;
                 var shot = hp.Order;
 
-                if (pointDict.ContainsKey(shot))
+                if (pointDict[shot] != null)
                 {
                     coordinates = pointDict[shot];
                 }
@@ -381,26 +381,39 @@ namespace hockeylizer.Controllers
                 var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points.ToArray(), width,
                     height, offsets.ToArray(), path);
 
-                if (analysis.WasErrors) continue;
+                if (analysis.WasErrors)
+                {
+                    t.AnalysisFailed = true;
+                    t.AnalysisFailedReason = analysis.ErrorMessage;
+                }
+                else 
+                {
+					t.XCoordinateAnalyzed = analysis.HitPoint.x;
+					t.YCoordinateAnalyzed = analysis.HitPoint.y;
 
-                t.XCoordinateAnalyzed = analysis.HitPoint.x;
-                t.YCoordinateAnalyzed = analysis.HitPoint.y;
+					t.XOffset = analysis.OffsetFromTarget.x;
+					t.YOffset = analysis.OffsetFromTarget.y;
 
-                t.XOffset = analysis.OffsetFromTarget.x;
-                t.YOffset = analysis.OffsetFromTarget.y;
-
-                t.HitGoal = analysis.DidHitGoal;
-                t.FrameHit = analysis.FrameNr;
+					t.HitGoal = analysis.DidHitGoal;
+					t.FrameHit = analysis.FrameNr;
+                }
             }
 
             session.Analyzed = true;
 
             await _db.SaveChangesAsync();
 
-            if (System.IO.File.Exists(path))
-            {
-                System.IO.File.Delete(path);
-            }
+			try
+			{
+				System.IO.File.Delete(path);
+			}
+			catch (Exception e)
+			{
+				session.DeleteFailed = true;
+				session.DeleteFailedWhere = path;
+
+                await _db.SaveChangesAsync();
+			}
 
             return true;
         }
@@ -492,11 +505,55 @@ namespace hockeylizer.Controllers
 
             if (System.IO.File.Exists(path))
             {
-                System.IO.File.Delete(path);
+                try
+                {
+                    System.IO.File.Delete(path);
+                }
+                catch (Exception e)
+                {
+					session.DeleteFailed = true;
+					session.DeleteFailedWhere = path;
+
+					await _db.SaveChangesAsync();
+                }
             }
 
             return true;
         }
+
+		[AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
+		public async Task<bool> DeleteVideosFromDisc(int sessionId)
+		{
+            var sessions = _db.Sessions.Where(s => s.DeleteFailed);
+
+            if (sessions.Any())
+            {
+				foreach (var session in sessions)
+				{
+					var path = session.DeleteFailedWhere;
+
+					if (System.IO.File.Exists(path))
+					{
+						try
+						{
+							System.IO.File.Delete(path);
+
+                            session.DeleteFailed = false;
+                            session.DeleteFailedWhere = string.Empty;
+						}
+						catch (Exception e)
+						{
+							session.DeleteFailed = true;
+							session.DeleteFailedWhere = path;
+						}
+					}
+				}
+
+                await _db.SaveChangesAsync();
+            }
+
+			return true;
+		}
 
         [HttpPost]
         [AllowAnonymous]
@@ -645,7 +702,9 @@ namespace hockeylizer.Controllers
                 var ratio = targets.Count(t => t) + "/" + targets.Count;
 
                 response = new GetDataFromSessionResult(true, "Sessionen hittades.");
+
                 response.HitRatio = ratio;
+                response.Analyzed = session.Analyzed;
 
                 return Json(response);
             }
@@ -700,7 +759,8 @@ namespace hockeylizer.Controllers
                     XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
                     YCoordinateAnalyzed = shot.YCoordinateAnalyzed,
                     HitTarget = shot.HitGoal,
-                    FrameHit = shot.FrameHit
+                    FrameHit = shot.FrameHit,
+                    Analyzed = session.Analyzed
                 };
 
 				return Json(response);
