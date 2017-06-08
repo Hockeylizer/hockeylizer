@@ -522,32 +522,39 @@ namespace hockeylizer.Controllers
         }
 
 		[AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
-		public async Task<bool> DeleteVideosFromDisc(int sessionId)
+		public async Task<bool> DeleteVideosFromDisc()
 		{
             var sessions = _db.Sessions.Where(s => s.DeleteFailed);
 
             if (sessions.Any())
             {
-				foreach (var session in sessions)
-				{
-					var path = session.DeleteFailedWhere;
+                foreach (var session in sessions)
+                {
+                    if (session.Analyzed)
+                    {
+                        var path = session.DeleteFailedWhere;
 
-					if (System.IO.File.Exists(path))
-					{
-						try
-						{
-							System.IO.File.Delete(path);
+                        if (System.IO.File.Exists(path))
+                        {
+                            try
+                            {
+                                System.IO.File.Delete(path);
 
-                            session.DeleteFailed = false;
-                            session.DeleteFailedWhere = string.Empty;
-						}
-						catch (Exception e)
-						{
-							session.DeleteFailed = true;
-							session.DeleteFailedWhere = path;
-						}
-					}
-				}
+                                session.DeleteFailed = false;
+                                session.DeleteFailedWhere = string.Empty;
+                            }
+                            catch (Exception e)
+                            {
+                                session.DeleteFailed = true;
+                                session.DeleteFailedWhere = path;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        BackgroundJob.Enqueue<CoreController>(service => service.AnalyzeSession(session.SessionId));
+                    }
+                }
 
                 await _db.SaveChangesAsync();
             }
