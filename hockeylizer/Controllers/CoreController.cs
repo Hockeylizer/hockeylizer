@@ -823,12 +823,38 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-                var offsets = new Point2d((double)vm.x, (double)vm.y);
+                var targetPoint = Points.HitPointsInCm()[shotToUpdate.TargetNumber];
+                if (targetPoint == null)
+                {
+                    response = new GeneralResult(false, "Kunde inte hitta korrekt targetpoint.");
+                    return Json(response);
+                }
 
-                var convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, 
-                    Points.HitPointsInCm()[shotToUpdate.TargetNumber], 
-                    session.Targets.Select(t => new Point2d(t.XCoordinate ?? 0, t.YCoordinate ?? 0)).ToArray(), 
-                    Points.HitPointsInCm().Values.ToArray());
+                var sourceTargets = _db.Targets.Where(t => t.SessionId == session.SessionId).GroupBy(t => t.TargetNumber).Select(t => t.FirstOrDefault()).ToList();
+                if (!sourceTargets.Any())
+                {
+                    response = new GeneralResult(false, "Kunde inte hitta några punkter att sikta på.");
+                    return Json(response);
+                }
+
+                var hitpoints = new List<Point2d>();
+                foreach (var point in sourceTargets)
+                {
+                    var values = Points.HitPointsInCm()[point.TargetNumber];
+
+                    if (values == null)
+                    {
+                        response = new GeneralResult(false, "Det fanns ingen motsvarande träffpunkt för träff nummer: " + point.Order);
+                        return Json(response);
+                    }
+
+                    hitpoints.Add(values);
+                }
+
+                var offsets = new Point2d((double)vm.x, (double)vm.y);
+                var sourcePoints = sourceTargets.Select(t => new Point2d(t.XCoordinate ?? 0, t.YCoordinate ?? 0)).ToArray();
+
+                var convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, targetPoint, sourcePoints, hitpoints.ToArray());
 
                 shotToUpdate.XOffset = convertedPoints.x;
                 shotToUpdate.YOffset = convertedPoints.y;
@@ -836,7 +862,6 @@ namespace hockeylizer.Controllers
                 shotToUpdate.XCoordinateAnalyzed = vm.x;
                 shotToUpdate.YCoordinateAnalyzed = vm.y;
 
-                shotToUpdate.HitGoal = true;
                 await _db.SaveChangesAsync();
 
                 response = new GeneralResult(true, "Skottets träffpunkt har uppdaterats!");
