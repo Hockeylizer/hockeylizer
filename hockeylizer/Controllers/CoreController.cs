@@ -522,9 +522,10 @@ namespace hockeylizer.Controllers
         }
 
 		[AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
-		public async Task<bool> DeleteVideosFromDisc()
+		public async Task<Dictionary<int, bool>> DeleteVideosFromDisc()
 		{
             var sessions = _db.Sessions.Where(s => s.DeleteFailed);
+            var result = new Dictionary<int, bool>();
 
             if (sessions.Any())
             {
@@ -534,6 +535,7 @@ namespace hockeylizer.Controllers
                     {
                         var path = session.DeleteFailedWhere;
 
+                        bool individualResult;
                         if (System.IO.File.Exists(path))
                         {
                             try
@@ -542,13 +544,23 @@ namespace hockeylizer.Controllers
 
                                 session.DeleteFailed = false;
                                 session.DeleteFailedWhere = string.Empty;
+
+                                individualResult = true;
                             }
                             catch (Exception e)
                             {
                                 session.DeleteFailed = true;
                                 session.DeleteFailedWhere = path;
+
+                                individualResult = false;
                             }
                         }
+                        else
+                        {
+                            individualResult = false;
+                        }
+
+                        result.Add(session.SessionId, individualResult);
                     }
                     else
                     {
@@ -559,7 +571,7 @@ namespace hockeylizer.Controllers
                 await _db.SaveChangesAsync();
             }
 
-			return true;
+			return result;
 		}
 
         [HttpPost]
