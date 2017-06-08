@@ -426,7 +426,7 @@ namespace hockeylizer.Models
                 return false;
 			}
 
-            if (this.targetCoords.Count() != (this.rounds * this.shots))
+            if (this.shots != (this.rounds * this.numberOfTargets))
 			{
 				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet koordinater inte stämmer överens med antalet skott!", false);
 				return false;

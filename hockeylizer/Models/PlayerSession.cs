@@ -21,12 +21,12 @@ namespace hockeylizer.Models
         }
 
 		// to = targetorder, ts = timestamps
-		public void AddTargets(List<int> to, List<TargetCoordsVm> coords, List<ShotTimestampVm> ts)
+		public void AddTargets(List<int> to, List<TargetCoordsVm> coords, List<ShotTimestampVm> ts, int limit)
 		{
 			var index = 1;
             var co = coords.Count;
 
-			for (var t = 0; t < ts.Count; t++)
+			for (var t = 0; t < (limit - 1); t++)
 			{
                 var target = new Target(to[t % to.Count], index, ts[t].start, ts[t].end, coords[t % (co - 1)].xCoord, coords[t % (co - 1)].yCoord, null, null)
 				{
