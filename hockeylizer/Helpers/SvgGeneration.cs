@@ -174,39 +174,43 @@ namespace hockeylizer.Helpers
             XDocument svgCode = XDocument.Load(svg_template_path);
             XNamespace ns = svgCode.Root.Name.Namespace;
 
-            for (int target = 1; target <= 5; target++)
-            {
+            for (int target = 1; target <= 5; target++) {
                 var target_pts = selectPointsByTarget(points, targets, target);
-                List<double> xs = target_pts.Select((double[] pt) => { return pt[0]; }).ToList();
-                List<double> ys = target_pts.Select((double[] pt) => { return pt[1]; }).ToList();
-                xs.Sort();
-                ys.Sort();
                 int count = target_pts.Count();
 
-                double xMin = xs[0];
-                double xMax = xs[count - 1];
-                double yMin = ys[0];
-                double yMax = ys[count - 1];
-                double xMean = (use_median_not_average ? median(xs) : xs.Average());
-                double yMean = (use_median_not_average ? median(ys) : ys.Average());
+                if (count > 0) {
+                    List<double> xs = target_pts.Select((double[] pt) => { return pt[0]; }).ToList();
+                    List<double> ys = target_pts.Select((double[] pt) => { return pt[1]; }).ToList();
+                    xs.Sort();
+                    ys.Sort();
 
-                int quantileLowerIndex = (int)Math.Ceiling(0.25 * (count - 1));
-                int quantileUpperIndex = (int)Math.Floor(0.75 * (count - 1));
+                    // Cross boundaries
+                    double xMin = xs.First();
+                    double xMax = xs.Last();
+                    double yMin = ys.First();
+                    double yMax = ys.Last();
 
-                if (target_pts.Count == 1)  svgCode.Root.Add(svgCircle(ns, xs[0], ys[0]));
-                else if (2 <= target_pts.Count && target_pts.Count < boxplot_limit )
-                {
-                    var crossPlot = svgCrossPlot(ns, xMin, xMean, xMax, yMin, yMean, yMax);
-                    foreach (XElement svgLine in crossPlot)
+                    // Cross center
+                    double xMean = (use_median_not_average ? median(xs) : xs.Average());
+                    double yMean = (use_median_not_average ? median(ys) : ys.Average());
+
+                    // Change the factors to whatever quantile you want to be the box boundaries
+                    int quantileLowerIndex = (int)Math.Ceiling(0.25 * (count - 1));
+                    int quantileUpperIndex = (int)Math.Floor(0.75 * (count - 1));
+
+                    if (count == 1) svgCode.Root.Add(svgCircle(ns, xs[0], ys[0]));
+                    else if (2 <= count && count < boxplot_limit) {
+                        var crossPlot = svgCrossPlot(ns, xMin, xMean, xMax, yMin, yMean, yMax);
+                        foreach (XElement svgLine in crossPlot)
+                        {
+                            svgCode.Root.Add(svgLine);
+                        }
+                    } else if (boxplot_limit <= count)
                     {
-                        svgCode.Root.Add(svgLine);
-                    }
-                } else if (boxplot_limit <= target_pts.Count)
-                {
-                    var boxPlot = svgBoxPlot(ns, xMin, xs[quantileLowerIndex], xMean, xs[quantileUpperIndex], xMax, yMin, ys[quantileLowerIndex], yMean, ys[quantileUpperIndex], yMax);
-                    foreach (XElement svgLine in boxPlot)
-                    {
-                        svgCode.Root.Add(svgLine);
+                        var boxPlot = svgBoxPlot(ns, xMin, xs[quantileLowerIndex], xMean, xs[quantileUpperIndex], xMax, yMin, ys[quantileLowerIndex], yMean, ys[quantileUpperIndex], yMax);
+                        foreach (XElement svgLine in boxPlot) {
+                            svgCode.Root.Add(svgLine);
+                        }
                     }
                 }
             }
