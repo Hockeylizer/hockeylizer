@@ -26,7 +26,7 @@ namespace hockeylizer.Models
 			var index = 1;
             var co = coords.Count;
 
-			for (var t = 0; t < (limit - 1); t++)
+			for (var t = 0; t < limit; t++)
 			{
                 var target = new Target(to[t % to.Count], index, ts[t].start, ts[t].end, coords[t % (co - 1)].xCoord, coords[t % (co - 1)].yCoord, null, null)
 				{

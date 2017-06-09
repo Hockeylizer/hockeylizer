@@ -830,7 +830,7 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var sourceTargets = _db.Targets.Where(t => t.SessionId == session.SessionId).GroupBy(t => t.TargetNumber).Select(t => t.FirstOrDefault()).ToList();
+                var sourceTargets = _db.Targets.Where(t => t.SessionId == session.SessionId).ToList();
                 if (!sourceTargets.Any())
                 {
                     response = new GeneralResult(false, "Kunde inte hitta några punkter att sikta på.");
