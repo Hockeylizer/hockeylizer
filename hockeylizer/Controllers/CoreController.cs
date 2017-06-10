@@ -407,7 +407,7 @@ namespace hockeylizer.Controllers
 			{
 				System.IO.File.Delete(path);
 			}
-			catch (Exception e)
+			catch
 			{
 				session.DeleteFailed = true;
 				session.DeleteFailedWhere = path;
@@ -509,7 +509,7 @@ namespace hockeylizer.Controllers
                 {
                     System.IO.File.Delete(path);
                 }
-                catch (Exception e)
+                catch
                 {
 					session.DeleteFailed = true;
 					session.DeleteFailedWhere = path;
@@ -547,7 +547,7 @@ namespace hockeylizer.Controllers
 
                                 individualResult = true;
                             }
-                            catch (Exception e)
+                            catch
                             {
                                 session.DeleteFailed = true;
                                 session.DeleteFailedWhere = path;
@@ -720,10 +720,11 @@ namespace hockeylizer.Controllers
                 var targets = _db.Targets.Where(t => t.SessionId == vm.sessionId).Select(t => t.HitGoal).ToList();
                 var ratio = targets.Count(t => t) + "/" + targets.Count;
 
-                response = new GetDataFromSessionResult(true, "Sessionen hittades.");
-
-                response.HitRatio = ratio;
-                response.Analyzed = session.Analyzed;
+                response = new GetDataFromSessionResult(true, "Sessionen hittades.")
+                {
+                    HitRatio = ratio,
+                    Analyzed = session.Analyzed
+                };
 
                 return Json(response);
             }
@@ -840,15 +841,15 @@ namespace hockeylizer.Controllers
                 var hitpoints = new List<Point2d>();
                 foreach (var point in sourceTargets)
                 {
-                    var values = Points.HitPointsInCm()[point.TargetNumber];
+                    var value = Points.HitPointsInCm()[point.TargetNumber];
 
-                    if (values == null)
+                    if (value == null)
                     {
                         response = new GeneralResult(false, "Det fanns ingen motsvarande träffpunkt för träff nummer: " + point.Order);
                         return Json(response);
                     }
 
-                    hitpoints.Add(values);
+                    hitpoints.Add(value);
                 }
 
                 var offsets = new Point2d((double)vm.x, (double)vm.y);

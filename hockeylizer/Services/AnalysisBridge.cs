@@ -212,9 +212,9 @@ namespace hockeylizer.Services
         {
             if (pointsSrcSpace.Length != pointsCmSpace.Length)
             {
-                throw new System.ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length",
-                                                   "pointsDstSpace.Length");
+                throw new ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length", "pointsDstSpace.Length");
             }
+
             double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length*2];
             double[] pointsDstSpaceFlat = new double[pointsCmSpace.Length*2];
             int fi = 0;

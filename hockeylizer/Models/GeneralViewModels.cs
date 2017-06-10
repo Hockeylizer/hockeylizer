@@ -426,11 +426,13 @@ namespace hockeylizer.Models
                 return false;
 			}
 
-            if (this.shots != (this.rounds * this.numberOfTargets))
-			{
-				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet koordinater inte stämmer överens med antalet skott!", false);
-				return false;
-			}
+            // Fix issue #94 - uncommented this
+            
+            //if (this.shots != (this.rounds * this.numberOfTargets))
+			//{
+			//	this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet koordinater inte stämmer överens med antalet skott!", false);
+			//	return false;
+			//}
 
             this.sr = new SessionResult("Videoklippet laddades upp!", true);
 			return true;
