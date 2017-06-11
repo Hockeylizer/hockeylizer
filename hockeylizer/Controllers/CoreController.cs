@@ -1070,6 +1070,8 @@ namespace hockeylizer.Controllers
         public ContentResult GetHitsOverviewSvg2(int sessionId, string token, string returnType)
         {
             if (token != _appkey) return Content("Token var fel");
+            if (!_db.Sessions.Where(sess => sess.SessionId == sessionId).Any()) return Content("Sessionen finns inte");
+
             bool return_link = returnType == "link";
             // temp while we figure out why sending returnType = "link" doesn't work.
             return_link = returnType != "svg";
@@ -1088,6 +1090,8 @@ namespace hockeylizer.Controllers
         public ContentResult GetBoxPlotsSVG(int sessionId, string token, string returnType)
         {
             if (token != _appkey) return Content("Token var fel");
+            if (!_db.Sessions.Where(sess => sess.SessionId == sessionId).Any()) return Content("Sessionen finns inte");
+
             bool return_link = returnType == "link";
             // temp while we figure out why sending returnType = "link" doesn't work.
             return_link = returnType != "svg";
