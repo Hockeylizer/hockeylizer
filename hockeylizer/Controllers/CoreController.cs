@@ -1037,7 +1037,7 @@ namespace hockeylizer.Controllers
             // Validation
             if (!vm.Validate()) return vm.description;
             if (vm.token != _appkey) return "Inkorrekt token";
-            if (!_db.Sessions.Where(sess => sess.SessionId == vm.sessionId).Any()) return "Sessionen finns inte";
+            if (_db.Sessions.Find(vm.sessionId) == null) return "Sessionen finns inte";// Where(sess => sess.SessionId == vm.sessionId).Any()) return "Sessionen finns inte";
 
             bool return_link = vm.returnType == "link";
 
