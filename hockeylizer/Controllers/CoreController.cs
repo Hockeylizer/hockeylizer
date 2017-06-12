@@ -1087,22 +1087,39 @@ namespace hockeylizer.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public ContentResult GetBoxPlotsSVG(int sessionId, string token, string returnType)
+        //public ContentResult GetBoxPlotsSVG(int sessionId, string token, string returnType)
+        public ContentResult GetBoxPlotsSVG(GetSvgVm vm)
         {
-            if (token != _appkey) return Content("Token var fel");
-            if (!_db.Sessions.Where(sess => sess.SessionId == sessionId).Any()) return Content("Sessionen finns inte");
+            //if (token != _appkey) return Content("Token var fel");
+            //if (!_db.Sessions.Where(sess => sess.SessionId == sessionId).Any()) return Content("Sessionen finns inte");
 
-            bool return_link = returnType == "link";
-            // temp while we figure out why sending returnType = "link" doesn't work.
-            return_link = returnType != "svg";
+            //bool return_link = returnType == "link";
+            //// temp while we figure out why sending returnType = "link" doesn't work.
+            //return_link = returnType != "svg";
 
-            var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
+            //var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
+            //if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
+
+            //List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
+            //List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
+
+            //return Content(SvgGeneration.generateBoxplotsSVG(coords, targets, _svgDir, return_link));
+
+            // Validation
+            if (!vm.Validate()) return Content(vm.description);
+            if (vm.token != _appkey) return Content("Inkorrekt token");
+            if (!_db.Sessions.Where(sess => sess.SessionId == vm.sessionId).Any()) return Content("Sessionen finns inte");
+
+            bool return_link = vm.returnType == "link";
+
+            var hitList = _db.Targets.Where(target => target.SessionId == vm.sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
             if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
 
             List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
             List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
 
             return Content(SvgGeneration.generateBoxplotsSVG(coords, targets, _svgDir, return_link));
+
         }
 
         [HttpPost]
