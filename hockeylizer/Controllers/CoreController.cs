@@ -1018,107 +1018,47 @@ namespace hockeylizer.Controllers
             return Json(response);
         }
 
-        // To be replaced by GetHitsOverviewSVG2. This returns an URL, the other an XML.
         [HttpPost]
         [AllowAnonymous]
-        public ContentResult GetHitsOverviewSvg(int sessionId, string token, string returnType)
+        public ContentResult GetHitsOverviewSvg([FromBody]GetSvgVm vm)
         {
-            return GetHitsOverviewSvg2(sessionId, token, returnType);
-
-            //var defaultSvgUrl = @"http://hockeylizer.azurewebsites.net/images/goal_template.svg";
-            //if (token != _appkey) return Json(defaultSvgUrl);
-            //var hitList = _db.Targets.Where(target => target.SessionId == sessionId);
-            //if (hitList == null || !hitList.Any())
-            //{
-            //    return Json(defaultSvgUrl);
-            //}
-
-            //var svgBaseDir = _hostingEnvironment.WebRootPath + "/images/";
-            //var svgDoc = XDocument.Load(svgBaseDir + "goal_template.svg");
-            //var xmlNs = svgDoc.Root.Name.Namespace;
-
-            //var fill = new XAttribute("fill", "black");
-            //var radius = new XAttribute("r", 4);
-
-            //// Målpunkternas koordinater hårdkodade. Borde egentligen beräknas.
-            //var tCoords = new double[5, 2] { { 10, 91 }, { 10, 18 }, { 173, 18 }, { 173, 91 }, { 91.5, 101 } };
-
-            //foreach (var hit in hitList)
-            //{
-            //    if ((!hit.HitGoal) || hit.XCoordinate == null || hit.YCoordinate == null || hit.XCoordinateAnalyzed == null ||
-            //        hit.YCoordinate == null) continue;
-            //    var xCoord = new XAttribute("cx", hit.XCoordinateAnalyzed + tCoords[hit.TargetNumber, 0]);
-            //    var yCoord = new XAttribute("cy", hit.YCoordinateAnalyzed + tCoords[hit.TargetNumber, 1]);
-            //    svgDoc.Root.Add(new XElement(xmlNs + "circle", fill, radius, xCoord, yCoord));
-            //}
-
-            //// Setup unique filename and write to it
-            //var timeStr = DateTime.Now.ToString("ddhhmmss");
-            //var guidStr = Guid.NewGuid().ToString().Substring(0, 7);
-            //var fileName = "hits" + timeStr + "rnd" + guidStr + ".svg";
-
-            //var fs = new FileStream(svgBaseDir + fileName, FileMode.Create);
-            //svgDoc.Save(fs);
-
-            //return Json(@"http://hockeylizer.azurewebsites.net/images/" + fileName);
-        }
-
-        // This is the real deal. When GetHitsOverviewSVG has been phased out
-        // in the app, this will replace it.
-        [HttpPost]
-        [AllowAnonymous]
-        public ContentResult GetHitsOverviewSvg2(int sessionId, string token, string returnType)
-        {
-            if (token != _appkey) return Content("Token var fel");
-            if (!_db.Sessions.Where(sess => sess.SessionId == sessionId).Any()) return Content("Sessionen finns inte");
-
-            bool return_link = returnType == "link";
-            // temp while we figure out why sending returnType = "link" doesn't work.
-            return_link = returnType != "svg";
-
-            var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
-            if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
-
-            List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
-            List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
-
-            return Content(SvgGeneration.generateAllHitsSVG(coords, targets, _svgDir, return_link));
+            return Content(getSVG(vm, "all"));
         }
 
         [HttpPost]
         [AllowAnonymous]
-        //public ContentResult GetBoxPlotsSVG(int sessionId, string token, string returnType)
-        public ContentResult GetBoxPlotsSVG(GetSvgVm vm)
+        public ContentResult GetBoxPlotsSVG([FromBody]GetSvgVm vm)
         {
-            //if (token != _appkey) return Content("Token var fel");
-            //if (!_db.Sessions.Where(sess => sess.SessionId == sessionId).Any()) return Content("Sessionen finns inte");
+            return Content(getSVG(vm, "box"));
+        }
 
-            //bool return_link = returnType == "link";
-            //// temp while we figure out why sending returnType = "link" doesn't work.
-            //return_link = returnType != "svg";
-
-            //var hitList = _db.Targets.Where(target => target.SessionId == sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
-            //if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
-
-            //List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
-            //List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
-
-            //return Content(SvgGeneration.generateBoxplotsSVG(coords, targets, _svgDir, return_link));
-
+        private string getSVG(GetSvgVm vm, string svgType)
+        {
             // Validation
-            if (!vm.Validate()) return Content(vm.description);
-            if (vm.token != _appkey) return Content("Inkorrekt token");
-            if (!_db.Sessions.Where(sess => sess.SessionId == vm.sessionId).Any()) return Content("Sessionen finns inte");
+            if (!vm.Validate()) return vm.description;
+            if (vm.token != _appkey) return "Inkorrekt token";
+            if (!_db.Sessions.Where(sess => sess.SessionId == vm.sessionId).Any()) return "Sessionen finns inte";
 
             bool return_link = vm.returnType == "link";
 
             var hitList = _db.Targets.Where(target => target.SessionId == vm.sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
-            if (hitList == null || !hitList.Any()) return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
+            if (hitList == null || !hitList.Any()) return SvgGeneration.emptyGoalSvg(_svgDir, return_link);
 
             List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
             List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
 
-            return Content(SvgGeneration.generateBoxplotsSVG(coords, targets, _svgDir, return_link));
+            switch (svgType)
+            {
+                case "all":
+                    return SvgGeneration.generateAllHitsSVG(coords, targets, _svgDir, return_link);
+                    break;
+                case "box":
+                    return SvgGeneration.generateBoxplotsSVG(coords, targets, _svgDir, return_link);
+                    break;
+                default:
+                    return "Internal Error: Choice was neither 'all' nor 'box'.";
+                    break;
+            }
 
         }
 
