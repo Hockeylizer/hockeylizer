@@ -305,6 +305,39 @@ namespace hockeylizer.Models
 		public GetFramesFromShotResult gr { get; set; }
 	}
 
+    // Daniels försök
+    public class GetSvgVm
+    {
+        public bool Validate()
+        {
+            // Validation
+            if (this.sessionId == null)
+            {
+                this.description = "Sessionsid saknas.";
+                return false;
+            }
+            if (string.IsNullOrEmpty(token))
+            {
+                this.description = "Token saknas.";
+                return false;
+            }
+            if (string.IsNullOrEmpty(returnType) || string.IsNullOrWhiteSpace(returnType))
+            {
+                this.description = "returnType saknas ('link' eller 'svg').";
+                return false;
+            }
+
+            this.description = "Allt ser korrekt ut.";
+            return true;
+        }
+
+        public int? sessionId { get; set; }
+        public string returnType { get; set; }
+        public string token { get; set; }
+
+        public string description { get; set; }
+    }
+
     public class SessionVm
     {
         public int sessionId { get; set; }
