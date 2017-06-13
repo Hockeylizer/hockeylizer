@@ -838,19 +838,7 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var hitpoints = new List<Point2d>();
-                foreach (var point in sourceTargets)
-                {
-                    var value = Points.HitPointsInCm()[point.TargetNumber];
-
-                    if (value == null)
-                    {
-                        response = new GeneralResult(false, "Det fanns ingen motsvarande träffpunkt för träff nummer: " + point.Order);
-                        return Json(response);
-                    }
-
-                    hitpoints.Add(value);
-                }
+                var hitpoints = Points.HitPointsInCm().Values;
 
                 var offsets = new Point2d((double)vm.x, (double)vm.y);
                 var sourcePoints = sourceTargets.Select(t => new Point2d(t.XCoordinate ?? 0, t.YCoordinate ?? 0)).ToArray();
