@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using hockeylizer.Models;
 using System.Xml.Linq;
 using System.Linq;
 using System.IO;
@@ -73,12 +74,20 @@ namespace hockeylizer.Helpers
             return cross.Prepend(rect).ToList();
         }
 
+        // TODO: Delete when other version has been tested
         private static List<double[]> selectPointsByTarget(List<double[]> points, List<int> targets, int target)
         {
             int lim = Math.Min(points.Count, targets.Count);
             var ret = new List<double[]> { };
             for (int ii = 0; ii < lim; ii++) if (targets[ii] == target) ret.Add(points[ii]);
             return ret;
+        }
+        // TODO: Keep only this version after testing.
+        private static List<double[]> selectPointsByTarget(List<Point2d1T> points, int target)
+        {
+            var selectedPoints = points.Where(p => p.target == target);
+            var coordsOnly = selectedPoints.Select(p => new double[] { p.x, p.y });
+            return coordsOnly.ToList();
         }
 
         // Assumes a sorted list.
@@ -110,7 +119,8 @@ namespace hockeylizer.Helpers
             return @"http://hockeylizer.azurewebsites.net/images/" + fileName;
         }
 
-        private static List<double[]> offsetToAbsolute(List<double[]> offsets, List<int> targets)
+        // TODO: Delete when other version has been tested
+        private static List<double[]> offsetsToAbsolutes(List<double[]> offsets, List<int> targets)
         {
             var absoluteCoords = new List<double[]> { };
 
@@ -118,6 +128,21 @@ namespace hockeylizer.Helpers
             {
                 double x = _targetCoords[targets[ii] - 1, 0] + offsets[ii][0];
                 double y = _targetCoords[targets[ii] - 1, 1] + offsets[ii][1];
+                absoluteCoords.Add(new double[] { x, y });
+            }
+
+            return absoluteCoords;
+        }
+
+        // TODO: Keep only this version after testing.
+        private static List<double[]> offsetsToAbsolutes(List<Point2d1T> offsets)
+        {
+            var absoluteCoords = new List<double[]> { };
+
+            for (int ii = 0; ii < offsets.Count; ii++)
+            {
+                double x = _targetCoords[offsets[ii].target - 1, 0] + offsets[ii].x;
+                double y = _targetCoords[offsets[ii].target - 1, 1] + offsets[ii].y;
                 absoluteCoords.Add(new double[] { x, y });
             }
 
@@ -134,7 +159,7 @@ namespace hockeylizer.Helpers
             if (!offsets.Any()) return emptyGoalSvg(svg_dir, return_link);
 
             // Calculate absolute cm coords from offset + target coords.
-            List<double[]> points = offsetToAbsolute(offsets, targets);
+            List<double[]> points = offsetsToAbsolutes(offsets, targets);
             
             var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             XDocument svgCode = XDocument.Load(svg_template_path);
@@ -162,7 +187,7 @@ namespace hockeylizer.Helpers
             if (!offsets.Any()) return emptyGoalSvg(svg_dir, return_link);
 
             // Calculate absolute cm coords from offset + target coords.
-            List<double[]> points = offsetToAbsolute(offsets, targets);
+            List<double[]> points = offsetsToAbsolutes(offsets, targets);
 
             var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             // Hardcoded switch to change between average and median as mean for the cross.

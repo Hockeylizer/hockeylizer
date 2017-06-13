@@ -10,10 +10,10 @@ using hockeylizer.Models;
 using hockeylizer.Data;
 using System.Xml.Linq;
 using System.Linq;
+using System.Text;
 using System.IO;
 using Hangfire;
 using System;
-using System.Text;
 
 namespace hockeylizer.Controllers
 {
@@ -1049,6 +1049,8 @@ namespace hockeylizer.Controllers
             // Construct one list of analyzed hits with non-null offset values, and one of the intended targets for those hits.
             List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
             List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
+
+            List<Point2d1T> offsets = hitList.Select(hit => new Point2d1T(hit.XOffset.Value, hit.YOffset.Value, hit.TargetNumber)).ToList();
 
             switch (svgType)
             {
