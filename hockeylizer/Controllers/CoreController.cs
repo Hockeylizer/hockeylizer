@@ -29,7 +29,7 @@ namespace hockeylizer.Controllers
             _appkey = "langY6fgXWossV9o";
             this._db = db;
             this._hostingEnvironment = hostingEnvironment;
-            this._svgDir = _hostingEnvironment.WebRootPath + "/images";
+            this._svgDir = Path.Combine(_hostingEnvironment.WebRootPath, "images");
         }
 
 		[HttpPost]
@@ -955,7 +955,7 @@ namespace hockeylizer.Controllers
 
                 if (!chk.Valid)
                 {
-                    response = new GeneralResult(false, "Mailadressen " + vm.email + " var ogiltig.");
+                    response = new GeneralResult(false, "Mailadressen " + vm.email + " är ogiltig.");
                     return Json(response);
                 }
 
@@ -1037,13 +1037,16 @@ namespace hockeylizer.Controllers
             // Validation
             if (!vm.Validate()) return vm.description;
             if (vm.token != _appkey) return "Inkorrekt token";
-            if (_db.Sessions.Find(vm.sessionId) == null) return "Sessionen finns inte";// Where(sess => sess.SessionId == vm.sessionId).Any()) return "Sessionen finns inte";
+            if (_db.Sessions.Find(vm.sessionId) == null) return "Sessionen finns inte";
 
+            // Check requested return format
             bool return_link = vm.returnType == "link";
 
+            // Select analyzed hits with non-null offset values.
             var hitList = _db.Targets.Where(target => target.SessionId == vm.sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
             if (hitList == null || !hitList.Any()) return SvgGeneration.emptyGoalSvg(_svgDir, return_link);
 
+            // Construct one list of analyzed hits with non-null offset values, and one of the intended targets for those hits.
             List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
             List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
 

@@ -136,7 +136,7 @@ namespace hockeylizer.Helpers
             // Calculate absolute cm coords from offset + target coords.
             List<double[]> points = offsetToAbsolute(offsets, targets);
             
-            var svg_template_path = svg_dir + "/goal_template.svg";
+            var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             XDocument svgCode = XDocument.Load(svg_template_path);
             XNamespace ns = svgCode.Root.Name.Namespace;
            
@@ -164,7 +164,7 @@ namespace hockeylizer.Helpers
             // Calculate absolute cm coords from offset + target coords.
             List<double[]> points = offsetToAbsolute(offsets, targets);
 
-            var svg_template_path = svg_dir + "/goal_template.svg";
+            var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             // Hardcoded switch to change between average and median as mean for the cross.
             bool use_median_not_average = false;
             // This is the minimal number of shots against a target that will trigger
@@ -219,7 +219,7 @@ namespace hockeylizer.Helpers
 
         public static string emptyGoalSvg(string svg_dir, bool return_link)
         {
-            var svg_template_path = svg_dir + "/goal_template.svg";
+            var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             if (return_link) return @"http://hockeylizer.azurewebsites.net/images/goal_template.svg";
             else return svgToString(XDocument.Load(svg_template_path));
         }
