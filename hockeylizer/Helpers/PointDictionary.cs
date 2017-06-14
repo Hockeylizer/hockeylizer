@@ -14,10 +14,10 @@ namespace hockeylizer.Helpers
         {
             return new Dictionary<int, Point2d>
             {
-                {1, new Point2d(10, 91)},
-                {2, new Point2d(10, 18)},
-                {3, new Point2d(173, 18)},
-                {4, new Point2d(173, 91)},
+                {1, new Point2d(11.5, 91)},
+                {2, new Point2d(11.5, 18)},
+                {3, new Point2d(171.5, 18)},
+                {4, new Point2d(171.5, 91)},
                 {5, new Point2d(91.5, 101)}
             };
         }

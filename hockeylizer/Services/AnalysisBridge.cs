@@ -10,7 +10,7 @@ namespace hockeylizer.Services
     {
 
         // Decodes Frames and uploads them to blob storage
-        public static FrameCollection[] DecodeFrames(String videoName, String accountName, String accountKey, String containerName, DecodeInterval[] decodeIntervals)
+        public static FrameCollection[] DecodeFrames(String videoName, String blobPrefix, String accountName, String accountKey, String containerName, DecodeInterval[] decodeIntervals)
         {
             IntPtr res;
             int size;
@@ -26,11 +26,11 @@ namespace hockeylizer.Services
             int[] shotIndexes = new int[decodeIntervalsFlat.Length];
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                res = decodeFramesWin(videoName, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
+                res = decodeFramesWin(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                res = decodeFramesLinux(videoName, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
+                res = decodeFramesLinux(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
             }
             else
             {
@@ -258,7 +258,7 @@ namespace hockeylizer.Services
         private const String linuxSharedLibrary = "libanalyze.so";
 
         [DllImport(windowsSharedLibrary, EntryPoint = "decodeFrames")]
-        private static extern IntPtr decodeFramesWin(String videoName, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
+        private static extern IntPtr decodeFramesWin(String videoName, string blobPrefix, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
                                                      int decodeIntervalsSize, [In, Out] int[] shotIndexes);
 
         //Windows entry points
@@ -307,7 +307,7 @@ namespace hockeylizer.Services
 
 
         [DllImport(linuxSharedLibrary, EntryPoint = "decodeFrames")]
-        private static extern IntPtr decodeFramesLinux(String videoName, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
+        private static extern IntPtr decodeFramesLinux(String videoName, String blobPrefix, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
                                                      int decodeIntervalsSize, [In, Out] int[] shotIndexes);
 
         [DllImport(linuxSharedLibrary, EntryPoint = "analyzeShotCS")]
