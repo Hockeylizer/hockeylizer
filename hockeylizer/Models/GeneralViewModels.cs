@@ -388,7 +388,7 @@ namespace hockeylizer.Models
         public Guid? TeamId { get; set; }
 	}
 
-    public class  CreateSessionVm
+    public class CreateSessionVm
     {
         public bool Validate() 
         {
@@ -459,13 +459,11 @@ namespace hockeylizer.Models
                 return false;
 			}
 
-            // Fix issue #94 - uncommented this
-            
-            //if (this.shots != (this.rounds * this.numberOfTargets))
-			//{
-			//	this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet koordinater inte stämmer överens med antalet skott!", false);
-			//	return false;
-			//}
+            if (this.targetCoords.Count() != 5)
+			{
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet koordinater att sikta på inte är 5!", false);
+				return false;
+			}
 
             this.sr = new SessionResult("Videoklippet laddades upp!", true);
 			return true;

@@ -42,6 +42,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\images\goal-template.svg" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.deps.json" />
     <Content Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.runtimeconfig.dev.json" />
     <Content Include="bin\Debug\netcoreapp1.1\x86\hockeylizer.runtimeconfig.json" />
@@ -105,8 +108,6 @@
     <Content Include="wastorage.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="wwwroot\files\Info.txt" />
-    <Content Include="wwwroot\videos\VideoInfo.txt" />
     <Content Include="zlib1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -39,6 +39,19 @@ namespace hockeylizer.Models
 			}
 		}
 
+		public void AddAimpoints(List<TargetCoordsVm> coords)
+		{
+			foreach (var point in coords)
+			{
+                var aim = new AimPoint(point.xCoord, point.yCoord)
+                {
+                    Session = this
+                };
+
+                this.AimingPoints.Add(aim);
+			}
+		}
+
 		public PlayerSession(string path, string name, int playerId, int interval, int rounds, int shots, int noTargets)
 		{
 			this.VideoPath = path;
@@ -61,6 +74,8 @@ namespace hockeylizer.Models
             this.DeleteFailed = false;
 
             this.Created = DateTime.Now;
+
+            this.AimingPoints = new HashSet<AimPoint>();
 			this.Targets = new HashSet<Target>();
 		}
 
@@ -107,6 +122,7 @@ namespace hockeylizer.Models
         public bool DeleteFailed { get; set; }
         public string DeleteFailedWhere { get; set; }
 
+        public virtual ICollection<AimPoint> AimingPoints { get; set; }
         public virtual ICollection<Target> Targets { get; set; }
 	}
 }
