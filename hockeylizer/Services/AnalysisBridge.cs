@@ -26,10 +26,12 @@ namespace hockeylizer.Services
             int[] shotIndexes = new int[decodeIntervalsFlat.Length];
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter och lägga till här
                 res = decodeFramesWin(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, 0, shotIndexes);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter och lägga till här
                 res = decodeFramesLinux(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, 0, shotIndexes);
             }
             else
@@ -97,11 +99,13 @@ namespace hockeylizer.Services
             AnalysisResult ret = new AnalysisResult();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter och lägga till här
                 analyzeShotCSWin(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
                             targetOffsetsInCmFlat, videoName, 0, ret);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter och lägga till här
                 analyzeShotCSLinux(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
                             targetOffsetsInCmFlat, videoName, 0, ret);
             }
