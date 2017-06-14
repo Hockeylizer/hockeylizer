@@ -3,24 +3,15 @@
     /// <summary>
     /// A container for 2D points, together with an intented target int. 2d1T stands for 2 doubles 1 Target
     /// </summary>
-    public class Point2d1T
+    public class Point2d1T : Point2d
     {
-        public Point2d1T(double x, double y)
+        public Point2d1T(double x, double y) : base(x, y)
         {
-            this.x = x;
-            this.y = y;
             this.target = -1;
         }
-        public Point2d1T(double x, double y, int target)
+        public Point2d1T(double x, double y, int target) : base(x, y)
         {
-            this.x = x;
-            this.y = y;
             this.target = target;
-        }
-
-        public Point2d toPoint2d()
-        {
-            return new Point2d(x, y);
         }
 
         /// <summary>
@@ -32,8 +23,8 @@
             return new double[] { x, y };
         }
 
-        public double x { get; set; }
-        public double y { get; set; }
+        //public double x;
+        //public double y;
         public int target { get; set; }
     }
 }

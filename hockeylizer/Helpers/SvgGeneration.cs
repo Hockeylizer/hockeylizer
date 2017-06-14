@@ -9,9 +9,12 @@ namespace hockeylizer.Helpers
 {
     public static class SvgGeneration
     {
+        public static readonly Dictionary<int, Point2d> _targetCoords = new Dictionary<int, Point2d> { { 1, new Point2d(10, 91)  },
+                                                                                                       { 2, new Point2d(10, 18)  },
+                                                                                                       { 3, new Point2d(173, 18) },
+                                                                                                       { 4, new Point2d(173, 91) },
+                                                                                                       { 5, new Point2d(91.5, 101)} };
 
-        private static readonly double[,] _targetCoords = new double[5, 2] { { 10, 91 }, { 10, 18 }, { 173, 18 }, { 173, 91 }, { 91.5, 101 } };
-        
         // A black circle to mark indivdual hits.
         private static XElement svgCircle(XNamespace ns, double cx, double cy)
         {
@@ -75,19 +78,18 @@ namespace hockeylizer.Helpers
         }
 
         // TODO: Delete when other version has been tested
-        private static List<double[]> selectPointsByTarget(List<double[]> points, List<int> targets, int target)
-        {
-            int lim = Math.Min(points.Count, targets.Count);
-            var ret = new List<double[]> { };
-            for (int ii = 0; ii < lim; ii++) if (targets[ii] == target) ret.Add(points[ii]);
-            return ret;
-        }
+        //private static List<double[]> selectPointsByTarget(List<double[]> points, List<int> targets, int target)
+        //{
+        //    int lim = Math.Min(points.Count, targets.Count);
+        //    var ret = new List<double[]> { };
+        //    for (int ii = 0; ii < lim; ii++) if (targets[ii] == target) ret.Add(points[ii]);
+        //    return ret;
+        //}
         // TODO: Keep only this version after testing.
-        private static List<double[]> selectPointsByTarget(List<Point2d1T> points, int target)
+        private static List<Point2d> selectPointsByTarget(List<Point2d1T> points, int target)
         {
-            var selectedPoints = points.Where(p => p.target == target);
-            var coordsOnly = selectedPoints.Select(p => new double[] { p.x, p.y });
-            return coordsOnly.ToList();
+            // The IEnumerable<Point2d> casting is necessary to be able to cast Point2d1T to its base class inside the List.
+            return ((IEnumerable<Point2d>) points.Where(p => p.target == target)).ToList();
         }
 
         // Assumes a sorted list.
@@ -120,33 +122,24 @@ namespace hockeylizer.Helpers
         }
 
         // TODO: Delete when other version has been tested
-        private static List<double[]> offsetsToAbsolutes(List<double[]> offsets, List<int> targets)
-        {
-            var absoluteCoords = new List<double[]> { };
+        //private static List<double[]> offsetsToAbsolutes(List<double[]> offsets, List<int> targets)
+        //{
+        //    var absoluteCoords = new List<double[]> { };
 
-            for (int ii = 0; ii < offsets.Count; ii++)
-            {
-                double x = _targetCoords[targets[ii] - 1, 0] + offsets[ii][0];
-                double y = _targetCoords[targets[ii] - 1, 1] + offsets[ii][1];
-                absoluteCoords.Add(new double[] { x, y });
-            }
+        //    for (int ii = 0; ii < offsets.Count; ii++)
+        //    {
+        //        double x = _targetCoords[targets[ii]].x + offsets[ii][0];
+        //        double y = _targetCoords[targets[ii]].y + offsets[ii][1];
+        //        absoluteCoords.Add(new double[] { x, y });
+        //    }
 
-            return absoluteCoords;
-        }
+        //    return absoluteCoords;
+        //}
 
         // TODO: Keep only this version after testing.
-        private static List<double[]> offsetsToAbsolutes(List<Point2d1T> offsets)
+        private static List<Point2d1T> offsetsToAbsolutes(List<Point2d1T> offsets)
         {
-            var absoluteCoords = new List<double[]> { };
-
-            for (int ii = 0; ii < offsets.Count; ii++)
-            {
-                double x = _targetCoords[offsets[ii].target - 1, 0] + offsets[ii].x;
-                double y = _targetCoords[offsets[ii].target - 1, 1] + offsets[ii].y;
-                absoluteCoords.Add(new double[] { x, y });
-            }
-
-            return absoluteCoords;
+            return offsets.Select(p => new Point2d1T( _targetCoords[p.target].x + p.x,  _targetCoords[p.target].y + p.y ) ).ToList();
         }
 
         /// <summary>
@@ -154,18 +147,24 @@ namespace hockeylizer.Helpers
         /// </summary>
         /// <param name="points">List of elements {x_double, y_double}.</param>
         /// <param name="svg_template_path">Path to the template that the back dots are added to.</param>
-        public static string generateAllHitsSVG(List<double[]> offsets, List<int> targets, string svg_dir, bool return_link)
+        public static string generateAllHitsSVG(List<Point2d1T> offsets, string svg_dir, bool return_link)
+        //public static string generateAllHitsSVG(List<double[]> offsets, List<int> targets, string svg_dir, bool return_link)
         {
             if (!offsets.Any()) return emptyGoalSvg(svg_dir, return_link);
 
             // Calculate absolute cm coords from offset + target coords.
-            List<double[]> points = offsetsToAbsolutes(offsets, targets);
-            
+            List<Point2d1T> points = offsetsToAbsolutes(offsets);
+
+            //if (!offsets.Any()) return emptyGoalSvg(svg_dir, return_link);
+
+            //// Calculate absolute cm coords from offset + target coords.
+            //List<double[]> points = offsetsToAbsolutes(offsets, targets);
+
             var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             XDocument svgCode = XDocument.Load(svg_template_path);
             XNamespace ns = svgCode.Root.Name.Namespace;
            
-            foreach (double[] point in points) svgCode.Root.Add(svgCircle(ns, point[0], point[1]));
+            foreach (Point2d point in points) svgCode.Root.Add(svgCircle(ns, point.x, point.y));
             
             return (return_link ? svgToLink(svgCode, svg_dir) : svgToString(svgCode));
         }
@@ -182,12 +181,13 @@ namespace hockeylizer.Helpers
         /// <param name="svg_template_path">
         /// File path to the svg goal template.
         /// </param>
-        public static string generateBoxplotsSVG(List<double[]> offsets, List<int> targets, string svg_dir, bool return_link)
+        public static string generateBoxplotsSVG(List<Point2d1T> offsets, string svg_dir, bool return_link)
+        //public static string generateBoxplotsSVG(List<double[]> offsets, List<int> targets, string svg_dir, bool return_link)
         {
             if (!offsets.Any()) return emptyGoalSvg(svg_dir, return_link);
 
             // Calculate absolute cm coords from offset + target coords.
-            List<double[]> points = offsetsToAbsolutes(offsets, targets);
+            List<Point2d1T> points = offsetsToAbsolutes(offsets);
 
             var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             // Hardcoded switch to change between average and median as mean for the cross.
@@ -200,12 +200,12 @@ namespace hockeylizer.Helpers
             XNamespace ns = svgCode.Root.Name.Namespace;
 
             for (int target = 1; target <= 5; target++) {
-                var target_pts = selectPointsByTarget(points, targets, target);
+                var target_pts = selectPointsByTarget(points, target);
                 int count = target_pts.Count();
 
                 if (count > 0) {
-                    List<double> xs = target_pts.Select((double[] pt) => { return pt[0]; }).ToList();
-                    List<double> ys = target_pts.Select((double[] pt) => { return pt[1]; }).ToList();
+                    List<double> xs = target_pts.Select(p => p.x).ToList();
+                    List<double> ys = target_pts.Select(p => p.y).ToList();
                     xs.Sort();
                     ys.Sort();
 

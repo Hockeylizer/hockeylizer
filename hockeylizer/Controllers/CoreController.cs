@@ -1047,18 +1047,18 @@ namespace hockeylizer.Controllers
             if (hitList == null || !hitList.Any()) return SvgGeneration.emptyGoalSvg(_svgDir, return_link);
 
             // Construct one list of analyzed hits with non-null offset values, and one of the intended targets for those hits.
-            List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
-            List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
+            //List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
+            //List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
 
             List<Point2d1T> offsets = hitList.Select(hit => new Point2d1T(hit.XOffset.Value, hit.YOffset.Value, hit.TargetNumber)).ToList();
 
             switch (svgType)
             {
                 case "all":
-                    return SvgGeneration.generateAllHitsSVG(coords, targets, _svgDir, return_link);
+                    return SvgGeneration.generateAllHitsSVG(offsets, _svgDir, return_link);
                     break;
                 case "box":
-                    return SvgGeneration.generateBoxplotsSVG(coords, targets, _svgDir, return_link);
+                    return SvgGeneration.generateBoxplotsSVG(offsets, _svgDir, return_link);
                     break;
                 default:
                     return "Internal Error: Choice was neither 'all' nor 'box'.";
