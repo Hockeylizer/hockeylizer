@@ -345,7 +345,33 @@ namespace hockeylizer.Controllers
 			var sourcePoints = _db.AimPoints.Where(t => t.SessionId == session.SessionId)
                                   .Select(t => new Point2i((int)t.XCoordinate, (int)t.YCoordinate)).ToArray();
 
+<<<<<<< HEAD
 			if (!sourcePoints.Any()) throw new Exception("Kunde inte hitta några punkter astt sikta på.");
+=======
+            var pointDict = Points.HitPointsInCm();
+
+            var points = new List<Point2i>();
+            var offsets = new List<Point2d>();
+            
+            foreach (var hp in targets)
+            {
+                points.Add(new Point2i((int)(hp.XCoordinate ?? 0), (int)(hp.YCoordinate ?? 0)));
+
+                Point2d coordinates;
+                var shot = hp.Order;
+
+                if (pointDict[(shot % 5) + 1] != null)
+                {
+                    coordinates = pointDict[(shot % 5) + 1];
+                }
+                else
+                {
+                    coordinates = new Point2d(0, 0);
+                }
+
+                offsets.Add(coordinates);
+            }
+>>>>>>> 7fbf22989b2dcdb0d74cdb074fb809c5fbd322c0
 
             var width = Points.ClothWidth;
             var height = Points.ClothHeight;
