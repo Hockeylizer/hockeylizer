@@ -26,11 +26,11 @@ namespace hockeylizer.Services
             int[] shotIndexes = new int[decodeIntervalsFlat.Length];
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                res = decodeFramesWin(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
+                res = decodeFramesWin(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, 0, shotIndexes);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                res = decodeFramesLinux(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
+                res = decodeFramesLinux(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, 0, shotIndexes);
             }
             else
             {
@@ -98,12 +98,12 @@ namespace hockeylizer.Services
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 analyzeShotCSWin(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
-                            targetOffsetsInCmFlat, videoName, ret);
+                            targetOffsetsInCmFlat, videoName, 0, ret);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 analyzeShotCSLinux(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
-                            targetOffsetsInCmFlat, videoName, ret);
+                            targetOffsetsInCmFlat, videoName, 0, ret);
             }
             else
             {
@@ -259,7 +259,7 @@ namespace hockeylizer.Services
 
         [DllImport(windowsSharedLibrary, EntryPoint = "decodeFrames")]
         private static extern IntPtr decodeFramesWin(String videoName, string blobPrefix, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
-                                                     int decodeIntervalsSize, [In, Out] int[] shotIndexes);
+                                                     int decodeIntervalsSize, float angle, [In, Out] int[] shotIndexes);
 
         //Windows entry points
         [DllImport(windowsSharedLibrary, EntryPoint = "analyzeShotCS")]
@@ -268,7 +268,7 @@ namespace hockeylizer.Services
                                                     [In] int[] targetCoords,
                                                     double sizeX, double sizeY,
                                                     [In] double[] targetOffsetsInCm,
-                                                    String videoName,
+                                                    String videoName, float angle,
                                                     [In, Out, MarshalAs(UnmanagedType.LPStruct)]
                                                     AnalysisResult ret);
 
@@ -308,7 +308,7 @@ namespace hockeylizer.Services
 
         [DllImport(linuxSharedLibrary, EntryPoint = "decodeFrames")]
         private static extern IntPtr decodeFramesLinux(String videoName, String blobPrefix, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
-                                                     int decodeIntervalsSize, [In, Out] int[] shotIndexes);
+                                                     int decodeIntervalsSize, float angle, [In, Out] int[] shotIndexes);
 
         [DllImport(linuxSharedLibrary, EntryPoint = "analyzeShotCS")]
         private static extern void analyzeShotCSLinux(long msStartTimestamp, long msEndTimestamp,
@@ -316,7 +316,7 @@ namespace hockeylizer.Services
                                                     [In] int[] targetCoords,
                                                     double sizeX, double sizeY,
                                                     [In] double[] targetOffsetsInCm,
-                                                    String videoName,
+                                                    String videoName, float angle,
                                                     [In, Out, MarshalAs(UnmanagedType.LPStruct)]
                                                     AnalysisResult ret);
 
