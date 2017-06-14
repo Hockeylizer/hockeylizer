@@ -427,8 +427,6 @@ namespace hockeylizer.Controllers
 			var session = _db.Sessions.Find(sessionId);
 			if (session == null) throw new Exception("Kunde inte hitta session.");
 
-			if (session.Chopped) return true;
-
 			var blobname = session.FileName;
 			var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
 

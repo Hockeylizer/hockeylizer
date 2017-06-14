@@ -27,12 +27,12 @@ namespace hockeylizer.Services
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
-                res = decodeFramesWin(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, 0, shotIndexes);
+                res = decodeFramesWin(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes, 0);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
-                res = decodeFramesLinux(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, 0, shotIndexes);
+                res = decodeFramesLinux(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes, 0);
             }
             else
             {
@@ -263,7 +263,7 @@ namespace hockeylizer.Services
 
         [DllImport(windowsSharedLibrary, EntryPoint = "decodeFrames")]
         private static extern IntPtr decodeFramesWin(String videoName, string blobPrefix, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
-                                                     int decodeIntervalsSize, float angle, [In, Out] int[] shotIndexes);
+                                                     int decodeIntervalsSize, [In, Out] int[] shotIndexes, float angle);
 
         //Windows entry points
         [DllImport(windowsSharedLibrary, EntryPoint = "analyzeShotCS")]
@@ -312,7 +312,7 @@ namespace hockeylizer.Services
 
         [DllImport(linuxSharedLibrary, EntryPoint = "decodeFrames")]
         private static extern IntPtr decodeFramesLinux(String videoName, String blobPrefix, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
-                                                     int decodeIntervalsSize, float angle, [In, Out] int[] shotIndexes);
+                                                     int decodeIntervalsSize, [In, Out] int[] shotIndexes, float angle);
 
         [DllImport(linuxSharedLibrary, EntryPoint = "analyzeShotCS")]
         private static extern void analyzeShotCSLinux(long msStartTimestamp, long msEndTimestamp,
