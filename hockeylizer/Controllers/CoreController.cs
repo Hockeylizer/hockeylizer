@@ -348,8 +348,7 @@ namespace hockeylizer.Controllers
 
             var points = new List<Point2i>();
             var offsets = new List<Point2d>();
-
-            var iter = 1;
+            
             foreach (var hp in targets)
             {
                 points.Add(new Point2i((int)(hp.XCoordinate ?? 0), (int)(hp.YCoordinate ?? 0)));
@@ -357,13 +356,9 @@ namespace hockeylizer.Controllers
                 Point2d coordinates;
                 var shot = hp.Order;
 
-                if (pointDict[shot] != null)
+                if (pointDict[(shot % 5) + 1] != null)
                 {
-                    coordinates = pointDict[shot];
-                }
-                else if (pointDict.ContainsKey(iter % 5))
-                {
-                    coordinates = pointDict[iter % 5];
+                    coordinates = pointDict[(shot % 5) + 1];
                 }
                 else
                 {
@@ -371,7 +366,6 @@ namespace hockeylizer.Controllers
                 }
 
                 offsets.Add(coordinates);
-                iter++;
             }
 
             var width = Points.ClothWidth;
