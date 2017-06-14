@@ -253,7 +253,7 @@ namespace hockeylizer.Controllers
                         var savedSession = new PlayerSession(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
                         _db.Sessions.Add(savedSession);
 
-                        savedSession.AddTargets(vm.targetOrder, vm.targetCoords, vm.timestamps, vm.shots ?? 0);
+                        savedSession.AddTargets(vm.targetOrder, vm.targetCoords, vm.timestamps, (int)vm.shots);
                         savedSession.AddAimpoints(vm.targetCoords);
 
                         _db.SaveChanges();
@@ -342,45 +342,19 @@ namespace hockeylizer.Controllers
             var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
             if (!download.Key) throw new Exception("Kunde inte ladda ned film för att: " + download.Value);
 
-            var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
+			var sourcePoints = _db.AimPoints.Where(t => t.SessionId == session.SessionId)
+                                  .Select(t => new Point2i((int)t.XCoordinate, (int)t.YCoordinate)).ToArray();
 
-            var pointDict = Points.HitPointsInCm();
-
-            var points = new List<Point2i>();
-            var offsets = new List<Point2d>();
-
-            var iter = 1;
-            foreach (var hp in targets)
-            {
-                points.Add(new Point2i((int)(hp.XCoordinate ?? 0), (int)(hp.YCoordinate ?? 0)));
-
-                Point2d coordinates;
-                var shot = hp.Order;
-
-                if (pointDict[shot] != null)
-                {
-                    coordinates = pointDict[shot];
-                }
-                else if (pointDict.ContainsKey(iter % 5))
-                {
-                    coordinates = pointDict[iter % 5];
-                }
-                else
-                {
-                    coordinates = new Point2d(0, 0);
-                }
-
-                offsets.Add(coordinates);
-                iter++;
-            }
+			if (!sourcePoints.Any()) throw new Exception("Kunde inte hitta några punkter astt sikta på.");
 
             var width = Points.ClothWidth;
             var height = Points.ClothHeight;
 
+			var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
+
             foreach (var t in targets)
             {
-                var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, points.ToArray(), width,
-                    height, offsets.ToArray(), path);
+                var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, sourcePoints, width, height, Points.HitPointsInCm().Values.ToArray(), path);
 
                 if (analysis.WasErrors)
                 {
@@ -784,7 +758,8 @@ namespace hockeylizer.Controllers
                     YCoordinateAnalyzed = shot.YCoordinateAnalyzed,
                     HitTarget = shot.HitGoal,
                     FrameHit = shot.FrameHit,
-                    Analyzed = session.Analyzed
+                    Analyzed = shot.AnalysisFailed,
+                    Reason = shot.AnalysisFailedReason
                 };
 
 				return Json(response);
@@ -835,8 +810,8 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var sourcePoints = _db.AimPoints.Where(t => t.SessionId == session.SessionId)
-                                        .Select(t => new Point2d(t.XCoordinate ?? 0, t.YCoordinate ?? 0)).ToArray();
+				var sourcePoints = _db.AimPoints.Where(t => t.SessionId == session.SessionId)
+										.Select(t => new Point2d((int)t.XCoordinate, (int)t.YCoordinate)).ToArray();
                 
                 if (!sourcePoints.Any())
                 {
@@ -844,11 +819,9 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var hitpoints = Points.HitPointsInCm().Values;
-
                 var offsets = new Point2d((double)vm.x, (double)vm.y);
 
-                var convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, targetPoint, sourcePoints, hitpoints.ToArray());
+                var convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, targetPoint, sourcePoints, Points.HitPointsInCm().Values.ToArray());
 
                 shotToUpdate.XOffset = convertedPoints.x;
                 shotToUpdate.YOffset = convertedPoints.y;

@@ -231,6 +231,7 @@ namespace hockeylizer.Models
         public int? FrameHit { get; set; }
 
         public bool Analyzed { get; set; }
+        public string Reason { get; set; }
 
 		public List<string> FrameUrls { get; set; }
 	}
@@ -462,6 +463,12 @@ namespace hockeylizer.Models
             if (this.targetCoords.Count() != 5)
 			{
 				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet koordinater att sikta på inte är 5!", false);
+				return false;
+			}
+
+            if (this.targetCoords.Any(tc => tc.xCoord == null) || this.targetCoords.Any(tc => tc.yCoord == null))
+			{
+				this.sr = new SessionResult("Videoklippet kunde inte laddas upp någon av koordinaterna att sikta på var null!", false);
 				return false;
 			}
 
