@@ -77,19 +77,9 @@ namespace hockeylizer.Helpers
             return cross.Prepend(rect).ToList();
         }
 
-        // TODO: Delete when other version has been tested
-        //private static List<double[]> selectPointsByTarget(List<double[]> points, List<int> targets, int target)
-        //{
-        //    int lim = Math.Min(points.Count, targets.Count);
-        //    var ret = new List<double[]> { };
-        //    for (int ii = 0; ii < lim; ii++) if (targets[ii] == target) ret.Add(points[ii]);
-        //    return ret;
-        //}
-        // TODO: Keep only this version after testing.
-        private static List<Point2d> selectPointsByTarget(List<Point2d1T> points, int target)
+        private static List<Point2d1T> selectPointsByTarget(List<Point2d1T> points, int target)
         {
-            // The IEnumerable<Point2d> casting is necessary to be able to cast Point2d1T to its base class inside the List.
-            return ((IEnumerable<Point2d>) points.Where(p => p.target == target)).ToList();
+            return points.Where(p => p.target == target).ToList();
         }
 
         // Assumes a sorted list.
@@ -121,25 +111,9 @@ namespace hockeylizer.Helpers
             return @"http://hockeylizer.azurewebsites.net/images/" + fileName;
         }
 
-        // TODO: Delete when other version has been tested
-        //private static List<double[]> offsetsToAbsolutes(List<double[]> offsets, List<int> targets)
-        //{
-        //    var absoluteCoords = new List<double[]> { };
-
-        //    for (int ii = 0; ii < offsets.Count; ii++)
-        //    {
-        //        double x = _targetCoords[targets[ii]].x + offsets[ii][0];
-        //        double y = _targetCoords[targets[ii]].y + offsets[ii][1];
-        //        absoluteCoords.Add(new double[] { x, y });
-        //    }
-
-        //    return absoluteCoords;
-        //}
-
-        // TODO: Keep only this version after testing.
         private static List<Point2d1T> offsetsToAbsolutes(List<Point2d1T> offsets)
         {
-            return offsets.Select(p => new Point2d1T( _targetCoords[p.target].x + p.x,  _targetCoords[p.target].y + p.y ) ).ToList();
+            return offsets.Select(p => new Point2d1T( _targetCoords[p.target].x + p.x,  _targetCoords[p.target].y + p.y, p.target) ).ToList();
         }
 
         /// <summary>
@@ -154,11 +128,6 @@ namespace hockeylizer.Helpers
 
             // Calculate absolute cm coords from offset + target coords.
             List<Point2d1T> points = offsetsToAbsolutes(offsets);
-
-            //if (!offsets.Any()) return emptyGoalSvg(svg_dir, return_link);
-
-            //// Calculate absolute cm coords from offset + target coords.
-            //List<double[]> points = offsetsToAbsolutes(offsets, targets);
 
             var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             XDocument svgCode = XDocument.Load(svg_template_path);
@@ -189,13 +158,14 @@ namespace hockeylizer.Helpers
             // Calculate absolute cm coords from offset + target coords.
             List<Point2d1T> points = offsetsToAbsolutes(offsets);
 
-            var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
+            
             // Hardcoded switch to change between average and median as mean for the cross.
             bool use_median_not_average = false;
             // This is the minimal number of shots against a target that will trigger
             // the generation of a boxplot. Fewer will generate a crossplot instead.
             int boxplot_limit = 7;
 
+            var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             XDocument svgCode = XDocument.Load(svg_template_path);
             XNamespace ns = svgCode.Root.Name.Namespace;
 
@@ -249,5 +219,12 @@ namespace hockeylizer.Helpers
             else return svgToString(XDocument.Load(svg_template_path));
         }
 
+        // Temp for debug
+        private static string enumToString(IEnumerable<Object> ps) {
+            var ret = "{ ";
+            foreach (Object p in ps) ret += p.ToString() + " ";
+            ret += "}";
+            return ret;
+        }
     }
 }

@@ -1039,10 +1039,6 @@ namespace hockeylizer.Controllers
             var hitList = _db.Targets.Where(target => target.SessionId == vm.sessionId && target.HitGoal && target.XOffset.HasValue && target.YOffset.HasValue);
             if (hitList == null || !hitList.Any()) return SvgGeneration.emptyGoalSvg(_svgDir, return_link);
 
-            // Construct one list of analyzed hits with non-null offset values, and one of the intended targets for those hits.
-            //List<double[]> coords = hitList.Select(hit => new double[] { hit.XOffset.Value, hit.YOffset.Value }).ToList();
-            //List<int> targets = hitList.Select(hit => hit.TargetNumber).ToList();
-
             List<Point2d1T> offsets = hitList.Select(hit => new Point2d1T(hit.XOffset.Value, hit.YOffset.Value, hit.TargetNumber)).ToList();
 
             switch (svgType)
