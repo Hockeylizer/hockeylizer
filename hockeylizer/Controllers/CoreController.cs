@@ -254,6 +254,7 @@ namespace hockeylizer.Controllers
                         _db.Sessions.Add(savedSession);
 
                         savedSession.AddTargets(vm.targetOrder, vm.targetCoords, vm.timestamps, vm.shots ?? 0);
+                        savedSession.AddAimpoints(vm.targetCoords);
 
                         _db.SaveChanges();
                         _db.Entry(savedSession).GetDatabaseValues();
@@ -557,6 +558,9 @@ namespace hockeylizer.Controllers
                         }
                         else
                         {
+							session.DeleteFailed = false;
+							session.DeleteFailedWhere = string.Empty;
+
                             individualResult = false;
                         }
 
@@ -831,8 +835,10 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var sourceTargets = _db.Targets.Where(t => t.SessionId == session.SessionId).ToList();
-                if (!sourceTargets.Any())
+                var sourcePoints = _db.AimPoints.Where(t => t.SessionId == session.SessionId)
+                                        .Select(t => new Point2d(t.XCoordinate ?? 0, t.YCoordinate ?? 0)).ToArray();
+                
+                if (!sourcePoints.Any())
                 {
                     response = new GeneralResult(false, "Kunde inte hitta några punkter att sikta på.");
                     return Json(response);
@@ -841,7 +847,6 @@ namespace hockeylizer.Controllers
                 var hitpoints = Points.HitPointsInCm().Values;
 
                 var offsets = new Point2d((double)vm.x, (double)vm.y);
-                var sourcePoints = sourceTargets.Select(t => new Point2d(t.XCoordinate ?? 0, t.YCoordinate ?? 0)).ToArray();
 
                 var convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, targetPoint, sourcePoints, hitpoints.ToArray());
 
