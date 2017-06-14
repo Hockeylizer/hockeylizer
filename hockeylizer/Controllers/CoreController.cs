@@ -458,7 +458,7 @@ namespace hockeylizer.Controllers
 				endMs = t.TimestampEnd
 			}).ToArray();
 
-			var shots = AnalysisBridge.DecodeFrames(path, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
+			var shots = AnalysisBridge.DecodeFrames(path, blobname, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
 			if (shots.Any())
 			{
 				foreach (var s in shots)
