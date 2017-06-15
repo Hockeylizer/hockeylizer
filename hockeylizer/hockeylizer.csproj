@@ -229,5 +229,6 @@
   <ItemGroup>
     <Folder Include="bin\Debug\netcoreapp1.1\x64\" />
     <Folder Include="bin\Release\netcoreapp1.1\x64\" />
+    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 </Project>

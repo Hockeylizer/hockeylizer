@@ -511,54 +511,46 @@ namespace hockeylizer.Controllers
 			var sessions = _db.Sessions.Where(s => s.DeleteFailed);
 			var result = new Dictionary<int, bool>();
 
-			if (sessions.Any())
-			{
-				foreach (var session in sessions)
-				{
-					if (session.Analyzed)
-					{
-						var path = session.DeleteFailedWhere;
+		    if (!sessions.Any()) return result;
 
-						bool individualResult;
-						if (System.IO.File.Exists(path))
-						{
-							try
-							{
-								System.IO.File.Delete(path);
+		    foreach (var session in sessions)
+		    {
+		        var path = session.DeleteFailedWhere;
 
-								session.DeleteFailed = false;
-								session.DeleteFailedWhere = string.Empty;
+		        bool individualResult;
+		        if (System.IO.File.Exists(path))
+		        {
+		            try
+		            {
+		                System.IO.File.Delete(path);
 
-								individualResult = true;
-							}
-							catch
-							{
-								session.DeleteFailed = true;
-								session.DeleteFailedWhere = path;
+		                session.DeleteFailed = false;
+		                session.DeleteFailedWhere = string.Empty;
 
-								individualResult = false;
-							}
-						}
-						else
-						{
-							session.DeleteFailed = false;
-							session.DeleteFailedWhere = string.Empty;
+		                individualResult = true;
+		            }
+		            catch
+		            {
+		                session.DeleteFailed = true;
+		                session.DeleteFailedWhere = path;
 
-							individualResult = false;
-						}
+		                individualResult = false;
+		            }
+		        }
+		        else
+		        {
+		            session.DeleteFailed = false;
+		            session.DeleteFailedWhere = string.Empty;
 
-						result.Add(session.SessionId, individualResult);
-					}
-					else
-					{
-						BackgroundJob.Enqueue<CoreController>(service => service.AnalyzeSession(session.SessionId));
-					}
-				}
+		            individualResult = false;
+		        }
 
-				await _db.SaveChangesAsync();
-			}
+		        result.Add(session.SessionId, individualResult);
+            }
 
-			return result;
+		    await _db.SaveChangesAsync();
+
+		    return result;
 		}
 
 		[HttpPost]
