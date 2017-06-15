@@ -251,13 +251,6 @@ namespace hockeylizer.Controllers
 					}
 					else
 					{
-                        // Asserting conditions
-					    Debug.Assert(vm.interval != null, "vm.interval != null");
-					    Debug.Assert(vm.playerId != null, "vm.playerId != null");
-					    Debug.Assert(vm.rounds != null, "vm.rounds != null");
-					    Debug.Assert(vm.shots != null, "vm.shots != null");
-					    Debug.Assert(vm.numberOfTargets != null, "vm.numberOfTargets != null");
-
 					    var savedSession = new PlayerSession(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
 						_db.Sessions.Add(savedSession);
 

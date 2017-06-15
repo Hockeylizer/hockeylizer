@@ -26,13 +26,11 @@ namespace hockeylizer.Services
             int[] shotIndexes = new int[decodeIntervalsFlat.Length];
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
-                res = decodeFramesWin(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes, 0);
+                res = decodeFramesWin(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
-                res = decodeFramesLinux(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes, 0);
+                res = decodeFramesLinux(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
             }
             else
             {
@@ -74,18 +72,18 @@ namespace hockeylizer.Services
 
         // Main entry point for analysing a single shot.
         public static AnalysisResult AnalyzeShot(long firstFrame, long lastFrame,
-                                                 Point2i[] targetCoords,
-                                                 double sizeX, double sizeY,
-                                                 Point2d[] targetOffsetsInCm,
-                                                 string videoName)
+            Point2i[] targetCoords,
+            double sizeX, double sizeY,
+            Point2d[] targetOffsetsInCm,
+            string videoName)
         {
             if (targetCoords.Length != targetOffsetsInCm.Length)
             {
                 throw new System.ArgumentException("targetOffsetsInCm.Length != targetCoords.Length",
-                                                   "targetOffsetsInCm");
+                    "targetOffsetsInCm");
             }
-            int[] targetCoordsFlat = new int[targetCoords.Length*2];
-            double[] targetOffsetsInCmFlat = new double[targetOffsetsInCm.Length*2];
+            int[] targetCoordsFlat = new int[targetCoords.Length * 2];
+            double[] targetOffsetsInCmFlat = new double[targetOffsetsInCm.Length * 2];
             int fi = 0;
             for (int pi = 0; pi < targetCoords.Length; ++pi)
             {
@@ -99,15 +97,13 @@ namespace hockeylizer.Services
             AnalysisResult ret = new AnalysisResult();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
                 analyzeShotCSWin(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
-                            targetOffsetsInCmFlat, videoName, 0, ret);
+                    targetOffsetsInCmFlat, videoName, ret);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
                 analyzeShotCSLinux(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
-                            targetOffsetsInCmFlat, videoName, 0, ret);
+                    targetOffsetsInCmFlat, videoName, ret);
             }
             else
             {
@@ -120,14 +116,14 @@ namespace hockeylizer.Services
         // Hard to explain, see https://en.wikipedia.org/wiki/Rigid_transformation
         // not that the link will make it easier to understand though.
         public static bool IsRigidPerspectiveTransform(Point2d[] pointsSrcSpace,
-                                                       Point2d[] pointsDstSpace)
+            Point2d[] pointsDstSpace)
         {
             if (pointsSrcSpace.Length != pointsDstSpace.Length)
             {
                 return false;
             }
-            double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length*2];
-            double[] pointsDstSpaceFlat = new double[pointsSrcSpace.Length*2];
+            double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length * 2];
+            double[] pointsDstSpaceFlat = new double[pointsSrcSpace.Length * 2];
             int fi = 0;
             for (int pi = 0; pi < pointsSrcSpace.Length; ++pi)
             {
@@ -141,14 +137,14 @@ namespace hockeylizer.Services
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return isRigidPerspectiveTransformCSWin(pointsSrcSpace.Length,
-                                                        pointsSrcSpaceFlat,
-                                                        pointsDstSpaceFlat);
+                    pointsSrcSpaceFlat,
+                    pointsDstSpaceFlat);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 return isRigidPerspectiveTransformCSLinux(pointsSrcSpace.Length,
-                                                          pointsSrcSpaceFlat,
-                                                          pointsDstSpaceFlat);
+                    pointsSrcSpaceFlat,
+                    pointsDstSpaceFlat);
             }
             else
             {
@@ -166,16 +162,16 @@ namespace hockeylizer.Services
         // pointsSrcSpace is the target points in pixels.
         // pointsDstSpace is the target points in cm.
         public static Point2d PointBaseChange(Point2d srcSpacePoint,
-                                              Point2d[] pointsSrcSpace,
-                                              Point2d[] pointsDstSpace)
+            Point2d[] pointsSrcSpace,
+            Point2d[] pointsDstSpace)
         {
             if (pointsSrcSpace.Length != pointsDstSpace.Length)
             {
                 throw new System.ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length",
-                                                   "pointsDstSpace.Length");
+                    "pointsDstSpace.Length");
             }
-            double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length*2];
-            double[] pointsDstSpaceFlat = new double[pointsSrcSpace.Length*2];
+            double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length * 2];
+            double[] pointsDstSpaceFlat = new double[pointsSrcSpace.Length * 2];
             int fi = 0;
             for (int pi = 0; pi < pointsSrcSpace.Length; ++pi)
             {
@@ -190,16 +186,16 @@ namespace hockeylizer.Services
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 pointBaseChangeCSWin(srcSpacePoint.x, srcSpacePoint.y,
-                                     pointsSrcSpace.Length,
-                                     pointsSrcSpaceFlat,
-                                     pointsDstSpaceFlat, ret);
+                    pointsSrcSpace.Length,
+                    pointsSrcSpaceFlat,
+                    pointsDstSpaceFlat, ret);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 pointBaseChangeCSLinux(srcSpacePoint.x, srcSpacePoint.y,
-                                     pointsSrcSpace.Length,
-                                     pointsSrcSpaceFlat,
-                                     pointsDstSpaceFlat, ret);
+                    pointsSrcSpace.Length,
+                    pointsSrcSpaceFlat,
+                    pointsDstSpaceFlat, ret);
             }
             else
             {
@@ -210,17 +206,17 @@ namespace hockeylizer.Services
 
         // Returns the vector pointing from cmTargetPoint to srcSpacePoint in cm with positive meaning up.
         public static Point2d SrcPointToCmVectorFromTargetPoint(Point2d srcSpacePoint,
-                                                                Point2d cmTargetPoint,
-                                                                Point2d[] pointsSrcSpace,
-                                                                Point2d[] pointsCmSpace)
+            Point2d cmTargetPoint,
+            Point2d[] pointsSrcSpace,
+            Point2d[] pointsCmSpace)
         {
             if (pointsSrcSpace.Length != pointsCmSpace.Length)
             {
                 throw new ArgumentException("pointsSrcSpace.Length != pointsDstSpace.Length", "pointsDstSpace.Length");
             }
 
-            double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length*2];
-            double[] pointsDstSpaceFlat = new double[pointsCmSpace.Length*2];
+            double[] pointsSrcSpaceFlat = new double[pointsSrcSpace.Length * 2];
+            double[] pointsDstSpaceFlat = new double[pointsCmSpace.Length * 2];
             int fi = 0;
             for (int pi = 0; pi < pointsSrcSpace.Length; ++pi)
             {
@@ -235,18 +231,18 @@ namespace hockeylizer.Services
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 srcPointToCmVectorFromTargetPointCSWin(srcSpacePoint.x, srcSpacePoint.y,
-                                                       cmTargetPoint.x, cmTargetPoint.y,
-                                                       pointsSrcSpace.Length,
-                                                       pointsSrcSpaceFlat, pointsDstSpaceFlat,
-                                                       ret);
+                    cmTargetPoint.x, cmTargetPoint.y,
+                    pointsSrcSpace.Length,
+                    pointsSrcSpaceFlat, pointsDstSpaceFlat,
+                    ret);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 srcPointToCmVectorFromTargetPointCSLinux(srcSpacePoint.x, srcSpacePoint.y,
-                                                         cmTargetPoint.x, cmTargetPoint.y,
-                                                         pointsSrcSpace.Length,
-                                                         pointsSrcSpaceFlat, pointsDstSpaceFlat,
-                                                         ret);
+                    cmTargetPoint.x, cmTargetPoint.y,
+                    pointsSrcSpace.Length,
+                    pointsSrcSpaceFlat, pointsDstSpaceFlat,
+                    ret);
             }
             else
             {
@@ -263,47 +259,47 @@ namespace hockeylizer.Services
 
         [DllImport(windowsSharedLibrary, EntryPoint = "decodeFrames")]
         private static extern IntPtr decodeFramesWin(String videoName, string blobPrefix, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
-                                                     int decodeIntervalsSize, [In, Out] int[] shotIndexes, float angle);
+            int decodeIntervalsSize, [In, Out] int[] shotIndexes);
 
         //Windows entry points
         [DllImport(windowsSharedLibrary, EntryPoint = "analyzeShotCS")]
         private static extern void analyzeShotCSWin(long msStartTimestamp, long msEndTimestamp,
-                                                    int targetNo,
-                                                    [In] int[] targetCoords,
-                                                    double sizeX, double sizeY,
-                                                    [In] double[] targetOffsetsInCm,
-                                                    String videoName, float angle,
-                                                    [In, Out, MarshalAs(UnmanagedType.LPStruct)]
-                                                    AnalysisResult ret);
+            int targetNo,
+            [In] int[] targetCoords,
+            double sizeX, double sizeY,
+            [In] double[] targetOffsetsInCm,
+            String videoName,
+            [In, Out, MarshalAs(UnmanagedType.LPStruct)]
+            AnalysisResult ret);
 
 
         [DllImport(windowsSharedLibrary, EntryPoint = "isRigidPerspectiveTransformCS")]
         private static extern bool isRigidPerspectiveTransformCSWin(int len,
-                                                                    [In] double[] pointsSrcSpaceFlat,
-                                                                    [In] double[] pointsDstSpaceFlat);
+            [In] double[] pointsSrcSpaceFlat,
+            [In] double[] pointsDstSpaceFlat);
 
         [DllImport(windowsSharedLibrary, EntryPoint = "pointBaseChangeCS")]
         private static extern void pointBaseChangeCSWin(double x, double y,
-                                                        int len,
-                                                        [In] double[] pointsSrcSpaceFlat,
-                                                        [In] double[] pointsDstSpaceFlat,
-                                                        [In, Out, MarshalAs(UnmanagedType.LPStruct)]
-                                                        DumPoint2d ret);
+            int len,
+            [In] double[] pointsSrcSpaceFlat,
+            [In] double[] pointsDstSpaceFlat,
+            [In, Out, MarshalAs(UnmanagedType.LPStruct)]
+            DumPoint2d ret);
 
         [DllImport(windowsSharedLibrary, EntryPoint = "srcPointToCmVectorFromTargetPointCS")]
         private static extern
             void srcPointToCmVectorFromTargetPointCSWin(double src_space_point_x,
-                                                        double src_space_point_y,
-                                                        double cm_target_point_x,
-                                                        double cm_target_point_y,
-                                                        int len,
-                                                        [In]
-                                                        double[] pointsSrcSpaceFlat,
-                                                        [In]
-                                                        double[] pointsDstSpaceFlat,
-                                                        [In, Out,
-                                                        MarshalAs(UnmanagedType.LPStruct)]
-                                                        DumPoint2d ret);
+                double src_space_point_y,
+                double cm_target_point_x,
+                double cm_target_point_y,
+                int len,
+                [In]
+                double[] pointsSrcSpaceFlat,
+                [In]
+                double[] pointsDstSpaceFlat,
+                [In, Out,
+                 MarshalAs(UnmanagedType.LPStruct)]
+                DumPoint2d ret);
 
 
 
@@ -312,45 +308,45 @@ namespace hockeylizer.Services
 
         [DllImport(linuxSharedLibrary, EntryPoint = "decodeFrames")]
         private static extern IntPtr decodeFramesLinux(String videoName, String blobPrefix, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
-                                                     int decodeIntervalsSize, [In, Out] int[] shotIndexes, float angle);
+            int decodeIntervalsSize, [In, Out] int[] shotIndexes);
 
         [DllImport(linuxSharedLibrary, EntryPoint = "analyzeShotCS")]
         private static extern void analyzeShotCSLinux(long msStartTimestamp, long msEndTimestamp,
-                                                    int targetNo,
-                                                    [In] int[] targetCoords,
-                                                    double sizeX, double sizeY,
-                                                    [In] double[] targetOffsetsInCm,
-                                                    String videoName, float angle,
-                                                    [In, Out, MarshalAs(UnmanagedType.LPStruct)]
-                                                    AnalysisResult ret);
+            int targetNo,
+            [In] int[] targetCoords,
+            double sizeX, double sizeY,
+            [In] double[] targetOffsetsInCm,
+            String videoName,
+            [In, Out, MarshalAs(UnmanagedType.LPStruct)]
+            AnalysisResult ret);
 
 
         [DllImport(linuxSharedLibrary, EntryPoint = "isRigidPerspectiveTransformCS")]
         private static extern bool isRigidPerspectiveTransformCSLinux(int len,
-                                                                    [In] double[] pointsSrcSpaceFlat,
-                                                                    [In] double[] pointsDstSpaceFlat);
+            [In] double[] pointsSrcSpaceFlat,
+            [In] double[] pointsDstSpaceFlat);
 
         [DllImport(linuxSharedLibrary, EntryPoint = "pointBaseChangeCS")]
         private static extern void pointBaseChangeCSLinux(double x, double y,
-                                                        int len,
-                                                        [In] double[] pointsSrcSpaceFlat,
-                                                        [In] double[] pointsDstSpaceFlat,
-                                                        [In, Out, MarshalAs(UnmanagedType.LPStruct)]
-                                                        DumPoint2d ret);
+            int len,
+            [In] double[] pointsSrcSpaceFlat,
+            [In] double[] pointsDstSpaceFlat,
+            [In, Out, MarshalAs(UnmanagedType.LPStruct)]
+            DumPoint2d ret);
 
         [DllImport(linuxSharedLibrary, EntryPoint = "srcPointToCmVectorFromTargetPointCS")]
         private static extern
             void srcPointToCmVectorFromTargetPointCSLinux(double src_space_point_x,
-                                                        double src_space_point_y,
-                                                        double cm_target_point_x,
-                                                        double cm_target_point_y,
-                                                        int len,
-                                                        [In]
-                                                        double[] pointsSrcSpaceFlat,
-                                                        [In]
-                                                        double[] pointsDstSpaceFlat,
-                                                        [In, Out,
-                                                        MarshalAs(UnmanagedType.LPStruct)]
-                                                        DumPoint2d ret);
+                double src_space_point_y,
+                double cm_target_point_x,
+                double cm_target_point_y,
+                int len,
+                [In]
+                double[] pointsSrcSpaceFlat,
+                [In]
+                double[] pointsDstSpaceFlat,
+                [In, Out,
+                 MarshalAs(UnmanagedType.LPStruct)]
+                DumPoint2d ret);
     }
 }
