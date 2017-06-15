@@ -114,7 +114,10 @@ namespace hockeylizer.Models
 		public bool VideoRemoved { get; set; }
 
         public bool Analyzed { get; set; }
+        public string AnalisysFailReason { get; set; }
+
 	    public bool Chopped { get; set; }
+	    public string ChopFailReason { get; set; }
 
         public bool SomethingFailed { get; set; }
         public string WhySomethingFailed { get; set; }

@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 using System.Globalization;
 using hockeylizer.Services;
 using hockeylizer.Helpers;
+using System.Diagnostics;
 using hockeylizer.Models;
 using hockeylizer.Data;
-using System.Xml.Linq;
 using System.Linq;
 using System.Text;
 using System.IO;
 using Hangfire;
 using System;
+
 
 namespace hockeylizer.Controllers
 {
@@ -27,9 +28,9 @@ namespace hockeylizer.Controllers
 		public CoreController(ApplicationDbContext db, IHostingEnvironment hostingEnvironment)
 		{
 			_appkey = "langY6fgXWossV9o";
-			this._db = db;
-			this._hostingEnvironment = hostingEnvironment;
-			this._svgDir = Path.Combine(_hostingEnvironment.WebRootPath, "images");
+			_db = db;
+			_hostingEnvironment = hostingEnvironment;
+			_svgDir = Path.Combine(_hostingEnvironment.WebRootPath, "images");
 		}
 
 		[HttpPost]
@@ -250,7 +251,14 @@ namespace hockeylizer.Controllers
 					}
 					else
 					{
-						var savedSession = new PlayerSession(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
+                        // Asserting conditions
+					    Debug.Assert(vm.interval != null, "vm.interval != null");
+					    Debug.Assert(vm.playerId != null, "vm.playerId != null");
+					    Debug.Assert(vm.rounds != null, "vm.rounds != null");
+					    Debug.Assert(vm.shots != null, "vm.shots != null");
+					    Debug.Assert(vm.numberOfTargets != null, "vm.numberOfTargets != null");
+
+					    var savedSession = new PlayerSession(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
 						_db.Sessions.Add(savedSession);
 
 						savedSession.AddTargets(vm.targetOrder, vm.targetCoords, vm.timestamps, (int)vm.shots);
@@ -358,6 +366,9 @@ namespace hockeylizer.Controllers
 
 				if (analysis.WasErrors)
 				{
+				    session.Analyzed = false;
+				    session.AnalisysFailReason = analysis.ErrorMessage;
+
 					t.AnalysisFailed = true;
 					t.AnalysisFailedReason = analysis.ErrorMessage;
 				}
@@ -371,10 +382,10 @@ namespace hockeylizer.Controllers
 
 					t.HitGoal = analysis.DidHitGoal;
 					t.FrameHit = analysis.FrameNr;
-				}
-			}
 
-			session.Analyzed = true;
+				    session.Analyzed = true;
+                }
+			}
 
 			await _db.SaveChangesAsync();
 
@@ -699,7 +710,8 @@ namespace hockeylizer.Controllers
 				response = new GetDataFromSessionResult(true, "Sessionen hittades.")
 				{
 					HitRatio = ratio,
-					Analyzed = session.Analyzed
+					Analyzed = session.Analyzed,
+                    AnalysisFailedReason = session.AnalisysFailReason
 				};
 
 				return Json(response);
@@ -940,13 +952,13 @@ namespace hockeylizer.Controllers
 				var csv = new StringBuilder();
 				for (var i = 0; i < 12; i++)
 				{
-					var first = 1;
-					var second = 2;
+					const int first = 1;
+					const int second = 2;
 
 					csv.AppendLine(string.Format("{0},{1}", first, second));
 				}
 
-				var filestart = "file";
+				const string filestart = "file";
 				var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
 				var path = Path.Combine(startpath, filestart + "-1.csv");
 

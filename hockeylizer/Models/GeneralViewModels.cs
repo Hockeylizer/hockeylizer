@@ -157,7 +157,7 @@ namespace hockeylizer.Models
 		{
 			this.Completed = comp;
 			this.Description = desc;
-            this.FrameUrls = urls == null ? new List<string>() : urls;
+            this.FrameUrls = urls ?? new List<string>();
 		}
 
 		public bool Completed { get; set; }
@@ -178,17 +178,20 @@ namespace hockeylizer.Models
             this.Analyzed = false;
         }
 
-        public GetDataFromSessionResult(bool comp, string desc)
+        public GetDataFromSessionResult(bool comp, string desc, string failreason = "")
         {
             this.Completed = comp;
             this.Description = desc;
+
             this.Analyzed = false;
+            this.AnalysisFailedReason = failreason;
         }
 
         public bool Completed { get; set; }
         public string Description { get; set; }
 
         public bool Analyzed { get; set; }
+        public string AnalysisFailedReason { get; set; }
         public string HitRatio { get; set; }
     }
 
