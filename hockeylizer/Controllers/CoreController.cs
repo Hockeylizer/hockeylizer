@@ -220,70 +220,79 @@ namespace hockeylizer.Controllers
 		[AllowAnonymous]
 		public async Task<JsonResult> CreateSession(CreateSessionVm vm)
 		{
-			SessionResult sr;
+		    try
+		    {
+		        SessionResult sr;
 
-			if (vm.token == _appkey)
-			{
-				if (vm.playerId == null)
-				{
-					sr = new SessionResult("SpelarId saknas i requesten.", false);
-					return Json(sr);
-				}
+		        if (vm.token == _appkey)
+		        {
+		            if (vm.playerId == null)
+		            {
+		                sr = new SessionResult("SpelarId saknas i requesten.", false);
+		                return Json(sr);
+		            }
 
-				var pl = _db.Players.Find(vm.playerId);
+		            var pl = _db.Players.Find(vm.playerId);
 
-				if (pl == null)
-				{
-					sr = new SessionResult("Spelaren kunde inte hittas.", false);
-				}
-				else
-				{
-					if (!vm.Validate())
-					{
-						return Json(vm.sr);
-					}
+		            if (pl == null)
+		            {
+		                sr = new SessionResult("Spelaren kunde inte hittas.", false);
+		            }
+		            else
+		            {
+		                if (!vm.Validate())
+		                {
+		                    return Json(vm.sr);
+		                }
 
-					var v = await FileHandler.UploadVideo(vm.video, pl.RetrieveContainerName(), "video");
+		                var v = await FileHandler.UploadVideo(vm.video, pl.RetrieveContainerName(), "video");
 
-					if (string.IsNullOrEmpty(v.FilePath))
-					{
-						sr = new SessionResult("Videoklippet kunde inte laddas upp då något gick knas vid uppladdning!", false);
-					}
-					else
-					{
-					    var savedSession = new PlayerSession(v.FilePath, v.FileName, (int)vm.playerId, (int)vm.interval, (int)vm.rounds, (int)vm.shots, (int)vm.numberOfTargets);
-						_db.Sessions.Add(savedSession);
+		                if (string.IsNullOrEmpty(v.FilePath))
+		                {
+		                    sr = new SessionResult("Videoklippet kunde inte laddas upp då något gick knas vid uppladdning!",
+		                        false);
+		                }
+		                else
+		                {
+		                    var savedSession = new PlayerSession(v.FilePath, v.FileName, (int) vm.playerId, (int) vm.interval,
+		                        (int) vm.rounds, (int) vm.shots, (int) vm.numberOfTargets);
+		                    _db.Sessions.Add(savedSession);
 
-						savedSession.AddTargets(vm.targetOrder, vm.targetCoords, vm.timestamps, (int)vm.shots);
-						savedSession.AddAimpoints(vm.targetCoords);
+		                    savedSession.AddTargets(vm.targetOrder, vm.targetCoords, vm.timestamps, (int) vm.shots);
+		                    savedSession.AddAimpoints(vm.targetCoords);
 
-						_db.SaveChanges();
-						_db.Entry(savedSession).GetDatabaseValues();
+		                    _db.SaveChanges();
+		                    _db.Entry(savedSession).GetDatabaseValues();
 
-						var sessionId = savedSession.SessionId;
+		                    var sessionId = savedSession.SessionId;
 
-						// Chop video
-						BackgroundJob.Enqueue<CoreController>
-						(
-							service => service.ChopSession(sessionId)
-						);
+		                    // Chop video
+		                    BackgroundJob.Enqueue<CoreController>
+		                    (
+		                        service => service.ChopSession(sessionId)
+		                    );
 
-						// Analyze video
-						BackgroundJob.Enqueue<CoreController>
-						(
-							service => service.AnalyzeSession(sessionId)
-						);
+		                    // Analyze video
+		                    BackgroundJob.Enqueue<CoreController>
+		                    (
+		                        service => service.AnalyzeSession(sessionId)
+		                    );
 
-						sr = new SessionResult("Videoklippet laddades upp!", true, sessionId);
-					}
-				}
-			}
-			else
-			{
-				sr = new SessionResult("Token var inkorrekt.", false);
-			}
+		                    sr = new SessionResult("Videoklippet laddades upp!", true, sessionId);
+		                }
+		            }
+		        }
+		        else
+		        {
+		            sr = new SessionResult("Token var inkorrekt.", false);
+		        }
 
-			return Json(sr);
+		        return Json(sr);
+		    }
+		    catch (Exception e)
+		    {
+		        return Json(new { e.Message, e.Source, e.Data });
+		    }
 		}
 
 		[HttpPost]

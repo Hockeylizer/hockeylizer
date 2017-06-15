@@ -27,7 +27,8 @@ namespace hockeylizer.Models
 
 			for (var t = 0; t < limit; t++)
 			{
-			    var currentTarget = to[t % to.Count];
+			    var mod = (to.Count - 1);
+			    var currentTarget = mod == 0 ? 0 : to[t % mod];
 
                 var xCoord = coords[currentTarget].xCoord;
 			    var yCoord = coords[currentTarget].yCoord;
