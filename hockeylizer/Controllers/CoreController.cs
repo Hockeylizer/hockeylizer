@@ -891,6 +891,12 @@ namespace hockeylizer.Controllers
 			GeneralResult response;
 			if (vm.token == _appkey)
 			{
+			    if (vm.sessionId == null)
+			    {
+			        response = new GeneralResult(false, "Sessionen kunde inte hittas då sessionsId saknas");
+			        return Json(response);
+                }
+
 				var session = _db.Sessions.Find(vm.sessionId);
 
 				if (session == null)
