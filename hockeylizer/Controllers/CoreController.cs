@@ -327,7 +327,10 @@ namespace hockeylizer.Controllers
 		public async Task<bool> AnalyzeSession(int sessionId)
 		{
 			var session = _db.Sessions.Find(sessionId);
-			if (session == null) throw new Exception("Kunde inte hitta session.");
+		    if (session == null)
+		    {
+		        throw new Exception("Kunde inte hitta session.");
+		    }
 
 			var blobname = session.FileName;
 			var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
@@ -347,15 +350,48 @@ namespace hockeylizer.Controllers
 			}
 
 			var player = _db.Players.Find(session.PlayerId);
-			if (player == null) throw new Exception("Kunde inte hitta spelare.");
+		    if (player == null)
+		    {
+		        session.Analyzed = false;
+		        session.AnalisysFailReason = "Kunde inte hitta spelare.";
+
+		        await _db.SaveChangesAsync();
+		        return false;
+		    }
 
 			var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-			if (!download.Key) throw new Exception("Kunde inte ladda ned film för att: " + download.Value);
+		    if (!download.Key)
+		    {
+		        session.Analyzed = false;
+		        session.AnalisysFailReason = "Kunde inte ladda ned film för att: " + download.Value;
+
+		        await _db.SaveChangesAsync();
+		        return false;
+		    }
 
 			var sourcePoints = _db.AimPoints.Where(t => t.SessionId == session.SessionId)
 								  .Select(t => new Point2i((int)t.XCoordinate, (int)t.YCoordinate)).ToArray();
 
-			if (!sourcePoints.Any()) throw new Exception("Kunde inte hitta några punkter astt sikta på.");
+		    if (!sourcePoints.Any())
+		    {
+		        session.Analyzed = false;
+		        session.AnalisysFailReason = "Kunde inte hitta några punkter att sikta på.";
+
+		        try
+		        {
+		            System.IO.File.Delete(path);
+		        }
+		        catch
+		        {
+		            session.DeleteFailed = true;
+		            session.DeleteFailedWhere = path;
+
+		            await _db.SaveChangesAsync();
+		        }
+
+                await _db.SaveChangesAsync();
+		        return false;
+		    }
 
 			var width = Points.ClothWidth;
 			var height = Points.ClothHeight;
@@ -364,7 +400,23 @@ namespace hockeylizer.Controllers
 
 			foreach (var t in targets)
 			{
-				var analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, sourcePoints, width, height, Points.HitPointsInCm().Values.ToArray(), path);
+			    AnalysisResult analysis;
+			    try
+			    {
+			        analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, sourcePoints, width, height,
+			            Points.HitPointsInCm().Values.ToArray(), path);
+			    }
+			    catch (Exception e)
+			    {
+			        session.Analyzed = false;
+			        session.AnalisysFailReason =
+			            "Servern kraschade medan den försöka analysera klippet. Felmeddelande från server: " + e.Message;
+
+			        t.AnalysisFailed = true;
+			        t.AnalysisFailedReason = e.Message;
+
+			        break;
+			    }
 
 				if (analysis.WasErrors)
 				{
@@ -458,10 +510,24 @@ namespace hockeylizer.Controllers
 			}
 
 			var player = _db.Players.Find(session.PlayerId);
-			if (player == null) throw new Exception("Kunde inte hitta spelare.");
+		    if (player == null)
+		    {
+		        session.Chopped = false;
+		        session.ChopFailReason = "Kunde inte hitta spelare.";
+
+		        await _db.SaveChangesAsync();
+		        return false;
+            }
 
 			var download = await FileHandler.DownloadBlob(path, blobname, player.RetrieveContainerName());
-			if (!download.Key) throw new Exception("Kunde inte ladda ned film för att: " + download.Value);
+		    if (!download.Key)
+		    {
+		        session.Chopped = false;
+		        session.ChopFailReason = "Kunde inte ladda ned film för att: " + download.Value;
+
+		        await _db.SaveChangesAsync();
+		        return false;
+		    }
 
 			var intervals = _db.Targets.Where(target => target.SessionId == sessionId).Select(t => new DecodeInterval
 			{
@@ -469,7 +535,31 @@ namespace hockeylizer.Controllers
 				endMs = t.TimestampEnd
 			}).ToArray();
 
-			var shots = AnalysisBridge.DecodeFrames(path, blobname, BlobCredentials.AccountName, BlobCredentials.Key, player.RetrieveContainerName(), intervals);
+		    FrameCollection[] shots;
+		    try
+		    {
+		        shots = AnalysisBridge.DecodeFrames(path, blobname, BlobCredentials.AccountName, BlobCredentials.Key,
+		            player.RetrieveContainerName(), intervals);
+		    }
+		    catch (Exception e)
+		    {
+		        session.Chopped = false;
+		        session.ChopFailReason = "Kunde inte stycka upp film. Felmeddelande från server: " + e.Message;
+
+		        try
+		        {
+		            System.IO.File.Delete(path);
+		        }
+		        catch
+		        {
+		            session.DeleteFailed = true;
+		            session.DeleteFailedWhere = path;
+		        }
+
+                await _db.SaveChangesAsync();
+		        return false;
+            }
+			
 			if (shots.Any())
 			{
 				foreach (var s in shots)
@@ -489,22 +579,21 @@ namespace hockeylizer.Controllers
 
 			await _db.SaveChangesAsync();
 
-			if (System.IO.File.Exists(path))
-			{
-				try
-				{
-					System.IO.File.Delete(path);
-				}
-				catch
-				{
-					session.DeleteFailed = true;
-					session.DeleteFailedWhere = path;
+		    if (!System.IO.File.Exists(path)) return true;
 
-					await _db.SaveChangesAsync();
-				}
-			}
+		    try
+		    {
+		        System.IO.File.Delete(path);
+		    }
+		    catch
+		    {
+		        session.DeleteFailed = true;
+		        session.DeleteFailedWhere = path;
 
-			return true;
+		        await _db.SaveChangesAsync();
+		    }
+
+		    return true;
 		}
 
 		[AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
