@@ -274,8 +274,8 @@ namespace hockeylizer.Models
 
         public int? sessionId { get; set; }
         public int? shot { get; set; }
-        public double? x { get; set; }
-        public double? y { get; set; }
+        public int? x { get; set; }
+        public int? y { get; set; }
         public string token { get; set; }
 
         public GeneralResult ur { get; set; }

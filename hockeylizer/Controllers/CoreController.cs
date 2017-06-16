@@ -918,6 +918,9 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
+			    var xCoord = (int)vm.x;
+			    var yCoord = (int) vm.y;
+
 				var targetPoint = Points.HitPointsInCm()[shotToUpdate.TargetNumber];
 				if (targetPoint == null)
 				{
@@ -934,7 +937,7 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				var offsets = new Point2d((double)vm.x, (double)vm.y);
+				var offsets = new Point2d(xCoord, yCoord);
 
 			    Point2d convertedPoints;
 			    try
@@ -948,11 +951,19 @@ namespace hockeylizer.Controllers
 			        return Json(response);
                 }
 
-				shotToUpdate.XOffset = convertedPoints.x;
-				shotToUpdate.YOffset = convertedPoints.y;
+			    try
+			    {
+			        shotToUpdate.XOffset = convertedPoints.x;
+			        shotToUpdate.YOffset = convertedPoints.y;
 
-				shotToUpdate.XCoordinateAnalyzed = vm.x;
-				shotToUpdate.YCoordinateAnalyzed = vm.y;
+			        shotToUpdate.XCoordinateAnalyzed = vm.x;
+			        shotToUpdate.YCoordinateAnalyzed = vm.y;
+			    }
+			    catch (Exception e)
+			    {
+			        response = new GeneralResult(false, "Kunde inte uppdatera då ett fel uppstod på servern. Felmeddelande från server: " + e.Message);
+			        return Json(response);
+                }
 
 				await _db.SaveChangesAsync();
 
