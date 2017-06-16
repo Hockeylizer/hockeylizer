@@ -26,11 +26,13 @@ namespace hockeylizer.Services
             int[] shotIndexes = new int[decodeIntervalsFlat.Length];
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                res = decodeFramesWin(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
+                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
+                res = decodeFramesWin(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes, 0);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                res = decodeFramesLinux(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes);
+                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
+                res = decodeFramesLinux(videoName, blobPrefix, out size, accountName, accountKey, containerName, decodeIntervalsFlat, decodeIntervals.Length, shotIndexes, 0);
             }
             else
             {
@@ -97,13 +99,15 @@ namespace hockeylizer.Services
             AnalysisResult ret = new AnalysisResult();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
                 analyzeShotCSWin(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
-                    targetOffsetsInCmFlat, videoName, ret);
+                    targetOffsetsInCmFlat, videoName, 0, ret);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
                 analyzeShotCSLinux(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
-                    targetOffsetsInCmFlat, videoName, ret);
+                    targetOffsetsInCmFlat, videoName, 0, ret);
             }
             else
             {
@@ -259,7 +263,7 @@ namespace hockeylizer.Services
 
         [DllImport(windowsSharedLibrary, EntryPoint = "decodeFrames")]
         private static extern IntPtr decodeFramesWin(String videoName, string blobPrefix, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
-            int decodeIntervalsSize, [In, Out] int[] shotIndexes);
+            int decodeIntervalsSize, [In, Out] int[] shotIndexes, float angle);
 
         //Windows entry points
         [DllImport(windowsSharedLibrary, EntryPoint = "analyzeShotCS")]
@@ -268,7 +272,7 @@ namespace hockeylizer.Services
             [In] int[] targetCoords,
             double sizeX, double sizeY,
             [In] double[] targetOffsetsInCm,
-            String videoName,
+            String videoName, float angle,
             [In, Out, MarshalAs(UnmanagedType.LPStruct)]
             AnalysisResult ret);
 
@@ -308,7 +312,7 @@ namespace hockeylizer.Services
 
         [DllImport(linuxSharedLibrary, EntryPoint = "decodeFrames")]
         private static extern IntPtr decodeFramesLinux(String videoName, String blobPrefix, out int urisArraySize, String accountName, String accountKey, String containerName, int[] decodeIntervalsFlat,
-            int decodeIntervalsSize, [In, Out] int[] shotIndexes);
+            int decodeIntervalsSize, [In, Out] int[] shotIndexes, float angle);
 
         [DllImport(linuxSharedLibrary, EntryPoint = "analyzeShotCS")]
         private static extern void analyzeShotCSLinux(long msStartTimestamp, long msEndTimestamp,
@@ -316,7 +320,7 @@ namespace hockeylizer.Services
             [In] int[] targetCoords,
             double sizeX, double sizeY,
             [In] double[] targetOffsetsInCm,
-            String videoName,
+            String videoName, float angle,
             [In, Out, MarshalAs(UnmanagedType.LPStruct)]
             AnalysisResult ret);
 
