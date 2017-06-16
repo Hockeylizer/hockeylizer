@@ -451,11 +451,13 @@ namespace hockeylizer.Models
                 return false;
             }
 
+            #pragma warning disable 0472 // Since t.start and t.end can indeed be null.
             if (this.timestamps.Any(t => t.start == null || t.end == null))
             {
                 this.sr = new SessionResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
                 return false;
             }
+            #pragma warning restore 0472
 
             if (!this.targetOrder.Any())
 			{
