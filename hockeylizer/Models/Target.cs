@@ -51,6 +51,8 @@ namespace hockeylizer.Models
         public double? YCoordinateAnalyzed { get; set; }
 
         public int? FrameHit { get; set; }
+        public int? RealFrameHit { get; set; }
+
         public bool HitGoal { get; set; }
 
 		public bool AnalysisFailed { get; set; }

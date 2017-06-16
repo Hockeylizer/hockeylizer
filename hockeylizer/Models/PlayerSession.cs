@@ -75,9 +75,7 @@ namespace hockeylizer.Models
             this.Analyzed = false;
             this.Chopped = false;
 
-			this.SomethingFailed = false;
             this.DeleteFailed = false;
-
             this.Created = DateTime.Now;
 
             this.AimingPoints = new HashSet<AimPoint>();
@@ -119,13 +117,11 @@ namespace hockeylizer.Models
 		public bool VideoRemoved { get; set; }
 
         public bool Analyzed { get; set; }
-        public string AnalisysFailReason { get; set; }
+        public string AnalysisFailReason { get; set; }
 
 	    public bool Chopped { get; set; }
 	    public string ChopFailReason { get; set; }
 
-        public bool SomethingFailed { get; set; }
-        public string WhySomethingFailed { get; set; }
 
         public bool DeleteFailed { get; set; }
         public string DeleteFailedWhere { get; set; }
