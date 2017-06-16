@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "hockeylizer", "hockeylizer\hockeylizer.csproj", "{6FAF3A20-AF93-4102-9D13-81DA5EB138F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HockeylizerUnitTests", "HockeylizerUnitTests\HockeylizerUnitTests.csproj", "{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,18 @@ Global
 		{6FAF3A20-AF93-4102-9D13-81DA5EB138F7}.Release|x64.Build.0 = Release|x64
 		{6FAF3A20-AF93-4102-9D13-81DA5EB138F7}.Release|x86.ActiveCfg = Release|x86
 		{6FAF3A20-AF93-4102-9D13-81DA5EB138F7}.Release|x86.Build.0 = Release|x86
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Debug|x64.Build.0 = Debug|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Debug|x86.Build.0 = Debug|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Release|x64.ActiveCfg = Release|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Release|x64.Build.0 = Release|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Release|x86.ActiveCfg = Release|Any CPU
+		{754BFA4F-D417-4481-97E9-01FF8BE3C8FC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

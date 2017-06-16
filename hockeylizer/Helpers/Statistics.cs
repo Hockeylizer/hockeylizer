@@ -3,7 +3,7 @@ using hockeylizer.Models;
 using System.Linq;
 using System;
 
-namespace Meck
+namespace hockeylizer.Helpers
 {
     public static class Statistics
     {
