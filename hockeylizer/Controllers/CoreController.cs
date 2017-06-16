@@ -825,7 +825,17 @@ namespace hockeylizer.Controllers
 
 				var offsets = new Point2d((double)vm.x, (double)vm.y);
 
-				var convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, targetPoint, sourcePoints, Points.HitPointsInCm().Values.ToArray());
+			    Point2d convertedPoints;
+			    try
+			    {
+			        convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, targetPoint, sourcePoints,
+			            Points.HitPointsInCm().Values.ToArray());
+			    }
+			    catch (Exception e)
+			    {
+			        response = new GeneralResult(false, "Något gick fel när perspektivet skulle uppdateras. Felmeddelande från server: " + e.Message);
+			        return Json(response);
+                }
 
 				shotToUpdate.XOffset = convertedPoints.x;
 				shotToUpdate.YOffset = convertedPoints.y;
