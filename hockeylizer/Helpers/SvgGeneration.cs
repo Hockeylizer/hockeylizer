@@ -131,6 +131,7 @@ namespace hockeylizer.Helpers
 
             var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             XDocument svgCode = XDocument.Load(svg_template_path);
+            svgCode.Declaration = new XDeclaration("1.0", "utf-8", "no");
             XNamespace ns = svgCode.Root.Name.Namespace;
            
             foreach (Point2d point in points) svgCode.Root.Add(svgCircle(ns, point.x, point.y));
