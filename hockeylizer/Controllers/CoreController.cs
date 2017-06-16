@@ -1121,13 +1121,10 @@ namespace hockeylizer.Controllers
 			{
 				case "all":
 					return SvgGeneration.generateAllHitsSVG(offsets, _svgDir, return_link);
-					break;
 				case "box":
 					return SvgGeneration.generateBoxplotsSVG(offsets, _svgDir, return_link);
-					break;
 				default:
 					return "Internal Error: Choice was neither 'all' nor 'box'.";
-					break;
 			}
 
 		}
