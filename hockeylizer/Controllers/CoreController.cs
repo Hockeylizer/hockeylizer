@@ -839,6 +839,28 @@ namespace hockeylizer.Controllers
 					images.Add(picture);
 				}
 
+			    int? frameHit = null;
+
+                // The problem is that we get framehit as the frameindex as filmed 
+                // from the start, therefore we must compensate
+
+                // ----------------------- * <-- shot.FrameHit
+                // -------------- * <-- start = shot.TimestampStart * 30 / 1000
+                //                  ------ * <-- our actual index for hit
+
+                // therefore the index at which our frame hit is
+                //
+                // frameHit = shot.FrameHit - start;
+
+			    if (shot.FrameHit != 0 && shot.FrameHit != null && shot.HitGoal)
+			    {
+			        var frame = (int)shot.FrameHit;
+
+			        var start = (shot.TimestampStart * 30) / 1000;
+
+			        frameHit = frame - start;
+			    }
+
 				response = new GetDataFromShotResult(true, "Skottets träffpunkt har uppdaterats!", images)
 				{
 					TargetNumber = shot.TargetNumber,
@@ -850,7 +872,7 @@ namespace hockeylizer.Controllers
 					XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
 					YCoordinateAnalyzed = shot.YCoordinateAnalyzed,
 					HitTarget = shot.HitGoal,
-					FrameHit = shot.FrameHit,
+					FrameHit = frameHit,
 					Analyzed = shot.AnalysisFailed,
 					Reason = shot.AnalysisFailedReason
 				};
