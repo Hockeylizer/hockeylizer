@@ -858,7 +858,13 @@ namespace hockeylizer.Controllers
 
 			        var start = (shot.TimestampStart * 30) / 1000;
 
-			        frameHit = frame - start;
+			        var frameHitProposed = frame - start;
+
+			        var numberOfFrames = _db.Frames.Count(fr => fr.TargetId == shot.TargetId);
+			        if (!(frameHitProposed > numberOfFrames))
+			        {
+			            frameHit = frameHitProposed;
+			        }
 			    }
 
 				response = new GetDataFromShotResult(true, "Skottets träffpunkt har uppdaterats!", images)
