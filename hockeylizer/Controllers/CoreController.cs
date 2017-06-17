@@ -407,12 +407,28 @@ namespace hockeylizer.Controllers
 			    }
 			    catch (Exception e)
 			    {
+			        try
+			        {
+			            System.IO.File.Delete(path);
+			        }
+			        catch
+			        {
+			            session.DeleteFailed = true;
+			            session.DeleteFailedWhere = path;
+
+			            await _db.SaveChangesAsync();
+			        }
 			        session.Analyzed = false;
 			        session.AnalysisFailReason =
 			            "Servern kraschade medan den försöka analysera klippet. Felmeddelande från server: " + e.Message;
 
 			        t.AnalysisFailed = true;
 			        t.AnalysisFailedReason = e.Message;
+
+                    BackgroundJob.Enqueue<CoreController>
+			        (
+			            service => service.ChopSession(sessionId)
+			        );
 
 			        break;
 			    }
@@ -574,6 +590,7 @@ namespace hockeylizer.Controllers
 				}
 			}
 
+		    session.ChopFailReason = "";
 			session.Chopped = true;
 
 			await _db.SaveChangesAsync();
@@ -715,7 +732,7 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				response = new IsChoppedResult(true, "Videoklippet kollat", session.Chopped);
+				response = new IsChoppedResult(true, "Videoklippet kollat. " + session.ChopFailReason, session.Chopped);
 				return Json(response);
 			}
 
@@ -880,6 +897,7 @@ namespace hockeylizer.Controllers
 					XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
 					YCoordinateAnalyzed = shot.YCoordinateAnalyzed,
                     HitGoal = shot.HitGoal,
+                    ManuallyAnalyzed = shot.ManuallyAnalyzed,
 					FrameHit = frameHit,
 					Analyzed = shot.AnalysisFailed,
 					Reason = shot.AnalysisFailedReason

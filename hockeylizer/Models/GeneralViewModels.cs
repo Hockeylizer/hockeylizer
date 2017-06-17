@@ -192,6 +192,7 @@ namespace hockeylizer.Models
 
         public bool Analyzed { get; set; }
         public string AnalysisFailedReason { get; set; }
+
         public string HitRatio { get; set; }
     }
 
@@ -212,6 +213,7 @@ namespace hockeylizer.Models
 
             this.Analyzed = false;
             this.HitGoal = false;
+		    this.ManuallyAnalyzed = false;
 
 			this.FrameUrls = urls ?? new List<string>();
 		}
@@ -233,6 +235,7 @@ namespace hockeylizer.Models
 
         public bool? HitGoal { get; set; }
         public int? FrameHit { get; set; }
+        public bool? ManuallyAnalyzed { get; set; }
 
         public bool Analyzed { get; set; }
         public string Reason { get; set; }
