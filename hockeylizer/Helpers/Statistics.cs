@@ -7,6 +7,10 @@ namespace hockeylizer.Helpers
 {
     public static class Statistics
     {
+        /*o=================================================================o
+          |                    PUCK CALCULATION METHODS                     |
+          o=================================================================o*/
+
         public static Dictionary<int, Point2d> TargetCoords { get; }
             = new Dictionary<int, Point2d> {{ 1, new Point2d(10, 91)  },
                                             { 2, new Point2d(10, 18)  },
@@ -14,13 +18,31 @@ namespace hockeylizer.Helpers
                                             { 4, new Point2d(173, 91) },
                                             { 5, new Point2d(91.5, 101)} };
 
+        public static IEnumerable<Point2d1T> offsetToAbsolute(IEnumerable<Point2d1T> offsets)
+        {
+            foreach (var p in offsets) {
+                if (p.target < 1 || 5 < p.target) throw new InvalidOperationException("A offset target is not in the range 1-5.");
+            }
+            return offsets.Select(p =>  offsetToAbsolute(p) );
+        }
+
+        public static Point2d1T offsetToAbsolute(Point2d1T offset)
+        {
+            if (offset.target < 1 || 5 < offset.target) throw new InvalidOperationException("offset.target is not in the range 1-5.");
+            return new Point2d1T(TargetCoords[offset.target].x + offset.x, TargetCoords[offset.target].y + offset.y, offset.target);
+        }
+
+        /*o=================================================================o
+          |                       STATISTICS METHODS                        |
+          o=================================================================o*/
+
         /// <summary></summary>
         /// <param name="sorted_nums">Must be sorted and non-empty.</param>
         /// <returns>The median of the values in sorted_nums</returns>
         public static double medianOnSorted(List<double> sorted_nums)
         {
-            if (sorted_nums == null) throw new ArgumentNullException("sorted_nums");
-            if (!sorted_nums.Any()) throw new InvalidOperationException("sorted_nums");
+            if (sorted_nums == null) throw new ArgumentNullException("sorted_nums is null.");
+            if (!sorted_nums.Any()) throw new InvalidOperationException("sorted_nums cannot be empty.");
             int len = sorted_nums.Count;
             if (len % 2 == 1) return sorted_nums[(len - 1) / 2];
             else return (sorted_nums[len / 2 - 1] + sorted_nums[len / 2]) / 2;
@@ -31,8 +53,8 @@ namespace hockeylizer.Helpers
         /// <returns></returns>
         public static double median(List<double> nums)
         {
-            if (nums == null) throw new ArgumentNullException("nums");
-            if (!nums.Any()) throw new InvalidOperationException("nums");
+            if (nums == null) throw new ArgumentNullException("nums is null.");
+            if (!nums.Any()) throw new InvalidOperationException("nums cannot be empty.");
             nums.Sort();
             return medianOnSorted(nums);
         }
@@ -51,8 +73,8 @@ namespace hockeylizer.Helpers
         /// <returns></returns>
         public static double squaredErrorSum(IEnumerable<double> nums)
         {
-            if (nums == null) throw new ArgumentNullException("nums");
-            if (!nums.Any()) throw new InvalidOperationException("nums");
+            if (nums == null) throw new ArgumentNullException("nums is null.");
+            if (!nums.Any()) throw new InvalidOperationException("nums cannot be empty.");
             var e = nums.Average();
             return squaredErrorSum(nums, e);
         }
@@ -65,8 +87,8 @@ namespace hockeylizer.Helpers
         /// <returns></returns>
         public static double squaredErrorSum(IEnumerable<double> nums, double expectedValue)
         {
-            if (nums == null) throw new ArgumentNullException("nums");
-            if (!nums.Any()) throw new InvalidOperationException("nums");
+            if (nums == null) throw new ArgumentNullException("nums is null.");
+            if (!nums.Any()) throw new InvalidOperationException("nums cannot be empty.");
             // The lambda argument applies that function to each element before summing.
             return nums.Sum((num => (num - expectedValue) * (num - expectedValue)));
         }
@@ -78,8 +100,8 @@ namespace hockeylizer.Helpers
         /// <returns></returns>
         public static double variance(IEnumerable<double> nums)
         {
-            if (nums == null) throw new ArgumentNullException("nums");
-            if (!nums.Any()) throw new InvalidOperationException("nums");
+            if (nums == null) throw new ArgumentNullException("nums is null.");
+            if (!nums.Any()) throw new InvalidOperationException("nums cannot be empty.");
 
             if (nums.Count() == 1) return 0;
 
@@ -87,8 +109,8 @@ namespace hockeylizer.Helpers
         }
         public static double standardDeviation(IEnumerable<double> nums)
         {
-            if (nums == null) throw new ArgumentNullException("nums");
-            if (!nums.Any()) throw new InvalidOperationException("nums");
+            if (nums == null) throw new ArgumentNullException("nums is null.");
+            if (!nums.Any()) throw new InvalidOperationException("nums cannot be empty.");
             return Math.Sqrt(variance(nums));
         }
 
@@ -118,6 +140,10 @@ namespace hockeylizer.Helpers
             if (quantile < 0 || 1 < quantile) throw new ArgumentOutOfRangeException("quantile", "Must be in the interval [0, 1].");
             else return (int)Math.Ceiling((1 - quantile) * (numberOfItems - 1));
         }
+
+        /*o=================================================================o
+          |                    REPORT GENERATION METHODS                    |
+          o=================================================================o*/
 
         /// <summary>
         /// Creates a CSV-string (comma separated values, but semicolons ';' are used, not commas.)
