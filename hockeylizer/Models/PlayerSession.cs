@@ -44,6 +44,8 @@ namespace hockeylizer.Models
 	        }
 	    }
 
+        // This what Daniel did
+
         //// to = targetorder, ts = timestamps
         //public void AddTargets(List<int> to, List<TargetCoordsVm> coords, List<ShotTimestampVm> ts, int limit)
         //{
