@@ -141,38 +141,6 @@ namespace hockeylizer.Helpers
             else return (int)Math.Ceiling((1 - quantile) * (numberOfItems - 1));
         }
 
-        /*o=================================================================o
-          |                    REPORT GENERATION METHODS                    |
-          o=================================================================o*/
-
-        /// <summary>
-        /// Creates a CSV-string (comma separated values, but semicolons ';' are used, not commas.)
-        /// from the matrix. Each row is  a line and each column on a row is one value.
-        /// </summary>
-        /// <param name="matrix">You probably don't want the entries to contain semicolons.</param>
-        /// <returns></returns>
-        public static string matrixToCSV(string[][] matrix)
-        {
-            return matrixToCSV(matrix, ";");
-        }
-
-        /// <summary>
-        /// Creates a CSV-string (comma separated values, but the separator paremeter is used, not commas.)
-        /// from the matrix. Each row is  a line and each column on a row is one value.
-        /// </summary>
-        /// <param name="matrix">You probably don't want the entries to contain the separator.</param>
-        /// <returns></returns>
-        public static string matrixToCSV(string[][] matrix, string separator)
-        {
-            if (matrix == null) return "";
-            if (separator == null) throw new ArgumentNullException("separator");
-            if (separator == "") throw new ArgumentException("separator", "Cannot be an empty string.");
-
-            var csv = new System.Text.StringBuilder();
-            foreach (string[] row in matrix) csv.AppendLine(String.Join(separator, row));
-            return csv.ToString().TrimEnd('\r', '\n');
-        }
-
         /* Uses divide-and-conquer method to minimise precision loss.
          * For even less precision loss, in some cases, sort nums first.
          */
@@ -188,5 +156,38 @@ namespace hockeylizer.Helpers
 
             return sum1 + sum2;
         }
+
+        /*o=================================================================o
+          |                    REPORT GENERATION METHODS                    |
+          o=================================================================o*/
+
+        /// <summary>
+        /// Creates a CSV-string (comma separated values, but semicolons ';' are used, not commas.)
+        /// from the matrix. Each row is  a line and each column on a row is one value.
+        /// </summary>
+        /// <param name="matrix">You probably don't want the entries to contain semicolons.</param>
+        /// <returns></returns>
+        public static string matrixToCSV(IEnumerable<string[]> matrix)
+        {
+            return matrixToCSV(matrix, ";");
+        }
+
+        /// <summary>
+        /// Creates a CSV-string (comma separated values, but the separator paremeter is used, not commas.)
+        /// from the matrix. Each row is  a line and each column on a row is one value.
+        /// </summary>
+        /// <param name="matrix">You probably don't want the entries to contain the separator.</param>
+        /// <returns></returns>
+        public static string matrixToCSV(IEnumerable<string[]> matrix, string separator)
+        {
+            if (matrix == null) return "";
+            if (separator == null) throw new ArgumentNullException("separator");
+            if (separator == "") throw new ArgumentException("separator", "Cannot be an empty string.");
+
+            var csv = new System.Text.StringBuilder();
+            foreach (string[] row in matrix) csv.AppendLine(String.Join(separator, row));
+            return csv.ToString().TrimEnd('\r', '\n');
+        }
+
     }
 }

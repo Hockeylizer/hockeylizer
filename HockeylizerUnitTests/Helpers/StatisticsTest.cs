@@ -324,5 +324,47 @@ namespace HockeylizerUnitTests.Helpers
             testMatrix = new string[4][] { new string[] { "a", "a", "a" }, new string[] { "b", "b" }, new string[] { }, new string[] { "ccc" } };
             Assert.AreEqual(ansStr, matrixToCSV(testMatrix));
         }
+
+        [TestMethod]
+        public void matrixToCsvTest3()
+        {
+            Assert.ThrowsException<ArgumentException>(() => matrixToCSV(new List<string[]>() { new string[] { "a", "b" } }, ""));
+            Assert.ThrowsException<ArgumentNullException>(() => matrixToCSV(new List<string[]>() { new string[] { "a", "b" } }, null));
+
+            Assert.AreEqual("", matrixToCSV(null, "!"));
+            Assert.AreEqual("", matrixToCSV(new List<string[]>() { }, "!"));
+            Assert.AreEqual("a.bb.ccc", matrixToCSV(new List<string[]>() { new string[] { "a", "bb", "ccc" } }, "."));
+
+            var n = Environment.NewLine;
+            var ansStr = string.Format("a{0}b", n);
+            var testMatrix = new List<string[]>() { new string[] { "a" }, new string[] { "b" } };
+            Assert.AreEqual(ansStr, matrixToCSV(testMatrix, "!"));
+
+            ansStr = string.Format("a!a!a{0}b!b{0}{0}ccc", n);
+            testMatrix = new List<string[]>() { new string[] { "a", "a", "a" }, new string[] { "b", "b" }, new string[] { }, new string[] { "ccc" } };
+            Assert.AreEqual(ansStr, matrixToCSV(testMatrix, "!"));
+
+            ansStr = string.Format("ax{0}bx{0}cx", n);
+            testMatrix = new List<string[]>() { new string[] { "ax", "bx", "cx" }, new string[] { n }, new string[] { } };
+            Assert.AreEqual(ansStr, matrixToCSV(testMatrix, n));
+        }
+
+        [TestMethod]
+        public void matrixToCsvTest4()
+        {
+            Assert.AreEqual("", matrixToCSV(null));
+            Assert.AreEqual("", matrixToCSV(new List<string[]>() { }));
+            Assert.AreEqual("a;bb;ccc", matrixToCSV(new List<string[]>() { new string[] { "a", "bb", "ccc" } }));
+
+            var n = Environment.NewLine;
+            var ansStr = string.Format("a{0}b", n);
+            var testMatrix = new List<string[]>() { new string[] { "a" }, new string[] { "b" } };
+            Assert.AreEqual(ansStr, matrixToCSV(testMatrix));
+
+            ansStr = string.Format("a;a;a{0}b;b{0}{0}ccc", n);
+            testMatrix = new List<string[]>() { new string[] { "a", "a", "a" }, new string[] { "b", "b" }, new string[] { }, new string[] { "ccc" } };
+            Assert.AreEqual(ansStr, matrixToCSV(testMatrix));
+        }
+
     }
 }
