@@ -167,7 +167,7 @@ namespace hockeylizer.Helpers
         /// </summary>
         /// <param name="matrix">You probably don't want the entries to contain semicolons.</param>
         /// <returns></returns>
-        public static string matrixToCSV(IEnumerable<string[]> matrix)
+        public static string matrixToCSV(IEnumerable<IEnumerable<string>> matrix)
         {
             return matrixToCSV(matrix, ";");
         }
@@ -178,16 +178,18 @@ namespace hockeylizer.Helpers
         /// </summary>
         /// <param name="matrix">You probably don't want the entries to contain the separator.</param>
         /// <returns></returns>
-        public static string matrixToCSV(IEnumerable<string[]> matrix, string separator)
+        public static string matrixToCSV(IEnumerable<IEnumerable<string>> matrix, string separator)
         {
             if (matrix == null) return "";
             if (separator == null) throw new ArgumentNullException("separator");
             if (separator == "") throw new ArgumentException("separator", "Cannot be an empty string.");
 
             var csv = new System.Text.StringBuilder();
-            foreach (string[] row in matrix) csv.AppendLine(String.Join(separator, row));
+            foreach (IEnumerable<string> row in matrix) csv.AppendLine(String.Join(separator, row));
             return csv.ToString().TrimEnd('\r', '\n');
         }
+
+        public static 
 
     }
 }
