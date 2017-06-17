@@ -873,6 +873,7 @@ namespace hockeylizer.Controllers
 			        // therefore the index at which our frame hit is
 			        //
 			        // frameHit = shot.FrameHit - start;
+
                     var frame = (int)shot.FrameHit;
 
 			        var start = (shot.TimestampStart * 30) / 1000;
