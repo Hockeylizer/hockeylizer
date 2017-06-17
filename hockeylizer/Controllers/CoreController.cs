@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Globalization;
 using hockeylizer.Services;
 using hockeylizer.Helpers;
-using System.Diagnostics;
 using hockeylizer.Models;
 using hockeylizer.Data;
 using System.Linq;
@@ -880,7 +879,6 @@ namespace hockeylizer.Controllers
 					YCoordinate = shot.YCoordinate,
 					XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
 					YCoordinateAnalyzed = shot.YCoordinateAnalyzed,
-					HitTarget = shot.HitTarget,
                     HitGoal = shot.HitGoal,
 					FrameHit = frameHit,
 					Analyzed = shot.AnalysisFailed,
@@ -987,9 +985,8 @@ namespace hockeylizer.Controllers
 			        shotToUpdate.YCoordinateAnalyzed = vm.y;
 
 			        shotToUpdate.RealFrameHit = vm.frame;
-			        shotToUpdate.HitTarget = vm.hitTarget;
+			        shotToUpdate.HitGoal = vm.hitTarget ?? false;
 
-			        shotToUpdate.HitGoal = true;
 			        shotToUpdate.ManuallyAnalyzed = true;
 			    }
 			    catch (Exception e)
