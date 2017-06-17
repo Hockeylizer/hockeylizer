@@ -20,55 +20,56 @@ namespace hockeylizer.Models
 		    this.Chopped = false;
         }
 
-	    // to = targetorder, ts = timestamps
-	    public void AddTargets(List<int> to, List<TargetCoordsVm> coords, List<ShotTimestampVm> ts, int limit)
-	    {
-	        var index = 1;
-
-	        for (var t = 0; t < limit; t++)
-	        {
-	            var mod = (to.Count - 1);
-	            var currentTarget = mod == 0 ? 0 : to[t % mod];
-
-	            var xCoord = coords[currentTarget].xCoord;
-	            var yCoord = coords[currentTarget].yCoord;
-
-	            var target = new Target(to[currentTarget], index, ts[t].start, ts[t].end, xCoord, yCoord, null, null)
-	            {
-	                RelatedSession = this
-	            };
-
-	            index++;
-
-	            this.Targets.Add(target);
-	        }
-	    }
-
-        // This what Daniel did
+        // This is what Lennart did.
 
         //// to = targetorder, ts = timestamps
         //public void AddTargets(List<int> to, List<TargetCoordsVm> coords, List<ShotTimestampVm> ts, int limit)
         //{
-        //	var index = 1;
+        //    var index = 1;
 
-        //	for (var t = 0; t < limit; t++)
-        //	{
-        //	    var mod = to.Count;
-        //	    var currentTarget = to[t % mod];
+        //    for (var t = 0; t < limit; t++)
+        //    {
+        //        var mod = (to.Count - 1);
+        //        var currentTarget = mod == 0 ? 0 : to[t % mod];
 
-        //              var xCoord = coords[currentTarget].xCoord;
-        //	    var yCoord = coords[currentTarget].yCoord;
+        //        var xCoord = coords[currentTarget].xCoord;
+        //        var yCoord = coords[currentTarget].yCoord;
 
-        //              var target = new Target(currentTarget, index, ts[t].start, ts[t].end, xCoord, yCoord, null, null)
-        //		{
-        //			RelatedSession = this
-        //		};
+        //        var target = new Target(to[currentTarget], index, ts[t].start, ts[t].end, xCoord, yCoord, null, null)
+        //        {
+        //            RelatedSession = this
+        //        };
 
-        //		index++;
+        //        index++;
 
-        //		this.Targets.Add(target);
-        //	}
+        //        this.Targets.Add(target);
+        //    }
         //}
+
+        // This what Daniel did
+
+        // to = targetorder, ts = timestamps
+        public void AddTargets(List<int> to, List<TargetCoordsVm> coords, List<ShotTimestampVm> ts, int limit)
+        {
+            var index = 1;
+
+            for (var t = 0; t < limit; t++)
+            {
+                var currentTarget = to[t % to.Count];
+
+                var xCoord = coords[currentTarget].xCoord;
+                var yCoord = coords[currentTarget].yCoord;
+
+                var target = new Target(currentTarget, index, ts[t].start, ts[t].end, xCoord, yCoord, null, null)
+                {
+                    RelatedSession = this
+                };
+
+                index++;
+
+                this.Targets.Add(target);
+            }
+        }
 
         public void AddAimpoints(List<TargetCoordsVm> coords)
 		{
