@@ -17,6 +17,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <WarningLevel>0</WarningLevel>
+    <Prefer32Bit>True</Prefer32Bit>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
