@@ -32,6 +32,10 @@ namespace hockeylizer.Helpers
             return new Point2d1T(TargetCoords[offset.target].x + offset.x, TargetCoords[offset.target].y + offset.y, offset.target);
         }
 
+        public static double norm(double x, double y) {
+            return System.Math.Sqrt(x * x + y * y);
+        }
+
         /*o=================================================================o
           |                       STATISTICS METHODS                        |
           o=================================================================o*/
@@ -197,6 +201,10 @@ namespace hockeylizer.Helpers
             // Invariant culture uses '.' as decimal sign instead of ','
             return nums.Select(n => n.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray();
         }
+
+        public static string generateMailString(Player player, PlayerSession session, IEnumerable<Target> targets) {
+            return "foo";
+        } 
 
     }
 }
