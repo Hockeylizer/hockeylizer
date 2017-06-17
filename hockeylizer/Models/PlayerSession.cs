@@ -27,13 +27,13 @@ namespace hockeylizer.Models
 
 			for (var t = 0; t < limit; t++)
 			{
-			    var mod = (to.Count - 1);
-			    var currentTarget = mod == 0 ? 0 : to[t % mod];
+			    var mod = to.Count;
+			    var currentTarget = to[t % mod];
 
                 var xCoord = coords[currentTarget].xCoord;
 			    var yCoord = coords[currentTarget].yCoord;
 
-                var target = new Target(to[currentTarget], index, ts[t].start, ts[t].end, xCoord, yCoord, null, null)
+                var target = new Target(currentTarget, index, ts[t].start, ts[t].end, xCoord, yCoord, null, null)
 				{
 					RelatedSession = this
 				};

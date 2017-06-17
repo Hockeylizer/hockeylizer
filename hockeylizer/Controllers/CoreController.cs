@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Globalization;
 using hockeylizer.Services;
 using hockeylizer.Helpers;
-using System.Diagnostics;
 using hockeylizer.Models;
 using hockeylizer.Data;
 using System.Linq;
@@ -408,12 +407,28 @@ namespace hockeylizer.Controllers
 			    }
 			    catch (Exception e)
 			    {
+			        try
+			        {
+			            System.IO.File.Delete(path);
+			        }
+			        catch
+			        {
+			            session.DeleteFailed = true;
+			            session.DeleteFailedWhere = path;
+
+			            await _db.SaveChangesAsync();
+			        }
 			        session.Analyzed = false;
 			        session.AnalysisFailReason =
 			            "Servern kraschade medan den försöka analysera klippet. Felmeddelande från server: " + e.Message;
 
 			        t.AnalysisFailed = true;
 			        t.AnalysisFailedReason = e.Message;
+
+                    BackgroundJob.Enqueue<CoreController>
+			        (
+			            service => service.ChopSession(sessionId)
+			        );
 
 			        break;
 			    }
@@ -575,6 +590,7 @@ namespace hockeylizer.Controllers
 				}
 			}
 
+		    session.ChopFailReason = "";
 			session.Chopped = true;
 
 			await _db.SaveChangesAsync();
@@ -716,7 +732,7 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				response = new IsChoppedResult(true, "Videoklippet kollat", session.Chopped);
+				response = new IsChoppedResult(true, "Videoklippet kollat. " + session.ChopFailReason, session.Chopped);
 				return Json(response);
 			}
 
@@ -762,7 +778,7 @@ namespace hockeylizer.Controllers
 				response = new GetFramesFromShotResult(true, "Skottets träffpunkter har hämtats!", images)
 				{
 					XCoordinate = shot.XCoordinateAnalyzed,
-					YCoordinate = shot.XCoordinateAnalyzed
+					YCoordinate = shot.YCoordinateAnalyzed
 				};
 
 				return Json(response);
@@ -857,13 +873,18 @@ namespace hockeylizer.Controllers
 			        // therefore the index at which our frame hit is
 			        //
 			        // frameHit = shot.FrameHit - start;
+
                     var frame = (int)shot.FrameHit;
 
 			        var start = (shot.TimestampStart * 30) / 1000;
 
-			        frameHit = frame - start;
+			        var frameHitProposed = frame - start;
 
-			        shot.RealFrameHit = frameHit;
+			        var numberOfFrames = _db.Frames.Count(fr => fr.TargetId == shot.TargetId);
+			        if (!(frameHitProposed > numberOfFrames))
+			        {
+			            frameHit = frameHitProposed;
+			        }
 			    }
 
                 response = new GetDataFromShotResult(true, "Skottets träffpunkt har uppdaterats!", images)
@@ -876,7 +897,8 @@ namespace hockeylizer.Controllers
 					YCoordinate = shot.YCoordinate,
 					XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
 					YCoordinateAnalyzed = shot.YCoordinateAnalyzed,
-					HitTarget = shot.HitGoal,
+                    HitGoal = shot.HitGoal,
+                    ManuallyAnalyzed = shot.ManuallyAnalyzed,
 					FrameHit = frameHit,
 					Analyzed = shot.AnalysisFailed,
 					Reason = shot.AnalysisFailedReason
@@ -982,6 +1004,9 @@ namespace hockeylizer.Controllers
 			        shotToUpdate.YCoordinateAnalyzed = vm.y;
 
 			        shotToUpdate.RealFrameHit = vm.frame;
+			        shotToUpdate.HitGoal = vm.hitTarget ?? false;
+
+			        shotToUpdate.ManuallyAnalyzed = true;
 			    }
 			    catch (Exception e)
 			    {

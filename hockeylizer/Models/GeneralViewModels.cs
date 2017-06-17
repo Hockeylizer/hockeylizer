@@ -192,6 +192,7 @@ namespace hockeylizer.Models
 
         public bool Analyzed { get; set; }
         public string AnalysisFailedReason { get; set; }
+
         public string HitRatio { get; set; }
     }
 
@@ -201,7 +202,6 @@ namespace hockeylizer.Models
 		{
 			this.Completed = false;
 			this.Description = "Okänt fel";
-            this.HitTarget = false;
             this.Analyzed = false;
 			this.FrameUrls = new List<string>();
 		}
@@ -210,8 +210,11 @@ namespace hockeylizer.Models
 		{
 			this.Completed = comp;
 			this.Description = desc;
-            this.HitTarget = false;
+
             this.Analyzed = false;
+            this.HitGoal = false;
+		    this.ManuallyAnalyzed = false;
+
 			this.FrameUrls = urls ?? new List<string>();
 		}
 
@@ -230,8 +233,9 @@ namespace hockeylizer.Models
         public bool Completed { get; set; }
 		public string Description { get; set; }
 
-        public bool? HitTarget { get; set; }
+        public bool? HitGoal { get; set; }
         public int? FrameHit { get; set; }
+        public bool? ManuallyAnalyzed { get; set; }
 
         public bool Analyzed { get; set; }
         public string Reason { get; set; }
@@ -274,6 +278,12 @@ namespace hockeylizer.Models
                 return false;
             }
 
+            if (this.hitTarget == null)
+            {
+                this.ur = new GeneralResult(false, "Boolen för träff saknas.");
+                return false;
+            }
+
             this.ur = new GeneralResult(true, "Allt ser korrekt ut.");
 			return true;
         }
@@ -283,6 +293,7 @@ namespace hockeylizer.Models
         public int? x { get; set; }
         public int? y { get; set; }
         public int? frame { get; set; }
+        public bool? hitTarget { get; set; }
         public string token { get; set; }
 
         public GeneralResult ur { get; set; }

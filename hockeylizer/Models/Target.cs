@@ -30,6 +30,8 @@ namespace hockeylizer.Models
             this.ChopFailed = false;
 
             this.HitGoal = false;
+            this.ManuallyAnalyzed = false;
+
             this.FramesToAnalyze = new HashSet<FrameToAnalyze>();
         }
 
@@ -54,8 +56,9 @@ namespace hockeylizer.Models
         public int? RealFrameHit { get; set; }
 
         public bool HitGoal { get; set; }
+        public bool ManuallyAnalyzed { get; set; }
 
-		public bool AnalysisFailed { get; set; }
+        public bool AnalysisFailed { get; set; }
 		public string AnalysisFailedReason { get; set; }
 
 		public bool ChopFailed { get; set; }
