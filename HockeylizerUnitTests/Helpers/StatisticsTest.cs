@@ -366,5 +366,22 @@ namespace HockeylizerUnitTests.Helpers
             Assert.AreEqual(ansStr, matrixToCSV(testMatrix));
         }
 
+        [TestMethod]
+        public void numsToStringsTest1()
+        {
+            Assert.AreEqual(0, numsToStrings(new int[0]).Length);
+            var retArray = numsToStrings(new int[] { -3, 122, 0 });
+            var ansArray = new string[] { "-3", "122", "0" };
+            for (int i = 0; i < ansArray.Length; i++) Assert.AreEqual(ansArray[i], retArray[i]);
+        }
+        [TestMethod]
+        public void numsToStringsTest2()
+        {
+            Assert.AreEqual(0, numsToStrings(new double[0]).Length);
+            var retArray = numsToStrings(new double[] { -3, 122, 0, -0.12, 8.888, 0.7 });
+            var ansArray = new string[] { "-3", "122", "0", "-0.12", "8.888", "0.7" };
+            for (int i = 0; i < ansArray.Length; i++) Assert.AreEqual(ansArray[i], retArray[i]);
+        }
+
     }
 }

@@ -189,7 +189,14 @@ namespace hockeylizer.Helpers
             return csv.ToString().TrimEnd('\r', '\n');
         }
 
-        public static 
+        public static string[] numsToStrings(IEnumerable<int> nums) {
+            return nums.Select(n => n.ToString()).ToArray();
+        }
+        public static string[] numsToStrings(IEnumerable<double> nums)
+        {
+            // Invariant culture uses '.' as decimal sign instead of ','
+            return nums.Select(n => n.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray();
+        }
 
     }
 }
