@@ -778,7 +778,7 @@ namespace hockeylizer.Controllers
 				response = new GetFramesFromShotResult(true, "Skottets träffpunkter har hämtats!", images)
 				{
 					XCoordinate = shot.XCoordinateAnalyzed,
-					YCoordinate = shot.XCoordinateAnalyzed
+					YCoordinate = shot.YCoordinateAnalyzed
 				};
 
 				return Json(response);
