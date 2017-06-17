@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using static hockeylizer.Helpers.Statistics;
+using System.Collections.Generic;
 using hockeylizer.Models;
 using System.Xml.Linq;
 using System.Linq;
@@ -9,12 +10,6 @@ namespace hockeylizer.Helpers
 {
     public static class SvgGeneration
     {
-        public static readonly Dictionary<int, Point2d> _targetCoords = new Dictionary<int, Point2d> { { 1, new Point2d(10, 91)  },
-                                                                                                       { 2, new Point2d(10, 18)  },
-                                                                                                       { 3, new Point2d(173, 18) },
-                                                                                                       { 4, new Point2d(173, 91) },
-                                                                                                       { 5, new Point2d(91.5, 101)} };
-
         // A black circle to mark indivdual hits.
         private static XElement svgCircle(XNamespace ns, double cx, double cy)
         {
@@ -77,17 +72,9 @@ namespace hockeylizer.Helpers
             return cross.Prepend(rect).ToList();
         }
 
-        private static List<Point2d1T> selectPointsByTarget(List<Point2d1T> points, int target)
+        private static IEnumerable<Point2d1T> selectPointsByTarget(IEnumerable<Point2d1T> points, int target)
         {
-            return points.Where(p => p.target == target).ToList();
-        }
-
-        // Assumes a sorted list.
-        private static double median(List<double> sorted_nums)
-        {
-            int len = sorted_nums.Count;
-            if (len % 2 == 1) return sorted_nums[(len - 1) / 2];
-            else return (sorted_nums[len / 2 - 1] + sorted_nums[len / 2]) / 2;
+            return points.Where(p => p.target == target);
         }
 
         private static string svgToString(XDocument svgCode)
@@ -111,10 +98,10 @@ namespace hockeylizer.Helpers
             return @"http://hockeylizer.azurewebsites.net/images/" + fileName;
         }
 
-        private static List<Point2d1T> offsetsToAbsolutes(List<Point2d1T> offsets)
-        {
-            return offsets.Select(p => new Point2d1T( _targetCoords[p.target].x + p.x,  _targetCoords[p.target].y + p.y, p.target) ).ToList();
-        }
+        //private static List<Point2d1T> offsetsToAbsolutes(List<Point2d1T> offsets)
+        //{
+        //    return offsets.Select(p => new Point2d1T( TargetCoords[p.target].x + p.x,  TargetCoords[p.target].y + p.y, p.target) ).ToList();
+        //}
 
         /// <summary>
         /// Takes a list of hit coordinates, and puts them as black dots on a simple svg of the goal.
@@ -127,7 +114,7 @@ namespace hockeylizer.Helpers
             if (!offsets.Any()) return emptyGoalSvg(svg_dir, return_link);
 
             // Calculate absolute cm coords from offset + target coords.
-            List<Point2d1T> points = offsetsToAbsolutes(offsets);
+            IEnumerable<Point2d1T> points = offsetToAbsolute(offsets);
 
             var svg_template_path = Path.Combine(svg_dir, "goal_template.svg");
             XDocument svgCode = XDocument.Load(svg_template_path);
@@ -157,9 +144,10 @@ namespace hockeylizer.Helpers
             if (!offsets.Any()) return emptyGoalSvg(svg_dir, return_link);
 
             // Calculate absolute cm coords from offset + target coords.
-            List<Point2d1T> points = offsetsToAbsolutes(offsets);
+            IEnumerable<Point2d1T> points = offsetToAbsolute(offsets);
+            //List<Point2d1T> points = offsetToAbsolute(offsets);
 
-            
+
             // Hardcoded switch to change between average and median as mean for the cross.
             bool use_median_not_average = false;
             // This is the minimal number of shots against a target that will trigger
@@ -187,8 +175,8 @@ namespace hockeylizer.Helpers
                     double yMax = ys.Last();
 
                     // Cross center
-                    double xMean = (use_median_not_average ? median(xs) : xs.Average());
-                    double yMean = (use_median_not_average ? median(ys) : ys.Average());
+                    double xMean = (use_median_not_average ? medianOnSorted(xs) : xs.Average());
+                    double yMean = (use_median_not_average ? medianOnSorted(ys) : ys.Average());
 
                     // Change the factors to whatever quantile you want to be the box boundaries
                     int quantileLowerIndex = (int)Math.Ceiling(0.25 * (count - 1));
