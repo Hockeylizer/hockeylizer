@@ -1124,7 +1124,17 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				var csv = new StringBuilder();
+                // TODO: refactor this ugly shit to Statistics and call a function from here.
+                //var line1 = new string[] { player.Name, session.Created.ToString() };
+                //var targets = _db.Targets.Where(t => t.SessionId == vm.sessionId).OrderBy(t => t.Order);
+                //var lines = new List<string[]>();
+                //if (targets == null || !targets.Any()) lines.Add(new string[] { "No hits found." });
+                //else foreach (Target t in targets)
+                //    {
+                //        lines.Add(new string[] { t.Order.ToString(), t.TargetNumber.ToString(), t.XOffset.ToString(), t.XOffset.ToString(), Statistics.norm(t.XOffset, t.YOffset).ToString() });
+                //    }
+
+                var csv = new StringBuilder();
 				for (var i = 0; i < 12; i++)
 				{
 					const int first = 1;
