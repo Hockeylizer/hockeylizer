@@ -353,7 +353,7 @@ namespace hockeylizer.Controllers
 		    if (player == null)
 		    {
 		        session.Analyzed = false;
-		        session.AnalisysFailReason = "Kunde inte hitta spelare.";
+		        session.AnalysisFailReason = "Kunde inte hitta spelare.";
 
 		        await _db.SaveChangesAsync();
 		        return false;
@@ -363,7 +363,7 @@ namespace hockeylizer.Controllers
 		    if (!download.Key)
 		    {
 		        session.Analyzed = false;
-		        session.AnalisysFailReason = "Kunde inte ladda ned film för att: " + download.Value;
+		        session.AnalysisFailReason = "Kunde inte ladda ned film för att: " + download.Value;
 
 		        await _db.SaveChangesAsync();
 		        return false;
@@ -375,7 +375,7 @@ namespace hockeylizer.Controllers
 		    if (!sourcePoints.Any())
 		    {
 		        session.Analyzed = false;
-		        session.AnalisysFailReason = "Kunde inte hitta några punkter att sikta på.";
+		        session.AnalysisFailReason = "Kunde inte hitta några punkter att sikta på.";
 
 		        try
 		        {
@@ -409,7 +409,7 @@ namespace hockeylizer.Controllers
 			    catch (Exception e)
 			    {
 			        session.Analyzed = false;
-			        session.AnalisysFailReason =
+			        session.AnalysisFailReason =
 			            "Servern kraschade medan den försöka analysera klippet. Felmeddelande från server: " + e.Message;
 
 			        t.AnalysisFailed = true;
@@ -421,7 +421,7 @@ namespace hockeylizer.Controllers
 				if (analysis.WasErrors)
 				{
 				    session.Analyzed = false;
-				    session.AnalisysFailReason = analysis.ErrorMessage;
+				    session.AnalysisFailReason = analysis.ErrorMessage;
 
 					t.AnalysisFailed = true;
 					t.AnalysisFailedReason = analysis.ErrorMessage;
@@ -794,7 +794,7 @@ namespace hockeylizer.Controllers
 				{
 					HitRatio = ratio,
 					Analyzed = session.Analyzed,
-                    AnalysisFailedReason = session.AnalisysFailReason
+                    AnalysisFailedReason = session.AnalysisFailReason
 				};
 
 				return Json(response);
@@ -841,20 +841,23 @@ namespace hockeylizer.Controllers
 
 			    int? frameHit = null;
 
-                // The problem is that we get framehit as the frameindex as filmed 
-                // from the start, therefore we must compensate
-
-                // ----------------------- * <-- shot.FrameHit
-                // -------------- * <-- start = shot.TimestampStart * 30 / 1000
-                //                  ------ * <-- our actual index for hit
-
-                // therefore the index at which our frame hit is
-                //
-                // frameHit = shot.FrameHit - start;
-
-			    if (shot.FrameHit != 0 && shot.FrameHit != null && shot.HitGoal)
+			    if (shot.RealFrameHit != null)
 			    {
-			        var frame = (int)shot.FrameHit;
+			        frameHit = shot.RealFrameHit;
+			    }
+                else if (shot.FrameHit != 0 && shot.FrameHit != null && shot.HitGoal)
+			    {
+			        // The problem is that we get framehit as the frameindex as filmed 
+			        // from the start, therefore we must compensate
+
+			        // ----------------------- * <-- shot.FrameHit
+			        // -------------- * <-- start = shot.TimestampStart * 30 / 1000
+			        //                  ------ * <-- our actual index for hit
+
+			        // therefore the index at which our frame hit is
+			        //
+			        // frameHit = shot.FrameHit - start;
+                    var frame = (int)shot.FrameHit;
 
 			        var start = (shot.TimestampStart * 30) / 1000;
 
@@ -867,7 +870,7 @@ namespace hockeylizer.Controllers
 			        }
 			    }
 
-				response = new GetDataFromShotResult(true, "Skottets träffpunkt har uppdaterats!", images)
+                response = new GetDataFromShotResult(true, "Skottets träffpunkt har uppdaterats!", images)
 				{
 					TargetNumber = shot.TargetNumber,
 					Order = shot.Order,
@@ -940,21 +943,32 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				var sourcePoints = _db.AimPoints.Where(t => t.SessionId == session.SessionId)
-										.Select(t => new Point2d((int)t.XCoordinate, (int)t.YCoordinate)).ToArray();
+			    var sp = _db.AimPoints.Where(t => t.SessionId == session.SessionId);
 
-				if (!sourcePoints.Any())
-				{
-					response = new GeneralResult(false, "Kunde inte hitta några punkter att sikta på.");
-					return Json(response);
-				}
+			    if (!sp.Any())
+			    {
+			        response = new GeneralResult(false, "Kunde inte hitta några punkter att sikta på.");
+			        return Json(response);
+			    }
+
+                var sourcePoints = new List<Point2d>();
+
+			    foreach (var p in sp)
+			    {
+			        double x = (double) (p.XCoordinate ?? (double) 0);
+			        double y = (double) (p.YCoordinate ?? (double) 0);
+
+			        var point = new Point2d(x, y);
+
+                    sourcePoints.Add(point);
+			    }
 
 				var offsets = new Point2d(xCoord, yCoord);
 
 			    Point2d convertedPoints;
 			    try
 			    {
-			        convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, targetPoint, sourcePoints,
+			        convertedPoints = AnalysisBridge.SrcPointToCmVectorFromTargetPoint(offsets, targetPoint, sourcePoints.ToArray(),
 			            Points.HitPointsInCm().Values.ToArray());
 			    }
 			    catch (Exception e)
@@ -970,6 +984,8 @@ namespace hockeylizer.Controllers
 
 			        shotToUpdate.XCoordinateAnalyzed = vm.x;
 			        shotToUpdate.YCoordinateAnalyzed = vm.y;
+
+			        shotToUpdate.RealFrameHit = vm.frame;
 			    }
 			    catch (Exception e)
 			    {

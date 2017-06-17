@@ -268,7 +268,13 @@ namespace hockeylizer.Models
 				return false;
 			}
 
-			this.ur = new GeneralResult(true, "Allt ser korrekt ut.");
+            if (this.frame == null)
+            {
+                this.ur = new GeneralResult(false, "Frame för träff saknas.");
+                return false;
+            }
+
+            this.ur = new GeneralResult(true, "Allt ser korrekt ut.");
 			return true;
         }
 
@@ -276,6 +282,7 @@ namespace hockeylizer.Models
         public int? shot { get; set; }
         public int? x { get; set; }
         public int? y { get; set; }
+        public int? frame { get; set; }
         public string token { get; set; }
 
         public GeneralResult ur { get; set; }

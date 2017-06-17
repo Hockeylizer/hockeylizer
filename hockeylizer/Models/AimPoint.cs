@@ -7,6 +7,12 @@ namespace hockeylizer.Models
 {
     public class AimPoint
     {
+        public AimPoint()
+        {
+            this.XCoordinate = 0;
+            this.YCoordinate = 0;
+        }
+
         public AimPoint(int? x, int? y)
         {
             this.XCoordinate = x;
