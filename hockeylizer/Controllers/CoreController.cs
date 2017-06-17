@@ -880,7 +880,8 @@ namespace hockeylizer.Controllers
 					YCoordinate = shot.YCoordinate,
 					XCoordinateAnalyzed = shot.XCoordinateAnalyzed,
 					YCoordinateAnalyzed = shot.YCoordinateAnalyzed,
-					HitTarget = shot.HitGoal,
+					HitTarget = shot.HitTarget,
+                    HitGoal = shot.HitGoal,
 					FrameHit = frameHit,
 					Analyzed = shot.AnalysisFailed,
 					Reason = shot.AnalysisFailedReason
@@ -986,6 +987,10 @@ namespace hockeylizer.Controllers
 			        shotToUpdate.YCoordinateAnalyzed = vm.y;
 
 			        shotToUpdate.RealFrameHit = vm.frame;
+			        shotToUpdate.HitTarget = vm.hitTarget;
+
+			        shotToUpdate.HitGoal = true;
+			        shotToUpdate.ManuallyAnalyzed = true;
 			    }
 			    catch (Exception e)
 			    {
