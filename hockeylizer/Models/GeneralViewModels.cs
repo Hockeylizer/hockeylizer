@@ -37,6 +37,13 @@ namespace hockeylizer.Models
         public string email { get; set; }
     }
 
+    public class GetPlayerStatsVm
+    {
+        public string token { get; set; }
+        public int? playerId { get; set; }
+        public string email { get; set; }
+    }
+
     public class UpdateNameVm
     {
         public bool Validate() 
