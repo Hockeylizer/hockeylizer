@@ -149,7 +149,7 @@ namespace hockeylizer.Helpers
 
 
             // Hardcoded switch to change between average and median as mean for the cross.
-            bool use_median_not_average = false;
+            bool use_median_not_mean = false;
             // This is the minimal number of shots against a target that will trigger
             // the generation of a boxplot. Fewer will generate a crossplot instead.
             int boxplot_limit = 7;
@@ -175,12 +175,12 @@ namespace hockeylizer.Helpers
                     double yMax = ys.Last();
 
                     // Cross center
-                    double xMean = (use_median_not_average ? medianOnSorted(xs) : xs.Average());
-                    double yMean = (use_median_not_average ? medianOnSorted(ys) : ys.Average());
+                    double xMean = use_median_not_mean ? medianOnSorted(xs) : mean(xs);
+                    double yMean = use_median_not_mean ? medianOnSorted(ys) : mean(ys);
 
                     // Change the factors to whatever quantile you want to be the box boundaries
-                    int quantileLowerIndex = (int)Math.Ceiling(0.25 * (count - 1));
-                    int quantileUpperIndex = (int)Math.Floor(0.75 * (count - 1));
+                    int quantileLowerIndex = quantileIndexRight(count, 0.75);
+                    int quantileUpperIndex = quantileIndexLeft(count, 0.75);
 
                     if (count == 1) svgCode.Root.Add(svgCircle(ns, xs[0], ys[0]));
                     else if (2 <= count && count < boxplot_limit) {
