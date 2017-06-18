@@ -1181,9 +1181,19 @@ namespace hockeylizer.Controllers
 
 				System.IO.File.WriteAllText(path, csv);
 
-				var sendMail = await Mailgun.SendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)", path);
+			    SendMessageResult sendMail;
+			    try
+			    {
+			        sendMail = await Mailgun.SendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)", path);
 
-				if (System.IO.File.Exists(path))
+                }
+			    catch (Exception e)
+			    {
+			        response = new GeneralResult(false, "Kunde inte skicka mail, serverfel. Felmeddelande: " + e.Message);
+			        return Json(response);
+			    }
+
+                if (System.IO.File.Exists(path))
 				{
 					System.IO.File.Delete(path);
 				}
@@ -1266,7 +1276,18 @@ namespace hockeylizer.Controllers
 
 	            System.IO.File.WriteAllText(path, csv);
 
-	            var sendMail = await Mailgun.SendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from all sessions.", "Here are the stats that you requested! :)", path);
+	            SendMessageResult sendMail;
+	            try
+	            {
+	                sendMail = await Mailgun.SendMessage(vm.email,
+	                    "Dr Hockey: exported data for " + player.Name + " from all sessions.",
+	                    "Here are the stats that you requested! :)", path);
+	            }
+	            catch (Exception e)
+	            {
+	                response = new GeneralResult(false, "Kunde inte skicka mail, serverfel. Felmeddelande: " + e.Message);
+	                return Json(response);
+                }
 
 	            if (System.IO.File.Exists(path))
 	            {
