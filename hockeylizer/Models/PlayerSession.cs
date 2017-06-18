@@ -28,10 +28,10 @@ namespace hockeylizer.Models
 	        
             for (var t = 0; t < limit; t++)
 	        {
-	            var currentTarget = to[t % mod] - 1;
+	            var currentTarget = to[t % mod];
 
-                var xCoord = coords[currentTarget].xCoord;
-	            var yCoord = coords[currentTarget].yCoord;
+                var xCoord = coords[currentTarget - 1].xCoord;
+	            var yCoord = coords[currentTarget - 1].yCoord;
 
 	            var target = new Target(currentTarget, index, ts[t].start, ts[t].end, xCoord, yCoord, null, null)
 	            {
