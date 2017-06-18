@@ -33,7 +33,7 @@ namespace hockeylizer.Models
                 var xCoord = coords[currentTarget].xCoord;
 	            var yCoord = coords[currentTarget].yCoord;
 
-	            var target = new Target(to[currentTarget], index, ts[t].start, ts[t].end, xCoord, yCoord, null, null)
+	            var target = new Target(to[t % mod], index, ts[t].start, ts[t].end, xCoord, yCoord, null, null)
 	            {
 	                RelatedSession = this
 	            };
