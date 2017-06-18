@@ -1092,8 +1092,33 @@ namespace hockeylizer.Controllers
 			return Json(response);
 		}
 
+	    [HttpPost]
+	    [AllowAnonymous]
+	    public JsonResult SessionIsAnalyzedAndChopped([FromBody]SessionVm vm)
+	    {
+	        GetSessionInfoAboutAnalysisAndChopping response;
+	        if (vm.token == _appkey)
+	        {
+	            var session = _db.Sessions.Find(vm.sessionId);
 
-		[HttpPost]
+	            if (session != null && !session.Deleted)
+	            {
+	                response = new GetSessionInfoAboutAnalysisAndChopping(session.Analyzed, session.Chopped, session.AnalysisFailReason + ". " + session.ChopFailReason);
+                }
+	            else
+	            {
+	                response = new GetSessionInfoAboutAnalysisAndChopping(false, false, "Videon finns inte");
+	            }
+	        }
+	        else
+	        {
+	            response = new GetSessionInfoAboutAnalysisAndChopping(false, false, "Token var inkorrekt");
+	        }
+
+	        return Json(response);
+	    }
+
+        [HttpPost]
 		[AllowAnonymous]
 		public async Task<JsonResult> ValidateEmail([FromBody]ValidateEmailVm vm)
 		{

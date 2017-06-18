@@ -607,6 +607,31 @@ namespace hockeylizer.Models
         public List<SessionVmSmall> Sessions { get; set; }
     }
 
+    public class GetSessionInfoAboutAnalysisAndChopping
+    {
+        public GetSessionInfoAboutAnalysisAndChopping()
+        {
+            this.SessionAnalyzed = false;
+            this.SessionChopped = false;
+
+            this.Errors = "Unknown error 4.";
+        }
+
+        public GetSessionInfoAboutAnalysisAndChopping(bool analyzed, bool chopped, string errors)
+        {
+            this.SessionAnalyzed = analyzed;
+            this.SessionChopped = chopped;
+            this.Errors = errors;
+        }
+
+        public bool SessionDone => this.SessionAnalyzed && this.SessionChopped;
+
+        public bool SessionAnalyzed { get; set; }
+        public bool SessionChopped { get; set; }
+
+        public string Errors { get; set; }
+    }
+
     public class GetFramesResult
     {
         public GetFramesResult()
