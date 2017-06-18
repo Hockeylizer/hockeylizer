@@ -420,9 +420,9 @@ namespace HockeylizerUnitTests.Helpers
             var line3 = ans[3];
             Assert.AreEqual("", line3);
             var line4 = ans[4];
-            Assert.AreEqual("Mean;;;N/A;N/A;N/A", line4);
+            Assert.AreEqual("Mean;;N/A;N/A;N/A", line4);
             var line5 = ans[5];
-            Assert.AreEqual("Standard deviation (unbiased);;;N/A;N/A;N/A", line5);
+            Assert.AreEqual("Standard deviation (unbiased);;N/A;N/A;N/A", line5);
 
             var t1 = mockTarget(1, 1, s.SessionId, 0, 0);
             var t2 = mockTarget(1, 14, s.SessionId, 1, 1);
@@ -457,11 +457,11 @@ namespace HockeylizerUnitTests.Helpers
             var line8 = ans[8];
             var xyMean = mean(new double[] { 0, -100.1, 100, 1 }).ToString(dotNotComma);
             var normMean = mean(new double[] { 0, norm(-100.1, -100.1), norm(100, 100), norm(1, 1) }).ToString(dotNotComma);
-            Assert.AreEqual("Mean;;;"+xyMean+";"+xyMean+";"+normMean, line8);
+            Assert.AreEqual("Mean;;"+xyMean+";"+xyMean+";"+normMean, line8);
             var line9 = ans[9];
             var xyStd = standardDeviation(new double[] { 0, -100.1, 100, 1 }).ToString(dotNotComma);
             var normStd = standardDeviation(new double[] { 0, norm(-100.1, -100.1), norm(100, 100), norm(1, 1) }).ToString(dotNotComma);
-            Assert.AreEqual("Standard deviation (unbiased);;;"+xyStd+";" +xyStd+ ";" +normStd, line9);
+            Assert.AreEqual("Standard deviation (unbiased);;"+xyStd+";" +xyStd+ ";" +normStd, line9);
             
         }
 

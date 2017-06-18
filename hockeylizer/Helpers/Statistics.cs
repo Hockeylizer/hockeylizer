@@ -236,13 +236,13 @@ namespace hockeylizer.Helpers
             var xMeanStr = xOffs.Any() ? mean(xOffs).ToString(dotNotComma) : "N/A";
             var yMeanStr = yOffs.Any() ? mean(yOffs).ToString(dotNotComma) : "N/A";
             var normMeanStr = norms.Any() ? mean(norms).ToString(dotNotComma) : "N/A";
-            var meanLine = new string[] { "Mean", "", "", xMeanStr, yMeanStr, normMeanStr };
+            var meanLine = new string[] { "Mean", "", xMeanStr, yMeanStr, normMeanStr };
 
             // Estimated standard deviation line
             var xStdStr = xOffs.Any() ? standardDeviation(xOffs).ToString(dotNotComma) : "N/A";
             var yStdStr = yOffs.Any() ? standardDeviation(yOffs).ToString(dotNotComma) : "N/A";
             var normStdStr = norms.Any() ? standardDeviation(norms).ToString(dotNotComma) : "N/A";
-            var stdLine = new string[] { "Standard deviation (unbiased)", "", "", xStdStr, yStdStr, normStdStr };
+            var stdLine = new string[] { "Standard deviation (unbiased)", "", xStdStr, yStdStr, normStdStr };
 
             // Generate the table, in matrix form.
             var table = new List<string[]>() { titleLine, captionsLine };
