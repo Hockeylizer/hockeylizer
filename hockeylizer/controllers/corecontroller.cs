@@ -1158,7 +1158,7 @@ namespace hockeylizer.Controllers
 				}
 
                 var targets = _db.Targets.Where(t => t.SessionId == vm.sessionId);
-                if (player == null)
+                if (!targets.Any())
                 {
                     response = new GeneralResult(false, "Något gick snett när skotten skulle hämtas.");
                     return Json(response);
@@ -1202,7 +1202,92 @@ namespace hockeylizer.Controllers
 			return Json(response);
 		}
 
-		[HttpPost]
+	    [HttpPost]
+	    [AllowAnonymous]
+	    public async Task<JsonResult> SendPlayerStatsAsEmail([FromBody]GetPlayerStatsVm vm)
+	    {
+	        GeneralResult response;
+	        if (vm.token == _appkey)
+	        {
+	            if (string.IsNullOrEmpty(vm.email))
+	            {
+	                response = new GeneralResult(false, "Email är tom eller saknas.");
+	                return Json(response);
+	            }
+
+	            var chk = await Mailgun.ValidateEmail(vm.email);
+
+	            if (!chk.Valid)
+	            {
+	                response = new GeneralResult(false, "Mailadressen " + vm.email + " är ogiltig.");
+	                return Json(response);
+	            }
+
+	            if (vm.playerId == null)
+	            {
+	                response = new GeneralResult(false, "Något gick snett när spelaren skulle hämtas.");
+	                return Json(response);
+	            }
+
+                var player = await _db.Players.FindAsync(vm.playerId);
+	            if (player == null)
+	            {
+	                response = new GeneralResult(false, "Något gick snett när spelaren skulle hämtas.");
+	                return Json(response);
+	            }
+
+	            var sessions = _db.Sessions.Where(s => s.PlayerId == vm.playerId).ToList();
+	            if (!sessions.Any())
+	            {
+	                response = new GeneralResult(false, "Kunde inte hämta data då det inte finns sessioner.");
+	                return Json(response);
+	            }
+
+                var csv = "";
+
+	            foreach (var session in sessions)
+	            {
+	                var targets = _db.Targets.Where(t => t.SessionId == session.SessionId).ToList();
+	                csv += Statistics.generateMailString(player, session, targets);
+	            }
+
+	            const string filestart = "file";
+	            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
+	            var path = Path.Combine(startpath, filestart + "-1.csv");
+
+	            var count = 1;
+	            while (System.IO.File.Exists(path))
+	            {
+	                var filename = filestart + "-" + count + ".csv";
+
+	                path = Path.Combine(startpath, filename);
+	                count++;
+	            }
+
+	            System.IO.File.WriteAllText(path, csv);
+
+	            var sendMail = await Mailgun.SendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from all sessions.", "Here are the stats that you requested! :)", path);
+
+	            if (System.IO.File.Exists(path))
+	            {
+	                System.IO.File.Delete(path);
+	            }
+
+	            if (sendMail.Message.Contains("failed") || sendMail.Message.Contains("missing"))
+	            {
+	                response = new GeneralResult(false, "Något gick snett när mailet skulle skickas. Fel från server: " + sendMail.Message);
+	                return Json(response);
+	            }
+
+	            response = new GeneralResult(true, "Skickade mail till den angivna adressen.");
+	            return Json(response);
+	        }
+
+	        response = new GeneralResult(false, "Token var inkorrekt");
+	        return Json(response);
+	    }
+
+        [HttpPost]
 		[AllowAnonymous]
 		public ContentResult GetHitsOverviewSvg([FromBody]GetSvgVm vm)
 		{
