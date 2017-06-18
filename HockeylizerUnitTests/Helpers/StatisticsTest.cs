@@ -383,5 +383,87 @@ namespace HockeylizerUnitTests.Helpers
             for (int i = 0; i < ansArray.Length; i++) Assert.AreEqual(ansArray[i], retArray[i]);
         }
 
+        private Target mockTarget(int targetNumber, int order, int sessionId, double? xOffset, double? yOffset)
+        {
+            var ret = new Target(targetNumber, order, -1, -1, -1, -1, -1, -1);
+            ret.SessionId = sessionId;
+            ret.XOffset = xOffset;
+            ret.YOffset = yOffset;
+            return ret;
+        }
+
+        [TestMethod]
+        public void generateMailStringTest(){
+            var dotNotComma = new System.Globalization.NumberFormatInfo();
+            dotNotComma.NumberDecimalSeparator = ".";
+
+            var p = new Player("Foo Fooson");
+            p.PlayerId = 1;
+            var s = new PlayerSession("whatevs", "whatevs", p.PlayerId, -1, -1, 5, 2);
+            s.SessionId = 1;
+
+            var targs = new List<Target>();
+            var ansStr = generateMailString(p, s, targs);
+            var ans = ansStr.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+            Assert.AreEqual(6, ans.Length, ansStr);
+
+            var line0 = ans[0].Split(';');
+            Assert.AreEqual(2, line0.Length);
+            Assert.AreEqual(p.Name, line0[0]);
+            DateTime foo;
+            Assert.IsTrue(DateTime.TryParse(line0[1], out foo), "Trying to parse date as DateTime");
+
+            var line1 = ans[1];
+            Assert.AreEqual("Shot No.;Target No.;x difference (cm);y difference (cm);Distance to target (cm)", line1);
+            var line2 = ans[2];
+            Assert.AreEqual("No hits found.", line2);
+            var line3 = ans[3];
+            Assert.AreEqual("", line3);
+            var line4 = ans[4];
+            Assert.AreEqual("Mean;;;N/A;N/A;N/A", line4);
+            var line5 = ans[5];
+            Assert.AreEqual("Standard deviation (unbiased);;;N/A;N/A;N/A", line5);
+
+            var t1 = mockTarget(1, 1, s.SessionId, 0, 0);
+            var t2 = mockTarget(1, 14, s.SessionId, 1, 1);
+            var t3 = mockTarget(2, 3, s.SessionId, null, null);
+            var t4 = mockTarget(2, 5, s.SessionId, 100, 100);
+            var t5 = mockTarget(3, 2, s.SessionId, -100.1, -100.1);
+
+            targs = new List<Target>() { t1, t2, t3, t4, t5 };
+            ansStr = generateMailString(p, s, targs);
+            ans = ansStr.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+            Assert.AreEqual(10, ans.Length, ansStr);
+
+            line0 = ans[0].Split(';');
+            Assert.AreEqual(2, line0.Length);
+            Assert.AreEqual(p.Name, line0[0]);
+            Assert.IsTrue(DateTime.TryParse(line0[1], out foo), "Trying to parse date as DateTime");
+
+            line1 = ans[1];
+            Assert.AreEqual("Shot No.;Target No.;x difference (cm);y difference (cm);Distance to target (cm)", line1);
+            line2 = ans[2];
+            Assert.AreEqual("1;1;0;0;0", line2);
+            line3 = ans[3];
+            Assert.AreEqual("2;3;-100.1;-100.1;" + norm(-100.1, -100.1).ToString(dotNotComma), line3);
+            line4 = ans[4];
+            Assert.AreEqual("3;2;N/A;N/A;N/A", line4);
+            line5 = ans[5];
+            Assert.AreEqual("5;2;100;100;" + norm(100, 100).ToString(dotNotComma), line5);
+            var line6 = ans[6];
+            Assert.AreEqual("14;1;1;1;" + norm(1, 1).ToString(dotNotComma), line6);
+            var line7 = ans[7];
+            Assert.AreEqual("", line7);
+            var line8 = ans[8];
+            var xyMean = mean(new double[] { 0, -100.1, 100, 1 }).ToString(dotNotComma);
+            var normMean = mean(new double[] { 0, norm(-100.1, -100.1), norm(100, 100), norm(1, 1) }).ToString(dotNotComma);
+            Assert.AreEqual("Mean;;;"+xyMean+";"+xyMean+";"+normMean, line8);
+            var line9 = ans[9];
+            var xyStd = standardDeviation(new double[] { 0, -100.1, 100, 1 }).ToString(dotNotComma);
+            var normStd = standardDeviation(new double[] { 0, norm(-100.1, -100.1), norm(100, 100), norm(1, 1) }).ToString(dotNotComma);
+            Assert.AreEqual("Standard deviation (unbiased);;;"+xyStd+";" +xyStd+ ";" +normStd, line9);
+            
+        }
+
     }
 }

@@ -203,8 +203,56 @@ namespace hockeylizer.Helpers
         }
 
         public static string generateMailString(Player player, PlayerSession session, IEnumerable<Target> targets) {
-            return "foo";
-        } 
+            var dotNotComma = new System.Globalization.NumberFormatInfo();
+            dotNotComma.NumberDecimalSeparator = ".";
+
+            var titleLine = new string[] { player.Name, session.Created.ToString() };
+            var sessionTargets = targets.Where(t => t.SessionId == session.SessionId).OrderBy(t => t.Order);
+
+            // Captions for the per-shot data lines
+            var captionsLine = new string[] { "Shot No.", "Target No.", "x difference (cm)", "y difference (cm)", "Distance to target (cm)" };
+
+            // Lines of per-shot data
+            var dataLines = new List<string[]>();
+            if (sessionTargets == null || !sessionTargets.Any()) dataLines.Add(new string[] { "No hits found." });
+            else foreach (Target t in sessionTargets)
+            {
+                var shotNo = t.Order.ToString(dotNotComma);
+                var targetNo = t.TargetNumber.ToString(dotNotComma);
+                var xExists = t.XOffset.HasValue;
+                var yExists = t.YOffset.HasValue;
+                var xOffset = xExists ? t.XOffset.Value.ToString(dotNotComma) : "N/A";
+                var yOffset = yExists ? t.YOffset.Value.ToString(dotNotComma) : "N/A";
+                var deltaNorm = xExists && yExists ? norm(t.XOffset.Value, t.XOffset.Value).ToString(dotNotComma) : "N/A";
+                dataLines.Add(new string[] { shotNo, targetNo, xOffset, yOffset, deltaNorm });
+            }
+
+            var emptyLine = new string[] { };
+
+            // Mean (average for you plebs) line
+            var xOffs = sessionTargets.Where(t => t.XOffset.HasValue).Select(t => t.XOffset.Value);
+            var yOffs = sessionTargets.Where(t => t.YOffset.HasValue).Select(t => t.YOffset.Value);
+            var norms = sessionTargets.Where(t => t.XOffset.HasValue && t.YOffset.HasValue).Select(t => norm(t.XOffset.Value, t.YOffset.Value));
+            var xMeanStr = xOffs.Any() ? mean(xOffs).ToString(dotNotComma) : "N/A";
+            var yMeanStr = yOffs.Any() ? mean(yOffs).ToString(dotNotComma) : "N/A";
+            var normMeanStr = norms.Any() ? mean(norms).ToString(dotNotComma) : "N/A";
+            var meanLine = new string[] { "Mean", "", "", xMeanStr, yMeanStr, normMeanStr };
+
+            // Estimated standard deviation line
+            var xStdStr = xOffs.Any() ? standardDeviation(xOffs).ToString(dotNotComma) : "N/A";
+            var yStdStr = yOffs.Any() ? standardDeviation(yOffs).ToString(dotNotComma) : "N/A";
+            var normStdStr = norms.Any() ? standardDeviation(norms).ToString(dotNotComma) : "N/A";
+            var stdLine = new string[] { "Standard deviation (unbiased)", "", "", xStdStr, yStdStr, normStdStr };
+
+            // Generate the table, in matrix form.
+            var table = new List<string[]>() { titleLine, captionsLine };
+            table = table.Concat(dataLines).ToList();
+            table.Add(emptyLine);
+            table.Add(meanLine);
+            table.Add(stdLine);
+
+            return matrixToCSV(table);
+        }
 
     }
 }
