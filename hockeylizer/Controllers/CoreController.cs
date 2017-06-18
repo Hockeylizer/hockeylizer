@@ -215,7 +215,40 @@ namespace hockeylizer.Controllers
 			return Json(response);
 		}
 
-		[HttpPost]
+        [HttpPost]
+        [AllowAnonymous]
+        public async void TestSession(CreateSessionVm vm)
+        {
+            List<int> to = vm.targetOrder;
+            List<TargetCoordsVm> coords = vm.targetCoords;
+            List<ShotTimestampVm> ts = vm.timestamps;
+            int limit = (int)(vm.shots ?? 0);
+
+            var index = 1;
+
+            for (var t = 0; t < limit; t++)
+            {
+                var mod = to.Count;
+                var currentTarget = to[t % mod];
+
+                var xCoord = coords[currentTarget - 1].xCoord;
+                var yCoord = coords[currentTarget - 1].yCoord;
+
+                var a1 = to[currentTarget - 1];
+                var a2 = index;
+                var a3 = ts[t].start;
+                var a4 = ts[t].end;
+                var a5 = xCoord;
+                var a6 = yCoord;
+
+                var target = new Target(to[t % mod], index, ts[t].start, ts[t].end, xCoord, yCoord, null, null);
+
+                index++;
+            }
+        }
+
+
+        [HttpPost]
 		[AllowAnonymous]
 		public async Task<JsonResult> CreateSession(CreateSessionVm vm)
 		{
