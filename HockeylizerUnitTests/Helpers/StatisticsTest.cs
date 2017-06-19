@@ -11,6 +11,9 @@ namespace HockeylizerUnitTests.Helpers
     public class puckCalculationMethodsTest
     {
 
+        // TODO Not sure if y-coords go upp or down. Fixate this after testing main app.
+        static int k = -1;
+
         [TestMethod]
         public void targetCoordsTest()
         {
@@ -29,8 +32,6 @@ namespace HockeylizerUnitTests.Helpers
         [TestMethod]
         public void offsetToAbsoluteTest1()
         {
-            // TODO Not sure if y-coords go upp or down. Fixate this after testing main app.
-            var k = 1;
 
             var pdt = new Point2d1T(0, 0, 1);
             var testPdt = offsetToAbsolute(pdt);
@@ -78,8 +79,7 @@ namespace HockeylizerUnitTests.Helpers
         [TestMethod]
         public void offsetToAbsoluteTest2()
         {
-            // TODO Not sure if y-coords go upp or down. Fixate this after testing main app.
-            var k = 1;
+            
 
             var emptyList = new List<Point2d1T> { };
             Assert.AreEqual(0, offsetToAbsolute(emptyList).Count());

@@ -29,7 +29,7 @@ namespace hockeylizer.Helpers
         public static Point2d1T offsetToAbsolute(Point2d1T offset)
         {
             if (offset.target < 1 || 5 < offset.target) throw new InvalidOperationException("offset.target is not in the range 1-5.");
-            return new Point2d1T(TargetCoords[offset.target].x + offset.x, TargetCoords[offset.target].y + offset.y, offset.target);
+            return new Point2d1T(TargetCoords[offset.target].x + offset.x, TargetCoords[offset.target].y - offset.y, offset.target);
         }
 
         public static double norm(double x, double y) {
