@@ -285,6 +285,26 @@ namespace HockeylizerUnitTests.Helpers
     public class ReportGenerationMethodsTest
     {
         [TestMethod]
+        public void cmToStringTest()
+        {
+            var test1 = cmToString(0);
+            var ans1 = "0.0";
+            var test2 = cmToString(12.12345);
+            var ans2 = "12.1";
+            var test3 = cmToString(1.17);
+            var ans3 = "1.2";
+            var test4 = cmToString(-0.345);
+            var ans4 = "-0.3";
+            var test5 = cmToString(123456789);
+            var ans5 = "123456789.0";
+            Assert.AreEqual(ans1, test1);
+            Assert.AreEqual(ans2, test2);
+            Assert.AreEqual(ans3, test3);
+            Assert.AreEqual(ans4, test4);
+            Assert.AreEqual(ans5, test5);
+        }
+
+        [TestMethod]
         public void matrixToCsvTest1()
         {
             Assert.ThrowsException<ArgumentException>(() => matrixToCSV(new string[1][] { new string[] { "a", "b" } }, ""));
@@ -393,9 +413,8 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void generateMailStringTest(){
-            var dotNotComma = new System.Globalization.NumberFormatInfo();
-            dotNotComma.NumberDecimalSeparator = ".";
+        public void generateMailStringTest()
+        {
 
             var p = new Player("Foo Fooson");
             p.PlayerId = 1;
@@ -443,27 +462,42 @@ namespace HockeylizerUnitTests.Helpers
             line1 = ans[1];
             Assert.AreEqual("Shot No.;Target No.;x difference (cm);y difference (cm);Distance to target (cm)", line1);
             line2 = ans[2];
-            Assert.AreEqual("1;1;0;0;0", line2);
+            Assert.AreEqual("1;1;0.0;0.0;0.0", line2);
             line3 = ans[3];
-            Assert.AreEqual("2;3;-100.1;-100.1;" + norm(-100.1, -100.1).ToString(dotNotComma), line3);
+            Assert.AreEqual("2;3;-100.1;-100.1;" + cmToString(141.563), line3);
             line4 = ans[4];
             Assert.AreEqual("3;2;N/A;N/A;N/A", line4);
             line5 = ans[5];
-            Assert.AreEqual("5;2;100;100;" + norm(100, 100).ToString(dotNotComma), line5);
+            Assert.AreEqual("5;2;100.0;100.0;" + cmToString(141.421), line5);
             var line6 = ans[6];
-            Assert.AreEqual("14;1;1;1;" + norm(1, 1).ToString(dotNotComma), line6);
+            Assert.AreEqual("14;1;1.0;1.0;" + cmToString(norm(1, 1)), line6);
             var line7 = ans[7];
             Assert.AreEqual("", line7);
             var line8 = ans[8];
-            var xyMean = mean(new double[] { 0, -100.1, 100, 1 }).ToString(dotNotComma);
-            var normMean = mean(new double[] { 0, norm(-100.1, -100.1), norm(100, 100), norm(1, 1) }).ToString(dotNotComma);
-            Assert.AreEqual("Mean;;"+xyMean+";"+xyMean+";"+normMean, line8);
+            var xyMean = cmToString(0.225);
+            var normMean = cmToString(71.0996);
+            Assert.AreEqual("Mean;;" + xyMean + ";" + xyMean + ";" + normMean, line8);
             var line9 = ans[9];
-            var xyStd = standardDeviation(new double[] { 0, -100.1, 100, 1 }).ToString(dotNotComma);
-            var normStd = standardDeviation(new double[] { 0, norm(-100.1, -100.1), norm(100, 100), norm(1, 1) }).ToString(dotNotComma);
-            Assert.AreEqual("Standard deviation (unbiased);;"+xyStd+";" +xyStd+ ";" +normStd, line9);
-            
-        }
+            var xyStd = cmToString(standardDeviation(new double[] { 0, -100.1, 100, 1 }));
+            var normStd = cmToString(standardDeviation(new double[] { 0, norm(-100.1, -100.1), norm(100, 100), norm(1, 1) }));
+            Assert.AreEqual("Standard deviation (unbiased);;" + xyStd + ";" + xyStd + ";" + normStd, line9);
 
+            // Buggen som Jonas hittade, issue #121. Berodde på att jag hade skrivit XOffset när det skulle vara YOffset.
+            t1 = mockTarget(5, 1, s.SessionId, 0, 0);
+            t2 = mockTarget(2, 2, s.SessionId, -74.90200118, 115.4000926);
+            targs = new List<Target> { t1, t2 };
+            ansStr = generateMailString(p, s, targs);
+            ans = ansStr.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+            Assert.AreEqual(7, ans.Length, ansStr);
+
+            line2 = ans[2];
+            Assert.AreEqual("1;5;0.0;0.0;0.0", line2);
+            line3 = ans[3];
+            Assert.AreEqual("2;2;" + cmToString(-74.90200118) + ";" + cmToString(115.4000926) + ";" + cmToString(137.57721887), line3);
+            line5 = ans[5];
+            Assert.AreEqual("Mean;;" + cmToString(-37.45100059) + ";" + cmToString(57.7000463) + ";" + cmToString(68.7886094), line5);
+            line6 = ans[6];
+            Assert.AreEqual("Standard deviation (unbiased);;" + cmToString(52.963713) + ";" + cmToString(81.600188) + ";" + cmToString(97.2817844), line6);
+        }
     }
 }
