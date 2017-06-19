@@ -409,11 +409,12 @@ namespace HockeylizerUnitTests.Helpers
             ret.SessionId = sessionId;
             ret.XOffset = xOffset;
             ret.YOffset = yOffset;
+            ret.HitGoal = true;
             return ret;
         }
 
         [TestMethod]
-        public void generateMailStringTest()
+        public void generateSessionMailStringTest()
         {
 
             var p = new Player("Foo Fooson");
@@ -422,7 +423,7 @@ namespace HockeylizerUnitTests.Helpers
             s.SessionId = 1;
 
             var targs = new List<Target>();
-            var ansStr = generateMailString(p, s, targs);
+            var ansStr = generateSessionMailString(p, s, targs);
             var ans = ansStr.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
             Assert.AreEqual(6, ans.Length, ansStr);
 
@@ -450,7 +451,7 @@ namespace HockeylizerUnitTests.Helpers
             var t5 = mockTarget(3, 2, s.SessionId, -100.1, -100.1);
 
             targs = new List<Target>() { t1, t2, t3, t4, t5 };
-            ansStr = generateMailString(p, s, targs);
+            ansStr = generateSessionMailString(p, s, targs);
             ans = ansStr.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
             Assert.AreEqual(10, ans.Length, ansStr);
 
@@ -482,11 +483,23 @@ namespace HockeylizerUnitTests.Helpers
             var normStd = cmToString(standardDeviation(new double[] { 0, norm(-100.1, -100.1), norm(100, 100), norm(1, 1) }));
             Assert.AreEqual("Standard deviation (unbiased);;" + xyStd + ";" + xyStd + ";" + normStd, line9);
 
+            // Samma som innan, men sätt t4 till miss och se så att allt stämmer.
+            t4.HitGoal = false;
+            ansStr = generateSessionMailString(p, s, targs);
+            ans = ansStr.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+            Assert.AreEqual(10, ans.Length, ansStr);
+            line5 = ans[5];
+            line8 = ans[8];
+            line9 = ans[9];
+            Assert.AreEqual("5;2;miss;miss;miss", line5);
+            Assert.AreEqual("Mean;;" + cmToString(-33.0333333) + ";" + cmToString(-33.0333333) + ";" + cmToString(47.658997), line8, ansStr);
+            Assert.AreEqual("Standard deviation (unbiased);;" + cmToString(58.083589) + ";" + cmToString(58.083589) + ";" + cmToString(81.32613356), line9);
+
             // Buggen som Jonas hittade, issue #121. Berodde på att jag hade skrivit XOffset när det skulle vara YOffset.
             t1 = mockTarget(5, 1, s.SessionId, 0, 0);
             t2 = mockTarget(2, 2, s.SessionId, -74.90200118, 115.4000926);
             targs = new List<Target> { t1, t2 };
-            ansStr = generateMailString(p, s, targs);
+            ansStr = generateSessionMailString(p, s, targs);
             ans = ansStr.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
             Assert.AreEqual(7, ans.Length, ansStr);
 

@@ -213,7 +213,23 @@ namespace hockeylizer.Helpers
             return nums.Select(n => n.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray();
         }
 
-        public static string generateMailString(Player player, PlayerSession session, IEnumerable<Target> targets)
+        private static string[] targetToCsvRow(Target t) {
+            var shotNo = t.Order.ToString();
+            var targetNo = t.TargetNumber.ToString();
+            var xOffset = "miss";
+            var yOffset = "miss";
+            var deltaNorm = "miss";
+            if (t.HitGoal) {
+                var xExists = t.XOffset.HasValue;
+                var yExists = t.YOffset.HasValue;
+                xOffset = xExists ? cmToString(t.XOffset.Value) : "N/A";
+                yOffset = yExists ? cmToString(t.YOffset.Value) : "N/A";
+                deltaNorm = xExists && yExists ? cmToString(norm(t.XOffset.Value, t.YOffset.Value)) : "N/A";
+            }
+            return new string[] { shotNo, targetNo, xOffset, yOffset, deltaNorm };
+        }
+
+        public static string generateSessionMailString(Player player, PlayerSession session, IEnumerable<Target> targets)
         {
 
             var titleLine = new string[] { player.Name, session.Created.ToString() };
@@ -225,24 +241,15 @@ namespace hockeylizer.Helpers
             // Lines of per-shot data
             var dataLines = new List<string[]>();
             if (sessionTargets == null || !sessionTargets.Any()) dataLines.Add(new string[] { "No hits found." });
-            else foreach (Target t in sessionTargets)
-                {
-                    var shotNo = t.Order.ToString();
-                    var targetNo = t.TargetNumber.ToString();
-                    var xExists = t.XOffset.HasValue;
-                    var yExists = t.YOffset.HasValue;
-                    var xOffset = xExists ? cmToString(t.XOffset.Value) : "N/A";
-                    var yOffset = yExists ? cmToString(t.YOffset.Value) : "N/A";
-                    var deltaNorm = xExists && yExists ? cmToString(norm(t.XOffset.Value, t.YOffset.Value)) : "N/A";
-                    dataLines.Add(new string[] { shotNo, targetNo, xOffset, yOffset, deltaNorm });
-                }
+            else foreach (Target t in sessionTargets) dataLines.Add(targetToCsvRow(t));
 
             var emptyLine = new string[] { };
 
             // Mean (average for you plebs) line
-            var xOffs = sessionTargets.Where(t => t.XOffset.HasValue).Select(t => t.XOffset.Value);
-            var yOffs = sessionTargets.Where(t => t.YOffset.HasValue).Select(t => t.YOffset.Value);
-            var norms = sessionTargets.Where(t => t.XOffset.HasValue && t.YOffset.HasValue).Select(t => norm(t.XOffset.Value, t.YOffset.Value));
+            var hitTargets = sessionTargets.Where(t => t.HitGoal);
+            var xOffs = hitTargets.Where(t => t.XOffset.HasValue).Select(t => t.XOffset.Value);
+            var yOffs = hitTargets.Where(t => t.YOffset.HasValue).Select(t => t.YOffset.Value);
+            var norms = hitTargets.Where(t =>  t.XOffset.HasValue && t.YOffset.HasValue).Select(t => norm(t.XOffset.Value, t.YOffset.Value));
             var xMeanStr = xOffs.Any() ? cmToString(mean(xOffs)) : "N/A";
             var yMeanStr = yOffs.Any() ? cmToString(mean(yOffs)) : "N/A";
             var normMeanStr = norms.Any() ? cmToString(mean(norms)) : "N/A";

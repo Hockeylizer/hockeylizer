@@ -1189,7 +1189,7 @@ namespace hockeylizer.Controllers
                     return Json(response);
                 }
 
-                var csv = Statistics.generateMailString(player, session, targets);
+                var csv = Statistics.generateSessionMailString(player, session, targets);
 
 				const string filestart = "file";
 				var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
@@ -1283,7 +1283,7 @@ namespace hockeylizer.Controllers
 	            foreach (var session in sessions)
 	            {
 	                var targets = _db.Targets.Where(t => t.SessionId == session.SessionId).ToList();
-	                csv += Statistics.generateMailString(player, session, targets);
+	                csv += Statistics.generateSessionMailString(player, session, targets);
 	            }
 
 	            const string filestart = "file";
