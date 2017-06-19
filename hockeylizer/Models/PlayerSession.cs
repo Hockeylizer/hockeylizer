@@ -101,6 +101,9 @@ namespace hockeylizer.Models
             this.Analyzed = false;
             this.Chopped = false;
 
+		    this.AnalysisFailed = false;
+		    this.ChopFailed = false;
+
             this.DeleteFailed = false;
             this.Created = DateTime.Now;
 
@@ -148,6 +151,8 @@ namespace hockeylizer.Models
 	    public bool Chopped { get; set; }
 	    public string ChopFailReason { get; set; }
 
+        public bool ChopFailed { get; set; }
+        public bool AnalysisFailed { get; set; }
 
         public bool DeleteFailed { get; set; }
         public string DeleteFailedWhere { get; set; }

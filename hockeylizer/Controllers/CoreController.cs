@@ -385,7 +385,8 @@ namespace hockeylizer.Controllers
 		    if (player == null)
 		    {
 		        session.Analyzed = false;
-		        session.AnalysisFailReason = "Kunde inte hitta spelare.";
+		        session.AnalysisFailed = true;
+                session.AnalysisFailReason = "Kunde inte hitta spelare.";
 
 		        await _db.SaveChangesAsync();
 		        return false;
@@ -395,7 +396,8 @@ namespace hockeylizer.Controllers
 		    if (!download.Key)
 		    {
 		        session.Analyzed = false;
-		        session.AnalysisFailReason = "Kunde inte ladda ned film för att: " + download.Value;
+		        session.AnalysisFailed = true;
+                session.AnalysisFailReason = "Kunde inte ladda ned film för att: " + download.Value;
 
 		        await _db.SaveChangesAsync();
 		        return false;
@@ -407,7 +409,8 @@ namespace hockeylizer.Controllers
 		    if (!sourcePoints.Any())
 		    {
 		        session.Analyzed = false;
-		        session.AnalysisFailReason = "Kunde inte hitta några punkter att sikta på.";
+		        session.AnalysisFailed = true;
+                session.AnalysisFailReason = "Kunde inte hitta några punkter att sikta på.";
 
 		        try
 		        {
@@ -451,7 +454,9 @@ namespace hockeylizer.Controllers
 
 			            await _db.SaveChangesAsync();
 			        }
+
 			        session.Analyzed = false;
+			        session.AnalysisFailed = true;
 			        session.AnalysisFailReason =
 			            "Servern kraschade medan den försöka analysera klippet. Felmeddelande från server: " + e.Message;
 
@@ -469,7 +474,8 @@ namespace hockeylizer.Controllers
 				if (analysis.WasErrors)
 				{
 				    session.Analyzed = false;
-				    session.AnalysisFailReason = analysis.ErrorMessage;
+				    session.AnalysisFailed = true;
+                    session.AnalysisFailReason = analysis.ErrorMessage;
 
 					t.AnalysisFailed = true;
 					t.AnalysisFailedReason = analysis.ErrorMessage;
@@ -486,6 +492,7 @@ namespace hockeylizer.Controllers
 					t.FrameHit = analysis.FrameNr;
 
 				    session.Analyzed = true;
+				    session.AnalysisFailed = false;
                 }
 			}
 
@@ -561,7 +568,8 @@ namespace hockeylizer.Controllers
 		    if (player == null)
 		    {
 		        session.Chopped = false;
-		        session.ChopFailReason = "Kunde inte hitta spelare.";
+		        session.ChopFailed = true;
+                session.ChopFailReason = "Kunde inte hitta spelare.";
 
 		        await _db.SaveChangesAsync();
 		        return false;
@@ -571,7 +579,8 @@ namespace hockeylizer.Controllers
 		    if (!download.Key)
 		    {
 		        session.Chopped = false;
-		        session.ChopFailReason = "Kunde inte ladda ned film för att: " + download.Value;
+		        session.ChopFailed = true;
+                session.ChopFailReason = "Kunde inte ladda ned film för att: " + download.Value;
 
 		        await _db.SaveChangesAsync();
 		        return false;
@@ -592,6 +601,7 @@ namespace hockeylizer.Controllers
 		    catch (Exception e)
 		    {
 		        session.Chopped = false;
+		        session.ChopFailed = true;
 		        session.ChopFailReason = "Kunde inte stycka upp film. Felmeddelande från server: " + e.Message;
 
 		        try
@@ -624,7 +634,8 @@ namespace hockeylizer.Controllers
 			}
 
 		    session.ChopFailReason = "";
-			session.Chopped = true;
+		    session.ChopFailed = false;
+            session.Chopped = true;
 
 			await _db.SaveChangesAsync();
 
@@ -1103,16 +1114,16 @@ namespace hockeylizer.Controllers
 
 	            if (session != null && !session.Deleted)
 	            {
-	                response = new GetSessionInfoAboutAnalysisAndChopping(session.Analyzed, session.Chopped, session.AnalysisFailReason + ". " + session.ChopFailReason);
+	                response = new GetSessionInfoAboutAnalysisAndChopping(session.Analyzed, session.Chopped, session.AnalysisFailReason + ". " + session.ChopFailReason, session.AnalysisFailed);
                 }
 	            else
 	            {
-	                response = new GetSessionInfoAboutAnalysisAndChopping(false, false, "Videon finns inte");
+	                response = new GetSessionInfoAboutAnalysisAndChopping(false, false, "Videon finns inte", false);
 	            }
 	        }
 	        else
 	        {
-	            response = new GetSessionInfoAboutAnalysisAndChopping(false, false, "Token var inkorrekt");
+	            response = new GetSessionInfoAboutAnalysisAndChopping(false, false, "Token var inkorrekt", false);
 	        }
 
 	        return Json(response);
