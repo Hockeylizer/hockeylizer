@@ -1282,7 +1282,7 @@ namespace hockeylizer.Controllers
 	                return Json(response);
 	            }
 
-	            var sessions = _db.Sessions.Where(s => s.PlayerId == vm.playerId).ToList();
+	            var sessions = _db.Sessions.Where(s => s.PlayerId == vm.playerId && s.Analyzed && !s.AnalysisFailed).ToList();
 	            if (!sessions.Any())
 	            {
 	                response = new GeneralResult(false, "Kunde inte hämta data då det inte finns sessioner.");
@@ -1299,7 +1299,7 @@ namespace hockeylizer.Controllers
 
 	            const string filestart = "file";
 	            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
-	            var path = Path.Combine(startpath, filestart + "-1.csv");
+	            var path = startpath + filestart + "-1.csv";
 
 	            var count = 1;
 	            while (System.IO.File.Exists(path))
