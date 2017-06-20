@@ -1299,7 +1299,7 @@ namespace hockeylizer.Controllers
 
 	            const string filestart = "file";
 	            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
-	            var path = Path.Combine(startpath, filestart + "-1.csv");
+	            var path = startpath + filestart + "-1.csv";
 
 	            var count = 1;
 	            while (System.IO.File.Exists(path))
