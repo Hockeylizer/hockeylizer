@@ -1386,7 +1386,13 @@ namespace hockeylizer.Controllers
 
 		}
 
-		[HttpPost]
+        //[HttpPost]
+        //[AllowAnonymous]
+        //public JsonResult getHitsData([FromBody]GetSvgVm vm) {
+            
+        //}
+
+        [HttpPost]
 		[AllowAnonymous]
 		public ContentResult getTestSVG(string token, string returnType)
 		{

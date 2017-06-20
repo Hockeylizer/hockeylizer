@@ -213,27 +213,76 @@ namespace hockeylizer.Helpers
             return nums.Select(n => n.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray();
         }
 
-        private static string[] targetToCsvRow(Target t) {
-            var shotNo = t.Order.ToString();
-            var targetNo = t.TargetNumber.ToString();
-            var xOffset = "miss";
-            var yOffset = "miss";
-            var deltaNorm = "miss";
-            if (t.HitGoal) {
-                var xExists = t.XOffset.HasValue;
-                var yExists = t.YOffset.HasValue;
-                xOffset = xExists ? cmToString(t.XOffset.Value) : "N/A";
-                yOffset = yExists ? cmToString(t.YOffset.Value) : "N/A";
-                deltaNorm = xExists && yExists ? cmToString(norm(t.XOffset.Value, t.YOffset.Value)) : "N/A";
+        // A wrapper to add norms to targets, and also a nice to string[] function.
+        private class TargetAndNorm {
+            public TargetAndNorm(Target t) {
+                this.target = t;
+                if (t.XOffset.HasValue && t.YOffset.HasValue) this.norm = norm(t.XOffset.Value, t.YOffset.Value);
+                else this.norm = null;
             }
-            return new string[] { shotNo, targetNo, xOffset, yOffset, deltaNorm };
+            public string[] toStringRow() {
+                var shotNo = target.Order.ToString();
+                var targetNo = target.TargetNumber.ToString();
+                var xOffset = "miss";
+                var yOffset = "miss";
+                var deltaNorm = "miss";
+                if (target.HitGoal)
+                {
+                    var xExists = target.XOffset.HasValue;
+                    var yExists = target.YOffset.HasValue;
+                    xOffset = xExists ? cmToString(target.XOffset.Value) : "N/A";
+                    yOffset = yExists ? cmToString(target.YOffset.Value) : "N/A";
+                    deltaNorm = norm.HasValue ? cmToString(norm.Value) : "N/A";
+                }
+                return new string[] { shotNo, targetNo, xOffset, yOffset, deltaNorm };
+            }
+            public Target target { get; set; }
+            public double? norm { get; set; }
+        }
+
+        public static string generatePlayerMailString(Player player, IEnumerable<PlayerSession> sessions, IEnumerable<Target> playerTargets) {
+            var pSessions = sessions.Where(s => s.PlayerId == player.PlayerId);
+
+            // titleLine
+            var titleLine = new string[] { player.Name, DateTime.Now.ToString() };
+            // Captions for the per-shot data lines
+            var captionsLine = new string[] { "Shot No.", "Target No.", "x difference (cm)", "y difference (cm)", "Distance to target (cm)" };
+            // empty Line
+            var emptyLine = new string[] { };
+
+            var sessionIds = sessions.Select(s => s.SessionId);
+            var pTargsTemp = playerTargets.Where(t => sessionIds.Contains(t.SessionId));
+            var pTargets = pTargsTemp.Select(targ => new TargetAndNorm(targ));
+            
+            // dataLines
+            var dataLines = new List<string[]>();
+            foreach (PlayerSession sess in pSessions) {
+                dataLines.Add(emptyLine);
+                var targs = pTargets.Where(t => t.target.SessionId == sess.SessionId);
+                var sessionTitleLine = new string[] { sess.Created.ToString("sv-SE") };
+                dataLines.Add(sessionTitleLine);
+                if (targs == null || !targs.Any()) dataLines.Add(new string[] { "No hits found." });
+                else foreach (TargetAndNorm t in targs) dataLines.Add(t.toStringRow());
+            }
+
+            var meanStdLines = targetAndNormsToMeanAndStdRows(pTargets);
+
+            // Generate the table, in matrix form.
+            var table = new List<string[]>() { titleLine, captionsLine };
+            table = table.Concat(dataLines).ToList();
+            table.Add(emptyLine);
+            table.Add(meanStdLines.First());
+            table.Add(meanStdLines.Last());
+
+            return matrixToCSV(table);
         }
 
         public static string generateSessionMailString(Player player, PlayerSession session, IEnumerable<Target> targets)
         {
 
             var titleLine = new string[] { player.Name, session.Created.ToString() };
-            var sessionTargets = targets.Where(t => t.SessionId == session.SessionId).OrderBy(t => t.Order);
+            var sessT = targets.Where(t => t.SessionId == session.SessionId);
+            var sessionTargets = sessT.Select(t => new TargetAndNorm(t)).OrderBy(t => t.target.Order);
 
             // Captions for the per-shot data lines
             var captionsLine = new string[] { "Shot No.", "Target No.", "x difference (cm)", "y difference (cm)", "Distance to target (cm)" };
@@ -241,34 +290,52 @@ namespace hockeylizer.Helpers
             // Lines of per-shot data
             var dataLines = new List<string[]>();
             if (sessionTargets == null || !sessionTargets.Any()) dataLines.Add(new string[] { "No hits found." });
-            else foreach (Target t in sessionTargets) dataLines.Add(targetToCsvRow(t));
+            else foreach (TargetAndNorm t in sessionTargets) dataLines.Add(t.toStringRow());
 
             var emptyLine = new string[] { };
 
-            // Mean (average for you plebs) line
-            var hitTargets = sessionTargets.Where(t => t.HitGoal);
-            var xOffs = hitTargets.Where(t => t.XOffset.HasValue).Select(t => t.XOffset.Value);
-            var yOffs = hitTargets.Where(t => t.YOffset.HasValue).Select(t => t.YOffset.Value);
-            var norms = hitTargets.Where(t =>  t.XOffset.HasValue && t.YOffset.HasValue).Select(t => norm(t.XOffset.Value, t.YOffset.Value));
-            var xMeanStr = xOffs.Any() ? cmToString(mean(xOffs)) : "N/A";
-            var yMeanStr = yOffs.Any() ? cmToString(mean(yOffs)) : "N/A";
-            var normMeanStr = norms.Any() ? cmToString(mean(norms)) : "N/A";
-            var meanLine = new string[] { "Mean", "", xMeanStr, yMeanStr, normMeanStr };
-
-            // Estimated standard deviation line
-            var xStdStr = xOffs.Any() ? cmToString(standardDeviation(xOffs)) : "N/A";
-            var yStdStr = yOffs.Any() ? cmToString(standardDeviation(yOffs)) : "N/A";
-            var normStdStr = norms.Any() ? cmToString(standardDeviation(norms)) : "N/A";
-            var stdLine = new string[] { "Standard deviation (unbiased)", "", xStdStr, yStdStr, normStdStr };
+            var meanStdLines = targetAndNormsToMeanAndStdRows(sessionTargets);
 
             // Generate the table, in matrix form.
             var table = new List<string[]>() { titleLine, captionsLine };
             table = table.Concat(dataLines).ToList();
             table.Add(emptyLine);
-            table.Add(meanLine);
-            table.Add(stdLine);
+            table.Add(meanStdLines.First());
+            table.Add(meanStdLines.Last());
 
             return matrixToCSV(table);
+        }
+
+        private static List<string[]> targetAndNormsToMeanAndStdRows(IEnumerable<TargetAndNorm> ts) {
+            var hitTargets = ts.Where(t => t.target.HitGoal);
+            var xOffs = hitTargets.Where(t => t.target.XOffset.HasValue).Select(t => t.target.XOffset.Value);
+            var yOffs = hitTargets.Where(t => t.target.YOffset.HasValue).Select(t => t.target.YOffset.Value);
+            var norms = hitTargets.Where(t => t.target.XOffset.HasValue && t.target.YOffset.HasValue).Select(t => norm(t.target.XOffset.Value, t.target.YOffset.Value));
+
+            return new List<string[]>() { numsToMeanRow(xOffs, yOffs, norms), numsToStdRow(xOffs, yOffs, norms) };
+        }
+
+        private static string[] numsToMeanRow(IEnumerable<double> xOffsets, IEnumerable<double> yOffsets, IEnumerable<double> norms) {
+            var xMeanStr = xOffsets.Any() ? cmToString(mean(xOffsets)) : "N/A";
+            var yMeanStr = yOffsets.Any() ? cmToString(mean(yOffsets)) : "N/A";
+            var normMeanStr = norms.Any() ? cmToString(mean(norms)) : "N/A";
+            return new string[] { "Mean", "", xMeanStr, yMeanStr, normMeanStr };
+        }
+
+        private static string[] numsToStdRow(IEnumerable<double> xOffsets, IEnumerable<double> yOffsets, IEnumerable<double> norms) {
+            var xStdStr = xOffsets.Any() ? cmToString(standardDeviation(xOffsets)) : "N/A";
+            var yStdStr = yOffsets.Any() ? cmToString(standardDeviation(yOffsets)) : "N/A";
+            var normStdStr = norms.Any() ? cmToString(standardDeviation(norms)) : "N/A";
+            return new string[] { "Standard deviation (unbiased)", "", xStdStr, yStdStr, normStdStr };
+        }
+
+        private static string[] targetToStringRow(Target t)
+        {
+            return (new TargetAndNorm(t)).toStringRow();
+        }
+
+        private static IEnumerable<string[]> targetsToStringTable(IEnumerable<Target> ts) {
+            return ts.Select(t => targetToStringRow(t));
         }
     }
 }

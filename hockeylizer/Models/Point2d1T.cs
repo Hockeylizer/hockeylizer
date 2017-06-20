@@ -22,8 +22,6 @@ namespace hockeylizer.Models
             return new double[] { x, y };
         }
 
-        //public double x;
-        //public double y;
         public int target { get; set; }
     }
 }

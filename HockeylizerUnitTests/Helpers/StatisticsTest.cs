@@ -414,6 +414,12 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
+        public void generatePlayerMailString_Test() {
+            
+        }
+        
+
+        [TestMethod]
         public void generateSessionMailStringTest()
         {
 
