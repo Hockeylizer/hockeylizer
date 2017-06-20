@@ -8,7 +8,7 @@ namespace hockeylizer.Helpers
     [StructLayout(LayoutKind.Sequential)]
     class DumPoint2d
     {
-        public double x;
-        public double y;
+        public float x;
+        public float y;
     }
 }

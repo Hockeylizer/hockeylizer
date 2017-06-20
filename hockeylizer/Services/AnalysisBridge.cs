@@ -228,7 +228,7 @@ namespace hockeylizer.Services
                 pointsDstSpaceFlat[fi] = pointsCmSpace[pi].x;
                 ++fi;
                 pointsSrcSpaceFlat[fi] = pointsSrcSpace[pi].y;
-                pointsDstSpaceFlat[fi] = pointsCmSpace[pi].x;
+                pointsDstSpaceFlat[fi] = pointsCmSpace[pi].y;
                 ++fi;
             }
             DumPoint2d ret = new DumPoint2d();
