@@ -466,7 +466,7 @@ namespace hockeylizer.Controllers
 					t.YOffset = analysis.OffsetFromTarget.y;
 
 					t.HitGoal = analysis.DidHitGoal;
-					t.FrameHit = analysis.VideoFrameNr;
+					t.FrameHit = analysis.FrameNr;
 
 				    session.Analyzed = true;
 				    session.AnalysisFailed = false;
@@ -1132,16 +1132,16 @@ namespace hockeylizer.Controllers
 
 	            if (session != null && !session.Deleted)
 	            {
-	                response = new GetSessionInfoAboutAnalysisAndChopping(session.Analyzed, session.ChopFailed, session.AnalysisFailReason + ". " + session.ChopFailReason, session.AnalysisFailed);
+	                response = new GetSessionInfoAboutAnalysisAndChopping(session.Analyzed, session.Chopped, session.AnalysisFailed, session.ChopFailed, session.AnalysisFailReason + ". " + session.ChopFailReason);
                 }
 	            else
 	            {
-	                response = new GetSessionInfoAboutAnalysisAndChopping(false, false, "Videon finns inte", false);
+	                response = new GetSessionInfoAboutAnalysisAndChopping(false, false, false, false, "Videon finns inte");
 	            }
 	        }
 	        else
 	        {
-	            response = new GetSessionInfoAboutAnalysisAndChopping(false, false, "Token var inkorrekt", false);
+	            response = new GetSessionInfoAboutAnalysisAndChopping(false, false, false, false, "Token var inkorrekt");
 	        }
 
 	        return Json(response);
