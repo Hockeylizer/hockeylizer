@@ -248,7 +248,7 @@ namespace hockeylizer.Helpers
         /// <param name="playerTargets">Targets are selected from there, but only those for the correct sessions.</param>
         /// <returns>A ';'-separated CSV.</returns>
         public static string generatePlayerMailString(Player player, IEnumerable<PlayerSession> sessions, IEnumerable<Target> playerTargets) {
-            var pSessions = sessions.Where(s => s.PlayerId == player.PlayerId);
+            var pSessions = sessions.Where(s => s.PlayerId == player.PlayerId && s.Analyzed);
 
             // titleLine
             var titleLine = new string[] { player.Name, DateTime.Now.ToString("yyyy-MM-dd HH:mm") };

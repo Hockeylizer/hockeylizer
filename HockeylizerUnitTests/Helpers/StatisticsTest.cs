@@ -414,8 +414,10 @@ namespace HockeylizerUnitTests.Helpers
             var p = new Player("Foo Fooson");
             p.PlayerId = 1;
             var s1 = new PlayerSession("whatevs", "whatevs", p.PlayerId, -1, -1, 5, 2);
+            s1.Analyzed = true;
             s1.SessionId = 1;
             var s2 = new PlayerSession("whatevs", "whatevs", p.PlayerId, -1, -1, 5, 2);
+            s2.Analyzed = true;
             s2.SessionId = 2;
             var dummyTarget = mockTarget(0, 1, 99, 0, 0);
             DateTime dateTimeOut;
