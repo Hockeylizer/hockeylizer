@@ -13,6 +13,11 @@ namespace hockeylizer.Models
             get { return frameNr; }
         }
 
+        public int VideoFrameNr
+        {
+            get { return frameNr + first_frame; }
+        }
+
         // The pixel we think it hit the goal at.
         public Point2i HitPoint
         {
