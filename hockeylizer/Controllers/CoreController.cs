@@ -1178,6 +1178,7 @@ namespace hockeylizer.Controllers
 			return Json(response);
 		}
 
+        // Currently used for Daniels experiment to switch to attaching byte arrays instead of paths.
 		[HttpPost]
 		[AllowAnonymous]
 		public async Task<JsonResult> SendEmail([FromBody]EmailVm vm)
@@ -1228,25 +1229,25 @@ namespace hockeylizer.Controllers
 
                 var csv = Statistics.generateSessionMailString(player, session, targets);
 
-				const string filestart = "file";
-				var startpath = _hostingEnvironment.WebRootPath + @"\files";
-                var path = startpath + @"\" + filestart + "-1.csv";
+				//const string filestart = "file";
+				//var startpath = _hostingEnvironment.WebRootPath + @"\files";
+    //            var path = startpath + @"\" + filestart + "-1.csv";
 
-				var count = 1;
-				while (System.IO.File.Exists(path))
-				{
-					var filename = filestart + "-" + count + ".csv";
+				//var count = 1;
+				//while (System.IO.File.Exists(path))
+				//{
+				//	var filename = filestart + "-" + count + ".csv";
 
-                    path = startpath + @"\" + filename;
-					count++;
-				}
+    //                path = startpath + @"\" + filename;
+				//	count++;
+				//}
 
-				System.IO.File.WriteAllText(path, csv);
+				//System.IO.File.WriteAllText(path, csv);
 
 			    SendMessageResult sendMail;
 			    try
 			    {
-			        sendMail = await Mailgun.SendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)", path);
+			        sendMail = await Mailgun.DanielsSendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)", csv);
 
                 }
 			    catch (Exception e)
@@ -1255,10 +1256,10 @@ namespace hockeylizer.Controllers
 			        return Json(response);
 			    }
 
-                if (System.IO.File.Exists(path))
-				{
-					System.IO.File.Delete(path);
-				}
+    //            if (System.IO.File.Exists(path))
+				//{
+				//	System.IO.File.Delete(path);
+				//}
 
 				if (sendMail.Message.Contains("failed") || sendMail.Message.Contains("missing"))
 				{

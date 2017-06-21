@@ -98,6 +98,34 @@ namespace hockeylizer.Services
             var res = await Mailgun.TryExecuteRequest<SendMessageResult>(request);
             return res;
         }
+
+        // Test to send with streamer instead of file path.
+        public static async Task<SendMessageResult> DanielsSendMessage(string email, string subject, string text, string csvString = null)
+        {
+            RestRequest request = new RestRequest
+            {
+                Method = Method.POST,
+                Resource = "/mg.dispono.nu/messages"
+            };
+
+            request.AddParameter("domain", "mg.dispono.nu", ParameterType.UrlSegment);
+
+            request.AddParameter("to", email);
+            request.AddParameter("from", "noreply@drhockey.com");
+
+            request.AddParameter("subject", subject);
+            request.AddParameter("text", text);
+
+            // CSV-string turned into byte[] and attached.
+            if (!string.IsNullOrEmpty(csvString) || !string.IsNullOrWhiteSpace(csvString))
+            {
+                var csvBytes = System.Text.Encoding.UTF8.GetBytes(csvString);
+                request.AddFile("attachment", csvBytes, "HockeyStats.csv", "text/csv");
+            }
+
+            var res = await Mailgun.TryExecuteRequest<SendMessageResult>(request);
+            return res;
+        }
     }
 
     public class SendMessageResult
