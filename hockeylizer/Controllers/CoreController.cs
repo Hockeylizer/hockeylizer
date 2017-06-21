@@ -417,7 +417,7 @@ namespace hockeylizer.Controllers
 			    AnalysisResult analysis;
 			    try
 			    {
-			        analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, sourcePoints, width, height,
+			        analysis = AnalysisBridge.AnalyzeShot(t.TimestampStart, t.TimestampEnd, sourcePoints, width, height, t.TargetNumber,
 			            Points.HitPointsInCm().Values.ToArray(), path);
 			    }
 			    catch (Exception e)

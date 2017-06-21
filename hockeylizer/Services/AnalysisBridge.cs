@@ -76,6 +76,7 @@ namespace hockeylizer.Services
         public static AnalysisResult AnalyzeShot(long firstFrame, long lastFrame,
             Point2i[] targetCoords,
             double sizeX, double sizeY,
+            int targetIndex,
             Point2d[] targetOffsetsInCm,
             string videoName)
         {
@@ -100,13 +101,13 @@ namespace hockeylizer.Services
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
-                analyzeShotCSWin(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
+                analyzeShotCSWin(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY, targetIndex,
                     targetOffsetsInCmFlat, videoName, 0, ret);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 // 0 här är hårdkodat ingen rotation! när vi har rotations data från app lägg till float parameter med vinkeln och lägga till här
-                analyzeShotCSLinux(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY,
+                analyzeShotCSLinux(firstFrame, lastFrame, targetCoords.Length, targetCoordsFlat, sizeX, sizeY, targetIndex,
                     targetOffsetsInCmFlat, videoName, 0, ret);
             }
             else
@@ -270,7 +271,7 @@ namespace hockeylizer.Services
         private static extern void analyzeShotCSWin(long msStartTimestamp, long msEndTimestamp,
             int targetNo,
             [In] int[] targetCoords,
-            double sizeX, double sizeY,
+            double sizeX, double sizeY, int targetIndex,
             [In] double[] targetOffsetsInCm,
             String videoName, float angle,
             [In, Out, MarshalAs(UnmanagedType.LPStruct)]
@@ -318,7 +319,7 @@ namespace hockeylizer.Services
         private static extern void analyzeShotCSLinux(long msStartTimestamp, long msEndTimestamp,
             int targetNo,
             [In] int[] targetCoords,
-            double sizeX, double sizeY,
+            double sizeX, double sizeY, int targetIndex,
             [In] double[] targetOffsetsInCm,
             String videoName, float angle,
             [In, Out, MarshalAs(UnmanagedType.LPStruct)]
