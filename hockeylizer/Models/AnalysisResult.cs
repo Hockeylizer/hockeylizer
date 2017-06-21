@@ -13,6 +13,11 @@ namespace hockeylizer.Models
             get { return frameNr; }
         }
 
+        public int VideoFrameNr
+        {
+            get { return frameNr + first_frame; }
+        }
+
         // The pixel we think it hit the goal at.
         public Point2i HitPoint
         {
@@ -41,6 +46,15 @@ namespace hockeylizer.Models
             get { return errorMessage; }
         }
 
+        public int LastFrame
+        {
+            get { return last_frame; }
+        }
+        public int FirstFrame
+        {
+            get { return first_frame; }
+        }
+
         private bool error;
         private string errorMessage;
         private bool hit;
@@ -49,5 +63,7 @@ namespace hockeylizer.Models
         private int pY;
         private double offsetX;
         private double offsetY;
+        private int first_frame;
+        private int last_frame;
     }
 }

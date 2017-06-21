@@ -201,8 +201,6 @@ namespace hockeylizer.Migrations
 
                     b.Property<int>("Order");
 
-                    b.Property<int?>("RealFrameHit");
-
                     b.Property<int>("SessionId");
 
                     b.Property<int>("TargetNumber");

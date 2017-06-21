@@ -613,24 +613,36 @@ namespace hockeylizer.Models
         {
             this.SessionAnalyzed = false;
             this.SessionChopped = false;
+
             this.AnalysisFailed = false;
+            this.ChopFailed = false;
+
             this.Errors = "Unknown error 4.";
         }
 
-        public GetSessionInfoAboutAnalysisAndChopping(bool analyzed, bool chopped, string errors, bool analysisFailed)
+        public GetSessionInfoAboutAnalysisAndChopping(bool analyzed, 
+                                bool chopped,
+                                bool analysisFailed,
+                                bool chopFailed,
+                                string errors)
         {
             this.SessionAnalyzed = analyzed;
             this.SessionChopped = chopped;
-            this.Errors = errors;
+
             this.AnalysisFailed = analysisFailed;
+            this.ChopFailed = chopFailed;
+
+            this.Errors = errors;
         }
 
         public bool SessionDone => this.SessionAnalyzed && this.SessionChopped;
-        public bool ErrorOccured => this.AnalysisFailed && !this.SessionChopped;
+        public bool ErrorOccured => this.AnalysisFailed || this.ChopFailed;
 
         public bool SessionAnalyzed { get; set; }
         public bool SessionChopped { get; set; }
+
         public bool AnalysisFailed { get; set; }
+        public bool ChopFailed { get; set; }
 
         public string Errors { get; set; }
     }
