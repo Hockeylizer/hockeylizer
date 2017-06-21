@@ -409,8 +409,10 @@ namespace hockeylizer.Controllers
 			var height = Points.ClothHeight;
 
 			var targets = _db.Targets.Where(shot => shot.SessionId == sessionId).ToList();
-
-			foreach (var t in targets)
+            session.Analyzed = true;
+            session.AnalysisFailed = false;
+            session.AnalysisFailReason = "";
+            foreach (var t in targets)
 			{
 			    AnalysisResult analysis;
 			    try
@@ -466,10 +468,11 @@ namespace hockeylizer.Controllers
 					t.YOffset = analysis.OffsetFromTarget.y;
 
 					t.HitGoal = analysis.DidHitGoal;
+					t.FrameHit = analysis.VideoFrameNr;
+                    t.AnalysisFailed = false;
+                    t.AnalysisFailedReason = "";
 					t.FrameHit = analysis.FrameNr;
 
-				    session.Analyzed = true;
-				    session.AnalysisFailed = false;
                 }
 			}
 
