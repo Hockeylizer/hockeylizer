@@ -48,26 +48,27 @@ namespace hockeylizer.Services
             }
             FrameCollection[] decodedFrames = new FrameCollection[decodeIntervals.Length];
             flatIndex = 0;
-            for (int i = 0; i < decodedFrames.Length; i++)
+
+            unsafe // NICE!
             {
-                int start = shotIndexes[flatIndex];
-                flatIndex++;
-                int end = shotIndexes[flatIndex];
-                flatIndex++;
-                decodedFrames[i] = new FrameCollection();
-                decodedFrames[i].Shot = i;
-                String[] uris = new String[end - start];
-                unsafe // NICE!
+                byte** ptrs = (byte**)res.ToPointer();
+                for (int i = 0; i < decodedFrames.Length; i++)
                 {
-                    byte** ptrs = (byte**)res.ToPointer();
+                    int start = shotIndexes[flatIndex];
+                    flatIndex++;
+                    int end = shotIndexes[flatIndex];
+                    flatIndex++;
+                    decodedFrames[i] = new FrameCollection();
+                    decodedFrames[i].Shot = i;
+                    String[] uris = new String[end - start];
                     for (int k = 0; k < uris.Length; ++k)
                     {
                         IntPtr ptr = new IntPtr((void*)(*ptrs));
                         uris[k] = Marshal.PtrToStringUTF8(ptr);
                         ptrs += 1;
                     }
+                    decodedFrames[i].Uris = uris;
                 }
-                decodedFrames[i].Uris = uris;
             }
             return decodedFrames;
         }
