@@ -1204,14 +1204,14 @@ namespace hockeylizer.Controllers
 
 				const string filestart = "file";
 				var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
-                var path = startpath + filestart + "-1.csv";
+                var path = startpath + @"\" + filestart + "-1.csv";
 
 				var count = 1;
 				while (System.IO.File.Exists(path))
 				{
 					var filename = filestart + "-" + count + ".csv";
 
-                    path = startpath + filename;
+                    path = startpath + @"\" + filename;
 					count++;
 				}
 
@@ -1298,14 +1298,14 @@ namespace hockeylizer.Controllers
 
 	            const string filestart = "file";
 	            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
-	            var path = startpath + filestart + "-1.csv";
+	            var path = startpath + @"\" + filestart + "-1.csv";
 
 	            var count = 1;
 	            while (System.IO.File.Exists(path))
 	            {
 	                var filename = filestart + "-" + count + ".csv";
 
-                    path = startpath + filename;
+                    path = startpath + @"\" + filename;
 	                count++;
 	            }
 
