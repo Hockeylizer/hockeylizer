@@ -626,8 +626,8 @@ namespace hockeylizer.Controllers
 				    try
 				    {
 				        s.Uris = s.Uris.ToList()
-				            .OrderByDescending(fr => Convert.ToInt32(fr.Split('.')[fr.Split('.').Count() - 2]))
-				            .ToArray();
+				            .OrderBy(fr => Convert.ToInt32(fr.Split('.')[fr.Split('.').Count() - 2]))
+				                .ToArray();
 				        target.Info = "";
 				    }
 				    catch (Exception e)
@@ -859,8 +859,8 @@ namespace hockeylizer.Controllers
 			    try
 			    {
 			        frames = _db.Frames.Where(fr => fr.TargetId == shot.TargetId).Select(frame => frame.FrameUrl).ToList()
-			            .OrderByDescending(fr => Convert.ToInt32(fr.Split('.')[fr.Split('.').Count() - 2]))
-			            .ToList();
+			            .OrderBy(fr => Convert.ToInt32(fr.Split('.')[fr.Split('.').Count() - 2]))
+			                .ToList();
 
 			        shot.Info = "";
 			    }
@@ -969,7 +969,7 @@ namespace hockeylizer.Controllers
 			    try
 			    {
 			        frames = _db.Frames.Where(fr => fr.TargetId == shot.TargetId).Select(frame => frame.FrameUrl).ToList()
-                                    .OrderByDescending(fr => Convert.ToInt32(fr.Split('.')[fr.Split('.').Count() - 2]))
+                                    .OrderBy(fr => Convert.ToInt32(fr.Split('.')[fr.Split('.').Count() - 2]))
                                         .ToList();
 
 			        shot.Info = "";
