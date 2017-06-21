@@ -63,6 +63,8 @@ namespace hockeylizer.Models
 		public bool ChopFailed { get; set; }
 		public string ChopFailedReason { get; set; }
 
+        public string Info { get; set; }
+
         [ForeignKey("RelatedSession")]
         public int SessionId { get; set; }
         public virtual PlayerSession RelatedSession { get; set; }

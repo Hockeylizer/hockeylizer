@@ -629,7 +629,21 @@ namespace hockeylizer.Controllers
 					var target = _db.Targets.FirstOrDefault(shot => shot.SessionId == session.SessionId && shot.Order == (s.Shot + 1));
 
 					if (target == null) continue;
-					foreach (var frame in s.Uris)
+
+                    // Try sorting
+				    try
+				    {
+				        s.Uris = s.Uris.ToList()
+				            .OrderByDescending(fr => Convert.ToInt32(fr.Split('.')[fr.Split('.').Count() - 2]))
+				            .ToArray();
+				        target.Info = "";
+				    }
+				    catch (Exception e)
+				    {
+				        target.Info = "Sortering av url:er misslyckades, se felmeddelande: " + e.Message;
+				    }
+
+                    foreach (var frame in s.Uris)
 					{
 						var picture = new FrameToAnalyze(target.TargetId, frame);
 						await _db.Frames.AddAsync(picture);
@@ -848,7 +862,25 @@ namespace hockeylizer.Controllers
 				}
 
 				var images = new List<string>();
-				foreach (var url in _db.Frames.Where(fr => fr.TargetId == shot.TargetId).Select(frame => frame.FrameUrl).ToList())
+
+			    List<string> frames;
+			    try
+			    {
+			        frames = _db.Frames.Where(fr => fr.TargetId == shot.TargetId).Select(frame => frame.FrameUrl).ToList()
+			            .OrderByDescending(fr => Convert.ToInt32(fr.Split('.')[fr.Split('.').Count() - 2]))
+			            .ToList();
+
+			        shot.Info = "";
+			    }
+			    catch (Exception e)
+			    {
+			        shot.Info = "Sortering av url:er misslyckades, se felmeddelande: " + e.Message;
+			        frames = _db.Frames.Where(fr => fr.TargetId == shot.TargetId).Select(frame => frame.FrameUrl)
+			            .ToList();
+			    }
+
+
+                foreach (var url in frames)
 				{
 					var picture = await FileHandler.GetShareableBlobUrl(url);
 					images.Add(picture);
@@ -940,7 +972,24 @@ namespace hockeylizer.Controllers
 				}
 
 				var images = new List<string>();
-				foreach (var url in _db.Frames.Where(fr => fr.TargetId == shot.TargetId).Select(frame => frame.FrameUrl).ToList())
+
+			    List<string> frames; 
+			    try
+			    {
+			        frames = _db.Frames.Where(fr => fr.TargetId == shot.TargetId).Select(frame => frame.FrameUrl).ToList()
+                                    .OrderByDescending(fr => Convert.ToInt32(fr.Split('.')[fr.Split('.').Count() - 2]))
+                                        .ToList();
+
+			        shot.Info = "";
+			    }
+			    catch (Exception e)
+			    {
+			        shot.Info = "Sortering av url:er misslyckades, se felmeddelande: " + e.Message;
+			        frames = _db.Frames.Where(fr => fr.TargetId == shot.TargetId).Select(frame => frame.FrameUrl)
+                                    .ToList();
+			    }
+
+                foreach (var url in frames)
 				{
 					var picture = await FileHandler.GetShareableBlobUrl(url);
 					images.Add(picture);
@@ -1122,7 +1171,7 @@ namespace hockeylizer.Controllers
 
 					foreach (var t in _db.Targets.Where(tar => tar.SessionId == session.SessionId).ToList())
 					{
-						foreach (var url in _db.Frames.Where(fr => fr.TargetId == t.TargetId).Select(frame => frame.FrameUrl).ToList())
+						foreach (var url in _db.Frames.Where(fr => fr.TargetId == t.TargetId).OrderBy(fr => fr.FrameId).Select(frame => frame.FrameUrl).ToList())
 						{
 							var picture = await FileHandler.GetShareableBlobUrl(url);
 							response.Images.Add(picture);
