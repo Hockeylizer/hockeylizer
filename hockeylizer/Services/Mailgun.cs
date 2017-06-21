@@ -100,7 +100,7 @@ namespace hockeylizer.Services
         }
 
         // Test to send with streamer instead of file path.
-        public static async Task<SendMessageResult> DanielsSendMessage(string email, string subject, string text, string csvString = null)
+        public static async Task<SendMessageResult> DanielsSendMessage(string email, string subject, string text, string fileName = null, string csvString = null, string mimeType = null)
         {
             RestRequest request = new RestRequest
             {
@@ -120,7 +120,7 @@ namespace hockeylizer.Services
             if (!string.IsNullOrEmpty(csvString) || !string.IsNullOrWhiteSpace(csvString))
             {
                 var csvBytes = System.Text.Encoding.UTF8.GetBytes(csvString);
-                request.AddFile("attachment", csvBytes, "HockeyStats.csv", "text/csv");
+                request.AddFile("attachment", csvBytes, fileName, mimeType);
             }
 
             var res = await Mailgun.TryExecuteRequest<SendMessageResult>(request);

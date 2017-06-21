@@ -1229,21 +1229,6 @@ namespace hockeylizer.Controllers
 
                 var csv = Statistics.generateSessionMailString(player, session, targets);
 
-				//const string filestart = "file";
-				//var startpath = _hostingEnvironment.WebRootPath + @"\files";
-    //            var path = startpath + @"\" + filestart + "-1.csv";
-
-				//var count = 1;
-				//while (System.IO.File.Exists(path))
-				//{
-				//	var filename = filestart + "-" + count + ".csv";
-
-    //                path = startpath + @"\" + filename;
-				//	count++;
-				//}
-
-				//System.IO.File.WriteAllText(path, csv);
-
 			    SendMessageResult sendMail;
 			    try
 			    {
@@ -1255,11 +1240,6 @@ namespace hockeylizer.Controllers
 			        response = new GeneralResult(false, "Kunde inte skicka mail, serverfel. Felmeddelande: " + e.Message);
 			        return Json(response);
 			    }
-
-    //            if (System.IO.File.Exists(path))
-				//{
-				//	System.IO.File.Delete(path);
-				//}
 
 				if (sendMail.Message.Contains("failed") || sendMail.Message.Contains("missing"))
 				{
@@ -1275,6 +1255,7 @@ namespace hockeylizer.Controllers
 			return Json(response);
 		}
 
+        // Experimented on by Daniel.
 	    [HttpPost]
 	    [AllowAnonymous]
 	    public async Task<JsonResult> SendPlayerStatsAsEmail([FromBody]GetPlayerStatsVm vm)
@@ -1323,27 +1304,27 @@ namespace hockeylizer.Controllers
 
                 var csv = Statistics.generatePlayerMailString(player, sessions, targets);
 
-	            const string filestart = "file";
-	            var startpath = _hostingEnvironment.WebRootPath + @"\files";
-                var path = startpath + @"\" + filestart + "-1.csv";
+	            //const string filestart = "file";
+	            //var startpath = _hostingEnvironment.WebRootPath + @"\files";
+             //   var path = startpath + @"\" + filestart + "-1.csv";
 
-	            var count = 1;
-	            while (System.IO.File.Exists(path))
-	            {
-	                var filename = filestart + "-" + count + ".csv";
+	            //var count = 1;
+	            //while (System.IO.File.Exists(path))
+	            //{
+	            //    var filename = filestart + "-" + count + ".csv";
 
-                    path = startpath + @"\" + filename;
-	                count++;
-	            }
+             //       path = startpath + @"\" + filename;
+	            //    count++;
+	            //}
 
-	            System.IO.File.WriteAllText(path, csv);
+	            //System.IO.File.WriteAllText(path, csv);
 
 	            SendMessageResult sendMail;
 	            try
 	            {
-	                sendMail = await Mailgun.SendMessage(vm.email,
+	                sendMail = await Mailgun.DanielsSendMessage(vm.email,
 	                    "Dr Hockey: exported data for " + player.Name + " from all sessions.",
-	                    "Here are the stats that you requested! :)", path);
+	                    "Here are the stats that you requested! :)", "Hockey stats.csv", csv, "text/csv" );
 	            }
 	            catch (Exception e)
 	            {
@@ -1351,10 +1332,10 @@ namespace hockeylizer.Controllers
 	                return Json(response);
                 }
 
-	            if (System.IO.File.Exists(path))
-	            {
-	                System.IO.File.Delete(path);
-	            }
+	            //if (System.IO.File.Exists(path))
+	            //{
+	            //    System.IO.File.Delete(path);
+	            //}
 
 	            if (sendMail.Message.Contains("failed") || sendMail.Message.Contains("missing"))
 	            {
