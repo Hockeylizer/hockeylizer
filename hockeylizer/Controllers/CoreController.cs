@@ -1232,7 +1232,7 @@ namespace hockeylizer.Controllers
 			    SendMessageResult sendMail;
 			    try
 			    {
-			        sendMail = await Mailgun.DanielsSendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)", csv);
+			        sendMail = await Mailgun.DanielsSendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)", "Hockey stats.csv", csv, "text/csv");
 
                 }
 			    catch (Exception e)
