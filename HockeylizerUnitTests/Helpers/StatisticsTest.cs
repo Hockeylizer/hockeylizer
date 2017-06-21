@@ -8,15 +8,13 @@ using System;
 namespace HockeylizerUnitTests.Helpers
 {
     [TestClass]
-    public class puckCalculationMethodsTest
-    {
+    public class puckCalculationMethodsTest {
 
         // TODO Not sure if y-coords go upp or down. Fixate this after testing main app.
         static int k = -1;
 
         [TestMethod]
-        public void targetCoordsTest()
-        {
+        public void targetCoordsTest() {
             Assert.AreEqual(10, TargetCoords[1].x, "target1.x is wrong.");
             Assert.AreEqual(91, TargetCoords[1].y, "target1.y is wrong.");
             Assert.AreEqual(10, TargetCoords[2].x, "target2.x is wrong.");
@@ -30,8 +28,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void offsetToAbsoluteTest1()
-        {
+        public void offsetToAbsolute_Test1() {
 
             var pdt = new Point2d1T(0, 0, 1);
             var testPdt = offsetToAbsolute(pdt);
@@ -77,8 +74,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void offsetToAbsoluteTest2()
-        {
+        public void offsetToAbsolute_Test2() {
             
 
             var emptyList = new List<Point2d1T> { };
@@ -118,7 +114,7 @@ namespace HockeylizerUnitTests.Helpers
     public class StatisticsMethodsTest
     {
         [TestMethod]
-        public void medianOnSortedTest()
+        public void medianOnSorted_Test()
         {
             Assert.ThrowsException<ArgumentNullException>(() => medianOnSorted(null));
             Assert.ThrowsException<InvalidOperationException>(() => medianOnSorted(new List<double> { }));
@@ -130,7 +126,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void medianTest()
+        public void median_Test()
         {
             Assert.ThrowsException<ArgumentNullException>(() => median(null));
             Assert.ThrowsException<InvalidOperationException>(() => median(new List<double> { }));
@@ -142,7 +138,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void meanTest()
+        public void mean_Test()
         {
             Assert.AreEqual(0, mean(new List<double> { 0 }));
             Assert.AreEqual(0, mean(new List<double> { -1, 1 }));
@@ -150,7 +146,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void squaredErrorSumTest1()
+        public void squaredErrorSum_Test1()
         {
             Assert.ThrowsException<ArgumentNullException>(() => squaredErrorSum(null));
             Assert.ThrowsException<InvalidOperationException>(() => squaredErrorSum(new List<double> { }));
@@ -163,7 +159,7 @@ namespace HockeylizerUnitTests.Helpers
             Assert.AreEqual(8600.06, squaredErrorSum(new List<double> { -0.1, -100, 8, 5.7, -0.1 }, -17.3), tolerance);
         }
         [TestMethod]
-        public void squaredErrorSumTest2()
+        public void squaredErrorSum_Test2()
         {
             Assert.ThrowsException<ArgumentNullException>(() => squaredErrorSum(null, 0));
             Assert.ThrowsException<InvalidOperationException>(() => squaredErrorSum(new List<double> { }, 0));
@@ -177,7 +173,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void varianceTest()
+        public void variance_Test()
         {
             Assert.ThrowsException<ArgumentNullException>(() => variance(null));
             Assert.ThrowsException<InvalidOperationException>(() => variance(new List<double> { }));
@@ -194,7 +190,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void standardDeviationTest()
+        public void standardDeviation_Test()
         {
             Assert.ThrowsException<ArgumentNullException>(() => standardDeviation(null));
             Assert.ThrowsException<InvalidOperationException>(() => standardDeviation(new List<double> { }));
@@ -211,7 +207,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void quantileIndexLeftTest()
+        public void quantileIndexLeft_Test()
         {
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => quantileIndexLeft(0, 0.5));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => quantileIndexLeft(0 - 1, 0.5));
@@ -243,7 +239,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void quantileIndexRightTest()
+        public void quantileIndexRight_Test()
         {
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => quantileIndexRight(0, 0.5));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => quantileIndexRight(0 - 1, 0.5));
@@ -285,7 +281,7 @@ namespace HockeylizerUnitTests.Helpers
     public class ReportGenerationMethodsTest
     {
         [TestMethod]
-        public void cmToStringTest()
+        public void cmToString_Test()
         {
             var test1 = cmToString(0);
             var ans1 = "0.0";
@@ -305,7 +301,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void matrixToCsvTest1()
+        public void matrixToCsv_Test1()
         {
             Assert.ThrowsException<ArgumentException>(() => matrixToCSV(new string[1][] { new string[] { "a", "b" } }, ""));
             Assert.ThrowsException<ArgumentNullException>(() => matrixToCSV(new string[1][] { new string[] { "a", "b" } }, null));
@@ -329,7 +325,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void matrixToCsvTest2()
+        public void matrixToCsv_Test2()
         {
             Assert.AreEqual("", matrixToCSV(null));
             Assert.AreEqual("", matrixToCSV(new string[0][] { }));
@@ -346,7 +342,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void matrixToCsvTest3()
+        public void matrixToCsv_Test3()
         {
             Assert.ThrowsException<ArgumentException>(() => matrixToCSV(new List<string[]>() { new string[] { "a", "b" } }, ""));
             Assert.ThrowsException<ArgumentNullException>(() => matrixToCSV(new List<string[]>() { new string[] { "a", "b" } }, null));
@@ -370,7 +366,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void matrixToCsvTest4()
+        public void matrixToCsv_Test4()
         {
             Assert.AreEqual("", matrixToCSV(null));
             Assert.AreEqual("", matrixToCSV(new List<string[]>() { }));
@@ -387,7 +383,7 @@ namespace HockeylizerUnitTests.Helpers
         }
 
         [TestMethod]
-        public void numsToStringsTest1()
+        public void numsToStrings_Test1()
         {
             Assert.AreEqual(0, numsToStrings(new int[0]).Length);
             var retArray = numsToStrings(new int[] { -3, 122, 0 });
@@ -395,7 +391,7 @@ namespace HockeylizerUnitTests.Helpers
             for (int i = 0; i < ansArray.Length; i++) Assert.AreEqual(ansArray[i], retArray[i]);
         }
         [TestMethod]
-        public void numsToStringsTest2()
+        public void numsToStrings_Test2()
         {
             Assert.AreEqual(0, numsToStrings(new double[0]).Length);
             var retArray = numsToStrings(new double[] { -3, 122, 0, -0.12, 8.888, 0.7 });
@@ -415,18 +411,88 @@ namespace HockeylizerUnitTests.Helpers
 
         [TestMethod]
         public void generatePlayerMailString_Test() {
-            
+            var p = new Player("Foo Fooson");
+            p.PlayerId = 1;
+            var s1 = new PlayerSession("whatevs", "whatevs", p.PlayerId, -1, -1, 5, 2);
+            s1.SessionId = 1;
+            var s2 = new PlayerSession("whatevs", "whatevs", p.PlayerId, -1, -1, 5, 2);
+            s2.SessionId = 2;
+            var dummyTarget = mockTarget(0, 1, 99, 0, 0);
+            DateTime dateTimeOut;
+
+            // Test of empty data list.
+            var targs = new List<Target>();
+            var ansStr = generatePlayerMailString(p, new List<PlayerSession> { s1 }, targs);
+            var ans = ansStr.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+            Assert.AreEqual(8, ans.Length, ansStr);
+
+            var line0 = ans[0].Split(';');
+            Assert.AreEqual(p.Name, line0[0]);
+            Assert.IsTrue(DateTime.TryParse(line0[1], out dateTimeOut), "Trying to parse "+line0[1]+" as DateTime.");
+            Assert.AreEqual("Shot No.;Target No.;x difference (cm);y difference (cm);Distance to target (cm)", ans[1]);
+            Assert.AreEqual("", ans[2]);
+            Assert.IsTrue(DateTime.TryParse(ans[3], out dateTimeOut), "Trying to parse date as DateTime");
+
+            Assert.AreEqual("No hits found.", ans[4]);
+            Assert.AreEqual("", ans[5]);
+            Assert.AreEqual("Mean;;N/A;N/A;N/A", ans[6]);
+            Assert.AreEqual("Standard deviation (unbiased);;N/A;N/A;N/A", ans[7]);
+
+            // 2nd Test set.
+
+            var t1 = mockTarget(1, 1, s1.SessionId, 0, 0);
+            var t2 = mockTarget(1, 14, s1.SessionId, 1, 1);
+            var t3 = mockTarget(2, 3, s1.SessionId, null, null);
+            var t4 = mockTarget(2, 5, s1.SessionId, 100, 100);
+            t4.HitGoal = false;
+            var t5 = mockTarget(3, 2, s1.SessionId, -100.1, -100.1);
+
+            var t6 = mockTarget(5, 1, s2.SessionId, 0, 0);
+            var t7 = mockTarget(2, 2, s2.SessionId, -74.90200118, 115.4000926);
+
+            targs = new List<Target>() { t1, t2, t3, t4, t5, t6, t7, dummyTarget };
+            ansStr = generatePlayerMailString(p, new List<PlayerSession> { s1, s2 }, targs);
+            ans = ansStr.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+            Assert.AreEqual(16, ans.Length, ansStr);
+
+            line0 = ans[0].Split(';');
+            Assert.AreEqual(p.Name, line0[0]);
+            Assert.IsTrue(DateTime.TryParse(line0[1], out dateTimeOut), "Trying to parse " + line0[1] + " as DateTime.");
+            Assert.AreEqual("Shot No.;Target No.;x difference (cm);y difference (cm);Distance to target (cm)", ans[1]);
+            Assert.AreEqual("", ans[2]);
+
+            Assert.IsTrue(DateTime.TryParse(ans[3], out dateTimeOut), "Trying to parse date as DateTime");
+            Assert.AreEqual("1;1;0.0;0.0;0.0", ans[4]);
+            Assert.AreEqual("2;3;-100.1;-100.1;" + cmToString(141.563), ans[5]);
+            Assert.AreEqual("3;2;N/A;N/A;N/A", ans[6]);
+            Assert.AreEqual("5;2;miss;miss;miss", ans[7]);
+            Assert.AreEqual("14;1;1.0;1.0;" + cmToString(norm(1, 1)), ans[8]);
+
+            Assert.AreEqual("", ans[9]);
+            Assert.IsTrue(DateTime.TryParse(ans[10], out dateTimeOut), "Trying to parse line10 '"+ans[10]+"' as DateTime.");
+
+            Assert.AreEqual("1;5;0.0;0.0;0.0", ans[11]);
+            Assert.AreEqual("2;2;" + cmToString(-74.90200118) + ";" + cmToString(115.4000926) + ";" + cmToString(137.57721887), ans[12]);
+
+            Assert.AreEqual("", ans[13]);
+
+            var xMean = cmToString(-34.8004);
+            var yMean = cmToString(3.26001852);
+            var normMean = cmToString(56.110842);
+            Assert.AreEqual("Mean;;" + xMean + ";" + yMean + ";" + normMean, ans[14]);
+            var xStd = cmToString(48.928469);
+            var yStd = cmToString(76.2972030);
+            var normStd = cmToString(76.202654);
+            Assert.AreEqual("Standard deviation (unbiased);;" + xStd + ";" + yStd + ";" + normStd, ans[15]);
         }
         
-
         [TestMethod]
-        public void generateSessionMailStringTest()
-        {
-
+        public void generateSessionMailString_Test() {
             var p = new Player("Foo Fooson");
             p.PlayerId = 1;
             var s = new PlayerSession("whatevs", "whatevs", p.PlayerId, -1, -1, 5, 2);
             s.SessionId = 1;
+            var dummyTarget = mockTarget(0, 1, 99, 0, 0);
 
             var targs = new List<Target>();
             var ansStr = generateSessionMailString(p, s, targs);
@@ -456,7 +522,7 @@ namespace HockeylizerUnitTests.Helpers
             var t4 = mockTarget(2, 5, s.SessionId, 100, 100);
             var t5 = mockTarget(3, 2, s.SessionId, -100.1, -100.1);
 
-            targs = new List<Target>() { t1, t2, t3, t4, t5 };
+            targs = new List<Target>() { t1, t2, t3, t4, t5, dummyTarget};
             ansStr = generateSessionMailString(p, s, targs);
             ans = ansStr.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
             Assert.AreEqual(10, ans.Length, ansStr);
@@ -518,5 +584,6 @@ namespace HockeylizerUnitTests.Helpers
             line6 = ans[6];
             Assert.AreEqual("Standard deviation (unbiased);;" + cmToString(52.963713) + ";" + cmToString(81.600188) + ";" + cmToString(97.2817844), line6);
         }
+
     }
 }

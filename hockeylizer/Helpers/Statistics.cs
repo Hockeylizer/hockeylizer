@@ -240,11 +240,18 @@ namespace hockeylizer.Helpers
             public double? norm { get; set; }
         }
 
+        /// <summary>
+        /// Generates a nice looking CSV string (semicolon-separated) for one player.
+        /// </summary>
+        /// <param name="player">The player for which the report is to be generated.</param>
+        /// <param name="sessions">Sessions will be selected from here, but only those for the correct player.</param>
+        /// <param name="playerTargets">Targets are selected from there, but only those for the correct sessions.</param>
+        /// <returns>A ';'-separated CSV.</returns>
         public static string generatePlayerMailString(Player player, IEnumerable<PlayerSession> sessions, IEnumerable<Target> playerTargets) {
             var pSessions = sessions.Where(s => s.PlayerId == player.PlayerId);
 
             // titleLine
-            var titleLine = new string[] { player.Name, DateTime.Now.ToString() };
+            var titleLine = new string[] { player.Name, DateTime.Now.ToString("yyyy-MM-dd HH:mm") };
             // Captions for the per-shot data lines
             var captionsLine = new string[] { "Shot No.", "Target No.", "x difference (cm)", "y difference (cm)", "Distance to target (cm)" };
             // empty Line
@@ -258,8 +265,8 @@ namespace hockeylizer.Helpers
             var dataLines = new List<string[]>();
             foreach (PlayerSession sess in pSessions) {
                 dataLines.Add(emptyLine);
-                var targs = pTargets.Where(t => t.target.SessionId == sess.SessionId);
-                var sessionTitleLine = new string[] { sess.Created.ToString("sv-SE") };
+                var targs = pTargets.Where(t => t.target.SessionId == sess.SessionId).OrderBy(t => t.target.Order);
+                var sessionTitleLine = new string[] { sess.Created.ToString("yyyy-MM-dd HH:mm") };
                 dataLines.Add(sessionTitleLine);
                 if (targs == null || !targs.Any()) dataLines.Add(new string[] { "No hits found." });
                 else foreach (TargetAndNorm t in targs) dataLines.Add(t.toStringRow());
@@ -277,6 +284,13 @@ namespace hockeylizer.Helpers
             return matrixToCSV(table);
         }
 
+        /// <summary>
+        /// Generates a nice looking CSV string (semicolon-separated) for one session.
+        /// </summary>
+        /// <param name="player">Only needed for the name.</param>
+        /// <param name="session">The session for which the report is to be generated.</param>
+        /// <param name="playerTargets">Targets are selected from there, but only those for the correct session.</param>
+        /// <returns>A ';'-separated CSV.</returns>
         public static string generateSessionMailString(Player player, PlayerSession session, IEnumerable<Target> targets)
         {
 

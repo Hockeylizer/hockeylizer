@@ -1289,13 +1289,12 @@ namespace hockeylizer.Controllers
 	                return Json(response);
 	            }
 
-                var csv = "";
+                var sessionIds = sessions.Select(s => s.SessionId);
+                // This filtering is done inside generatePlayerMailString too,
+                // so it could possibly be removed for efficiency.
+                var targets = _db.Targets.Where(t => sessionIds.Contains(t.SessionId));
 
-	            foreach (var session in sessions)
-	            {
-	                var targets = _db.Targets.Where(t => t.SessionId == session.SessionId).ToList();
-	                csv += Statistics.generateSessionMailString(player, session, targets);
-	            }
+                var csv = Statistics.generatePlayerMailString(player, sessions, targets);
 
 	            const string filestart = "file";
 	            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
