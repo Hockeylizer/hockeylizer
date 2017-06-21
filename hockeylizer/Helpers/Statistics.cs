@@ -253,7 +253,7 @@ namespace hockeylizer.Helpers
             // titleLine
             var titleLine = new string[] { player.Name, DateTime.Now.ToString("yyyy-MM-dd HH:mm") };
             // Captions for the per-shot data lines
-            var captionsLine = new string[] { "Shot No.", "Target No.", "x difference (cm)", "y difference (cm)", "Distance to target (cm)" };
+            var captionsLine = new string[] { "Shot No.", "Target No.", "X difference (cm)", "Y difference (cm)", "Distance to target (cm)" };
             // empty Line
             var emptyLine = new string[] { };
 
@@ -299,7 +299,7 @@ namespace hockeylizer.Helpers
             var sessionTargets = sessT.Select(t => new TargetAndNorm(t)).OrderBy(t => t.target.Order);
 
             // Captions for the per-shot data lines
-            var captionsLine = new string[] { "Shot No.", "Target No.", "x difference (cm)", "y difference (cm)", "Distance to target (cm)" };
+            var captionsLine = new string[] { "Shot No.", "Target No.", "X difference (cm)", "Y difference (cm)", "Distance to target (cm)" };
 
             // Lines of per-shot data
             var dataLines = new List<string[]>();

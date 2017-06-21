@@ -431,7 +431,7 @@ namespace HockeylizerUnitTests.Helpers
             var line0 = ans[0].Split(';');
             Assert.AreEqual(p.Name, line0[0]);
             Assert.IsTrue(DateTime.TryParse(line0[1], out dateTimeOut), "Trying to parse "+line0[1]+" as DateTime.");
-            Assert.AreEqual("Shot No.;Target No.;x difference (cm);y difference (cm);Distance to target (cm)", ans[1]);
+            Assert.AreEqual("Shot No.;Target No.;X difference (cm);Y difference (cm);Distance to target (cm)", ans[1]);
             Assert.AreEqual("", ans[2]);
             Assert.IsTrue(DateTime.TryParse(ans[3], out dateTimeOut), "Trying to parse date as DateTime");
 
@@ -460,7 +460,7 @@ namespace HockeylizerUnitTests.Helpers
             line0 = ans[0].Split(';');
             Assert.AreEqual(p.Name, line0[0]);
             Assert.IsTrue(DateTime.TryParse(line0[1], out dateTimeOut), "Trying to parse " + line0[1] + " as DateTime.");
-            Assert.AreEqual("Shot No.;Target No.;x difference (cm);y difference (cm);Distance to target (cm)", ans[1]);
+            Assert.AreEqual("Shot No.;Target No.;X difference (cm);Y difference (cm);Distance to target (cm)", ans[1]);
             Assert.AreEqual("", ans[2]);
 
             Assert.IsTrue(DateTime.TryParse(ans[3], out dateTimeOut), "Trying to parse date as DateTime");
@@ -508,7 +508,7 @@ namespace HockeylizerUnitTests.Helpers
             Assert.IsTrue(DateTime.TryParse(line0[1], out foo), "Trying to parse date as DateTime");
 
             var line1 = ans[1];
-            Assert.AreEqual("Shot No.;Target No.;x difference (cm);y difference (cm);Distance to target (cm)", line1);
+            Assert.AreEqual("Shot No.;Target No.;X difference (cm);Y difference (cm);Distance to target (cm)", line1);
             var line2 = ans[2];
             Assert.AreEqual("No hits found.", line2);
             var line3 = ans[3];
@@ -535,7 +535,7 @@ namespace HockeylizerUnitTests.Helpers
             Assert.IsTrue(DateTime.TryParse(line0[1], out foo), "Trying to parse date as DateTime");
 
             line1 = ans[1];
-            Assert.AreEqual("Shot No.;Target No.;x difference (cm);y difference (cm);Distance to target (cm)", line1);
+            Assert.AreEqual("Shot No.;Target No.;X difference (cm);Y difference (cm);Distance to target (cm)", line1);
             line2 = ans[2];
             Assert.AreEqual("1;1;0.0;0.0;0.0", line2);
             line3 = ans[3];
