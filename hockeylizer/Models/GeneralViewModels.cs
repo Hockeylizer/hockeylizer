@@ -626,7 +626,7 @@ namespace hockeylizer.Models
         }
 
         public bool SessionDone => this.SessionAnalyzed && this.SessionChopped;
-        public bool ErrorOccured => this.AnalysisFailed || !this.SessionChopped;
+        public bool ErrorOccured => this.AnalysisFailed || this.SessionChopped;
 
         public bool SessionAnalyzed { get; set; }
         public bool SessionChopped { get; set; }
