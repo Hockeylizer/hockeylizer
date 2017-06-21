@@ -468,11 +468,10 @@ namespace hockeylizer.Controllers
 					t.YOffset = analysis.OffsetFromTarget.y;
 
 					t.HitGoal = analysis.DidHitGoal;
-					t.FrameHit = analysis.VideoFrameNr;
                     t.AnalysisFailed = false;
+
                     t.AnalysisFailedReason = "";
 					t.FrameHit = analysis.FrameNr;
-
                 }
 			}
 
