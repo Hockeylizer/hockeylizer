@@ -115,6 +115,8 @@ namespace hockeylizer.Models
 		{
 			this.Deleted = true;
 			this.VideoPath = string.Empty;
+
+            this.RemoveVideo();
 		}
 
 		public void RemoveVideo()

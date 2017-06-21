@@ -9,7 +9,6 @@ using hockeylizer.Helpers;
 using hockeylizer.Models;
 using hockeylizer.Data;
 using System.Linq;
-using System.Text;
 using System.IO;
 using Hangfire;
 using System;
@@ -216,39 +215,6 @@ namespace hockeylizer.Controllers
 		}
 
         [HttpPost]
-        [AllowAnonymous]
-        public async void TestSession(CreateSessionVm vm)
-        {
-            List<int> to = vm.targetOrder;
-            List<TargetCoordsVm> coords = vm.targetCoords;
-            List<ShotTimestampVm> ts = vm.timestamps;
-            int limit = (int)(vm.shots ?? 0);
-
-            var index = 1;
-
-            for (var t = 0; t < limit; t++)
-            {
-                var mod = to.Count;
-                var currentTarget = to[t % mod];
-
-                var xCoord = coords[currentTarget - 1].xCoord;
-                var yCoord = coords[currentTarget - 1].yCoord;
-
-                var a1 = to[currentTarget - 1];
-                var a2 = index;
-                var a3 = ts[t].start;
-                var a4 = ts[t].end;
-                var a5 = xCoord;
-                var a6 = yCoord;
-
-                var target = new Target(to[t % mod], index, ts[t].start, ts[t].end, xCoord, yCoord, null, null);
-
-                index++;
-            }
-        }
-
-
-        [HttpPost]
 		[AllowAnonymous]
 		public async Task<JsonResult> CreateSession(CreateSessionVm vm)
 		{
@@ -364,7 +330,12 @@ namespace hockeylizer.Controllers
 		        throw new Exception("Kunde inte hitta session.");
 		    }
 
-			var blobname = session.FileName;
+		    if (session.Deleted)
+		    {
+		        throw new Exception("Kunde inte hitta session då den raderats.");
+		    }
+
+            var blobname = session.FileName;
 			var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
 
 			var path = Path.Combine(startpath, blobname);
@@ -489,7 +460,7 @@ namespace hockeylizer.Controllers
 					t.YOffset = analysis.OffsetFromTarget.y;
 
 					t.HitGoal = analysis.DidHitGoal;
-					t.FrameHit = analysis.FrameNr;
+					t.FrameHit = analysis.VideoFrameNr;
 
 				    session.Analyzed = true;
 				    session.AnalysisFailed = false;
@@ -528,7 +499,13 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				BackgroundJob.Enqueue<CoreController>
+			    if (session.Deleted)
+			    {
+			        response = new GeneralResult(false, "Kunde inte hitta session då den raderats.");
+                    return Json(response);
+			    }
+
+                BackgroundJob.Enqueue<CoreController>
 				(
 					service => service.ChopSession(vm.sessionId)
 				);
@@ -546,8 +523,12 @@ namespace hockeylizer.Controllers
 		{
 			var session = _db.Sessions.Find(sessionId);
 			if (session == null) throw new Exception("Kunde inte hitta session.");
+		    if (session.Deleted)
+		    {
+		        throw new Exception("Kunde inte hitta session då den raderats.");
+            }
 
-			var blobname = session.FileName;
+            var blobname = session.FileName;
 			var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "videos");
 
 			var path = Path.Combine(startpath, blobname);
@@ -659,7 +640,7 @@ namespace hockeylizer.Controllers
 		[AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
 		public async Task<Dictionary<int, bool>> DeleteVideosFromDisc()
 		{
-			var sessions = _db.Sessions.Where(s => s.DeleteFailed);
+			var sessions = _db.Sessions.Where(s => s.DeleteFailed && !s.Deleted);
 			var result = new Dictionary<int, bool>();
 
 		    if (!sessions.Any()) return result;
@@ -719,7 +700,13 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				var deleted = FileHandler.DeleteVideo(session.VideoPath, session.Player.RetrieveContainerName());
+			    if (session.Deleted)
+			    {
+			        response = new GeneralResult(false, "Sessionen är redan borttagen!");
+			        return Json(response);
+			    }
+
+                var deleted = FileHandler.DeleteVideo(session.VideoPath, session.Player.RetrieveContainerName());
 
 				if (deleted)
 				{
@@ -753,7 +740,13 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				response = new IsAnalyzedResult(true, "Videoklippet kollat", session.Analyzed);
+			    if (session.Deleted)
+			    {
+			        response = new IsAnalyzedResult(false, "Sessionen är redan borttagen!", false);
+			        return Json(response);
+			    }
+
+                response = new IsAnalyzedResult(true, "Videoklippet kollat", session.Analyzed);
 				return Json(response);
 			}
 
@@ -776,7 +769,13 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				response = new IsChoppedResult(true, "Videoklippet kollat. " + session.ChopFailReason, session.Chopped);
+			    if (session.Deleted)
+			    {
+			        response = new IsChoppedResult(false, "Sessionen är redan borttagen!", false);
+			        return Json(response);
+			    }
+
+                response = new IsChoppedResult(true, "Videoklippet kollat. " + session.ChopFailReason, session.Chopped);
 				return Json(response);
 			}
 
@@ -799,7 +798,13 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				if (!vm.Validate())
+			    if (session.Deleted)
+			    {
+			        response = new GetFramesFromShotResult(false, "Sessionen är borttagen!");
+			        return Json(response);
+			    }
+
+                if (!vm.Validate())
 				{
 					return Json(vm.gr);
 				}
@@ -847,7 +852,13 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				var targets = _db.Targets.Where(t => t.SessionId == vm.sessionId).Select(t => t.HitGoal).ToList();
+			    if (session.Deleted)
+			    {
+			        response = new GetDataFromSessionResult(false, "Sessionen är borttagen!");
+			        return Json(response);
+			    }
+
+                var targets = _db.Targets.Where(t => t.SessionId == vm.sessionId).Select(t => t.HitGoal).ToList();
 				var ratio = targets.Count(t => t) + "/" + targets.Count;
 
 				response = new GetDataFromSessionResult(true, "Sessionen hittades.")
@@ -879,7 +890,13 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				if (!vm.Validate())
+			    if (session.Deleted)
+			    {
+			        response = new GetDataFromShotResult(false, "Sessionen är borttagen!");
+			        return Json(response);
+			    }
+
+                if (!vm.Validate())
 				{
 					return Json(vm.gr);
 				}
@@ -900,35 +917,9 @@ namespace hockeylizer.Controllers
 				}
 
 			    int? frameHit = null;
-
-			    if (shot.RealFrameHit != null)
+			    if (shot.FrameHit != 0 && shot.FrameHit != null && shot.HitGoal)
 			    {
-			        frameHit = shot.RealFrameHit;
-			    }
-                else if (shot.FrameHit != 0 && shot.FrameHit != null && shot.HitGoal)
-			    {
-			        // The problem is that we get framehit as the frameindex as filmed 
-			        // from the start, therefore we must compensate
-
-			        // ----------------------- * <-- shot.FrameHit
-			        // -------------- * <-- start = shot.TimestampStart * 30 / 1000
-			        //                  ------ * <-- our actual index for hit
-
-			        // therefore the index at which our frame hit is
-			        //
-			        // frameHit = shot.FrameHit - start;
-
-                    var frame = (int)shot.FrameHit;
-
-			        var start = (shot.TimestampStart * 30) / 1000;
-
-			        var frameHitProposed = frame - start;
-
-			        var numberOfFrames = _db.Frames.Count(fr => fr.TargetId == shot.TargetId);
-			        if (!(frameHitProposed > numberOfFrames))
-			        {
-			            frameHit = frameHitProposed;
-			        }
+                    frameHit = (int)shot.FrameHit;
 			    }
 
                 response = new GetDataFromShotResult(true, "Skottets träffpunkt har uppdaterats!", images)
@@ -976,7 +967,13 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				if (!vm.Validate())
+			    if (session.Deleted)
+			    {
+			        response = new GeneralResult(false, "Sessionen är borttagen!");
+			        return Json(response);
+			    }
+
+                if (!vm.Validate())
 				{
 					return Json(vm.ur);
 				}
@@ -1007,7 +1004,7 @@ namespace hockeylizer.Controllers
 
 			    var sp = _db.AimPoints.Where(t => t.SessionId == session.SessionId);
 
-			    if (!sp.Any())
+			    if (!sp.Any() || sp.Any(p => p.XCoordinate == null || p.YCoordinate == null))
 			    {
 			        response = new GeneralResult(false, "Kunde inte hitta några punkter att sikta på.");
 			        return Json(response);
@@ -1017,12 +1014,20 @@ namespace hockeylizer.Controllers
 
 			    foreach (var p in sp)
 			    {
-			        double x = (double) (p.XCoordinate ?? (double) 0);
-			        double y = (double) (p.YCoordinate ?? (double) 0);
+			        if (p.XCoordinate != null && p.YCoordinate != null)
+			        {
+			            var x = (double) p.XCoordinate;
+			            var y = (double) p.YCoordinate;
 
-			        var point = new Point2d(x, y);
+			            var point = new Point2d(x, y);
 
-                    sourcePoints.Add(point);
+			            sourcePoints.Add(point);
+			        }
+			        else
+			        {
+			            response = new GeneralResult(false, "Punkt " + p.AimPointId + " hade ett ogiltigt set med koordinater.");
+			            return Json(response);
+                    }
 			    }
 
 				var offsets = new Point2d(xCoord, yCoord);
@@ -1047,7 +1052,7 @@ namespace hockeylizer.Controllers
 			        shotToUpdate.XCoordinateAnalyzed = vm.x;
 			        shotToUpdate.YCoordinateAnalyzed = vm.y;
 
-			        shotToUpdate.RealFrameHit = vm.frame;
+			        shotToUpdate.FrameHit = vm.frame;
 			        shotToUpdate.HitGoal = vm.hitTarget ?? false;
 
 			        shotToUpdate.ManuallyAnalyzed = true;
@@ -1186,7 +1191,13 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				var player = await _db.Players.FindAsync(session.PlayerId);
+			    if (session.Deleted)
+			    {
+			        response = new GeneralResult(false, "Sessionen är borttagen!");
+			        return Json(response);
+			    }
+
+                var player = await _db.Players.FindAsync(session.PlayerId);
 				if (player == null)
 				{
 					response = new GeneralResult(false, "Något gick snett när spelaren skulle hämtas.");
@@ -1282,7 +1293,7 @@ namespace hockeylizer.Controllers
 	                return Json(response);
 	            }
 
-	            var sessions = _db.Sessions.Where(s => s.PlayerId == vm.playerId && s.Analyzed && !s.AnalysisFailed).ToList();
+	            var sessions = _db.Sessions.Where(s => s.PlayerId == vm.playerId && s.Analyzed && !s.AnalysisFailed && !s.Deleted).ToList();
 	            if (!sessions.Any())
 	            {
 	                response = new GeneralResult(false, "Kunde inte hämta data då det inte finns sessioner.");
