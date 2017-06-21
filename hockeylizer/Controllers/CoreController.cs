@@ -470,8 +470,23 @@ namespace hockeylizer.Controllers
 					t.HitGoal = analysis.DidHitGoal;
                     t.AnalysisFailed = false;
 
+				    int? frameHit = null;
+
+				    if (analysis.FrameNr != 0 && analysis.FrameNr > 0 && analysis.DidHitGoal)
+				    {
+				        frameHit = analysis.FrameNr;
+				    }
+				    else if (analysis.FrameNr < 0 && analysis.VideoFrameNr > 0)
+				    {
+				        var frame = analysis.VideoFrameNr;
+
+				        var start = (t.TimestampStart * 30) / 1000;
+
+				        frameHit = frame - start;
+				    }
+
                     t.AnalysisFailedReason = "";
-					t.FrameHit = analysis.FrameNr;
+					t.FrameHit = frameHit;
                 }
 			}
 
@@ -932,9 +947,13 @@ namespace hockeylizer.Controllers
 				}
 
 			    int? frameHit = null;
-			    if (shot.FrameHit != 0 && shot.FrameHit != null && shot.HitGoal)
+			    var numberOfFrames = _db.Frames.Count(fr => fr.TargetId == shot.TargetId);
+
+                if (shot.FrameHit != 0 && shot.FrameHit != null
+                        && shot.FrameHit > 0 && shot.HitGoal 
+                            && !(shot.FrameHit > numberOfFrames))
 			    {
-                    frameHit = (int)shot.FrameHit;
+			        frameHit = shot.FrameHit;
 			    }
 
                 response = new GetDataFromShotResult(true, "Skottets träffpunkt har uppdaterats!", images)
