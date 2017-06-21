@@ -1401,5 +1401,34 @@ namespace hockeylizer.Controllers
 			return Content(SvgGeneration.emptyGoalSvg(_svgDir, return_link));
 		}
 
+        // For debugging
+        [HttpPost]
+        [AllowAnonymous]
+        public JsonResult tempPathTest(string token)
+        {
+            if (token != _appkey) return Json("Token var fel");
+
+            const string filestart = "file";
+            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
+            var path1 = startpath + @"\" + filestart + "-1.csv";
+            var path2 = Path.Combine(_hostingEnvironment.WebRootPath, "files");
+
+            var path1Pre = path1;
+            var path2Pre = path2;
+
+            var count = 1;
+            while (System.IO.File.Exists(path1))
+            {
+                var filename = filestart + "-" + count + ".csv";
+
+                path1 = startpath + @"\" + filename;
+                path2 = Path.Combine(startpath, filename);
+                count++;
+            }
+
+            var ret = new string[] { _hostingEnvironment.WebRootPath, startpath, path1Pre, path2Pre, path1, path2 };
+            return Json(ret); 
+        }
+
 	}
 }
