@@ -308,7 +308,13 @@ namespace hockeylizer.Controllers
 					return Json(response);
 				}
 
-				BackgroundJob.Enqueue<CoreController>
+			    if (session.Deleted)
+			    {
+			        response = new GeneralResult(false, "Sessionen är borttagen");
+			        return Json(response);
+			    }
+
+                BackgroundJob.Enqueue<CoreController>
 				(
 					service => service.AnalyzeSession(vm.sessionId)
 				);
@@ -706,7 +712,14 @@ namespace hockeylizer.Controllers
 			        return Json(response);
 			    }
 
-                var deleted = FileHandler.DeleteVideo(session.VideoPath, session.Player.RetrieveContainerName());
+			    var player = await _db.Players.FindAsync(session.PlayerId);
+                if (player == null)
+                {
+                    response = new GeneralResult(false, "Spelaren kunde inte hämtas.");
+                    return Json(response);
+                }
+
+                var deleted = FileHandler.DeleteVideo(session.VideoPath, player.RetrieveContainerName());
 
 				if (deleted)
 				{
@@ -1119,7 +1132,7 @@ namespace hockeylizer.Controllers
 
 	            if (session != null && !session.Deleted)
 	            {
-	                response = new GetSessionInfoAboutAnalysisAndChopping(session.Analyzed, session.Chopped, session.AnalysisFailReason + ". " + session.ChopFailReason, session.AnalysisFailed);
+	                response = new GetSessionInfoAboutAnalysisAndChopping(session.Analyzed, session.ChopFailed, session.AnalysisFailReason + ". " + session.ChopFailReason, session.AnalysisFailed);
                 }
 	            else
 	            {
@@ -1214,7 +1227,7 @@ namespace hockeylizer.Controllers
                 var csv = Statistics.generateSessionMailString(player, session, targets);
 
 				const string filestart = "file";
-				var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
+				var startpath = _hostingEnvironment.WebRootPath + @"\files";
                 var path = startpath + @"\" + filestart + "-1.csv";
 
 				var count = 1;
@@ -1308,8 +1321,8 @@ namespace hockeylizer.Controllers
                 var csv = Statistics.generatePlayerMailString(player, sessions, targets);
 
 	            const string filestart = "file";
-	            var startpath = Path.Combine(_hostingEnvironment.WebRootPath, "files");
-	            var path = startpath + @"\" + filestart + "-1.csv";
+	            var startpath = _hostingEnvironment.WebRootPath + @"\files";
+                var path = startpath + @"\" + filestart + "-1.csv";
 
 	            var count = 1;
 	            while (System.IO.File.Exists(path))
