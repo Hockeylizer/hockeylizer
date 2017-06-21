@@ -476,14 +476,6 @@ namespace hockeylizer.Controllers
 				    {
 				        frameHit = analysis.FrameNr;
 				    }
-				    else if (analysis.FrameNr < 0 && analysis.VideoFrameNr > 0)
-				    {
-				        var frame = analysis.VideoFrameNr;
-
-				        var start = (t.TimestampStart * 30) / 1000;
-
-				        frameHit = frame - start;
-				    }
 
                     t.AnalysisFailedReason = "";
 					t.FrameHit = frameHit;
