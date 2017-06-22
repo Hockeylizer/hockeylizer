@@ -458,7 +458,25 @@ namespace hockeylizer.Models
                 return false;
 			}
 
-			if (this.rounds == null)
+            if (this.interval > 8000)
+            {
+                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då intervallen mellan skotten är för stort!", false);
+                return false;
+            }
+
+            if (this.shots == null)
+            {
+                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet skott saknas!", false);
+                return false;
+            }
+
+            if (this.shots > 25)
+            {
+                this.sr = new SessionResult("Videoklippet kunde inte laddas upp då det inte går att ladda upp mer än 25 skott åt gången!", false);
+                return false;
+            }
+
+            if (this.rounds == null)
 			{
 				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då rundor saknas!", false);
                 return false;
@@ -476,13 +494,11 @@ namespace hockeylizer.Models
                 return false;
             }
 
-            #pragma warning disable 0472 // Since t.start and t.end can indeed be null.
             if (this.timestamps.Any(t => t.start == null || t.end == null))
             {
                 this.sr = new SessionResult("Videoklippet kunde inte laddas upp då timestamps saknas!", false);
                 return false;
             }
-            #pragma warning restore 0472
 
             if (!this.targetOrder.Any())
 			{
@@ -490,13 +506,13 @@ namespace hockeylizer.Models
                 return false;
 			}
 
-            if (this.targetCoords.Count() != 5)
+            if (this.targetCoords.Count != 5)
 			{
 				this.sr = new SessionResult("Videoklippet kunde inte laddas upp då antalet koordinater att sikta på inte är 5!", false);
 				return false;
 			}
 
-            if (this.targetCoords.Any(tc => tc.xCoord == null) || this.targetCoords.Any(tc => tc.yCoord == null))
+            if (this.targetCoords.Any(tc => tc.xCoord == null || tc.yCoord == null))
 			{
 				this.sr = new SessionResult("Videoklippet kunde inte laddas upp någon av koordinaterna att sikta på var null!", false);
 				return false;
