@@ -73,34 +73,34 @@ namespace hockeylizer.Services
             return await Mailgun.ExecuteRequest<EmailValidationResult>(request);
         }
 
-        public static async Task<SendMessageResult> SendMessage(string email, string subject, string text, string path = null)
-        {
-            RestRequest request = new RestRequest
-            {
-                Method = Method.POST,
-                Resource = "/mg.dispono.nu/messages"
-            };
+        //public static async Task<SendMessageResult> SendMessage(string email, string subject, string text, string path = null)
+        //{
+        //    RestRequest request = new RestRequest
+        //    {
+        //        Method = Method.POST,
+        //        Resource = "/mg.dispono.nu/messages"
+        //    };
 
-            request.AddParameter("domain", "mg.dispono.nu", ParameterType.UrlSegment);
+        //    request.AddParameter("domain", "mg.dispono.nu", ParameterType.UrlSegment);
 
-            request.AddParameter("to", email);
-            request.AddParameter("from", "noreply@drhockey.com");
+        //    request.AddParameter("to", email);
+        //    request.AddParameter("from", "noreply@drhockey.com");
 
-            request.AddParameter("subject", subject);
-            request.AddParameter("text", text);
+        //    request.AddParameter("subject", subject);
+        //    request.AddParameter("text", text);
 
-            // CSV-file link
-            if (!string.IsNullOrEmpty(path) || !string.IsNullOrWhiteSpace(path))
-            {
-                request.AddFile("attachment", path);
-            }
+        //    // CSV-file link
+        //    if (!string.IsNullOrEmpty(path) || !string.IsNullOrWhiteSpace(path))
+        //    {
+        //        request.AddFile("attachment", path);
+        //    }
 
-            var res = await Mailgun.TryExecuteRequest<SendMessageResult>(request);
-            return res;
-        }
+        //    var res = await Mailgun.TryExecuteRequest<SendMessageResult>(request);
+        //    return res;
+        //}
 
         // Test to send with streamer instead of file path.
-        public static async Task<SendMessageResult> DanielsSendMessage(string email, string subject, string text, string fileName = null, string csvString = null, string mimeType = null)
+        public static async Task<SendMessageResult> SendMessage(string email, string subject, string text, byte[] attachment = null, string attachmentName = null, string attachmentMimeType = null)
         {
             RestRequest request = new RestRequest
             {
@@ -117,10 +117,10 @@ namespace hockeylizer.Services
             request.AddParameter("text", text);
 
             // CSV-string turned into byte[] and attached.
-            if (!string.IsNullOrEmpty(csvString) || !string.IsNullOrWhiteSpace(csvString))
+            if (!(attachment == null) && attachment.Length > 0)
             {
-                var csvBytes = System.Text.Encoding.UTF8.GetBytes(csvString);
-                request.AddFile("attachment", csvBytes, fileName, mimeType);
+                if (attachmentName == null) attachmentName = "attachment";
+                request.AddFile("attachment", attachment, attachmentName, attachmentMimeType);
             }
 
             var res = await Mailgun.TryExecuteRequest<SendMessageResult>(request);

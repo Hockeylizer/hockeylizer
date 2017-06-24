@@ -1238,10 +1238,11 @@ namespace hockeylizer.Controllers
 			return Json(response);
 		}
 
-        // Currently used for Daniels experiment to switch to attaching byte arrays instead of paths.
+        // TODO: Most of SendSessionStatsAsEmail and SendPlayerStatsAsEmail are exactly the same.
+        // Factor the common parts to a separate function.
 		[HttpPost]
 		[AllowAnonymous]
-		public async Task<JsonResult> SendEmail([FromBody]EmailVm vm)
+		public async Task<JsonResult> SendSessionStatsAsEmail([FromBody]EmailVm vm)
 		{
 			GeneralResult response;
 			if (vm.token == _appkey)
@@ -1288,11 +1289,12 @@ namespace hockeylizer.Controllers
                 }
 
                 var csv = Statistics.generateSessionMailString(player, session, targets);
+                var csvBytes = System.Text.Encoding.UTF8.GetBytes(csv);
 
-			    SendMessageResult sendMail;
+                SendMessageResult sendMail;
 			    try
 			    {
-			        sendMail = await Mailgun.DanielsSendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)", "Hockey stats.csv", csv, "text/csv");
+			        sendMail = await Mailgun.SendMessage(vm.email, "Dr Hockey: exported data for " + player.Name + " from session at " + session.Created.ToString(new CultureInfo("sv-SE")), "Here are the stats that you requested! :)", csvBytes, "Hockey stats.csv", "text/csv");
 
                 }
 			    catch (Exception e)
@@ -1315,8 +1317,9 @@ namespace hockeylizer.Controllers
 			return Json(response);
 		}
 
-        // Experimented on by Daniel.
-	    [HttpPost]
+        // TODO: Most of SendSessionStatsAsEmail and SendPlayerStatsAsEmail are exactly the same.
+        // Factor the common parts to a separate function.
+        [HttpPost]
 	    [AllowAnonymous]
 	    public async Task<JsonResult> SendPlayerStatsAsEmail([FromBody]GetPlayerStatsVm vm)
 	    {
@@ -1363,39 +1366,20 @@ namespace hockeylizer.Controllers
                 var targets = _db.Targets.Where(t => sessionIds.Contains(t.SessionId));
 
                 var csv = Statistics.generatePlayerMailString(player, sessions, targets);
+                var csvBytes = System.Text.Encoding.UTF8.GetBytes(csv);
 
-	            //const string filestart = "file";
-	            //var startpath = _hostingEnvironment.WebRootPath + @"\files";
-             //   var path = startpath + @"\" + filestart + "-1.csv";
-
-	            //var count = 1;
-	            //while (System.IO.File.Exists(path))
-	            //{
-	            //    var filename = filestart + "-" + count + ".csv";
-
-             //       path = startpath + @"\" + filename;
-	            //    count++;
-	            //}
-
-	            //System.IO.File.WriteAllText(path, csv);
-
-	            SendMessageResult sendMail;
+                SendMessageResult sendMail;
 	            try
 	            {
-	                sendMail = await Mailgun.DanielsSendMessage(vm.email,
+	                sendMail = await Mailgun.SendMessage(vm.email,
 	                    "Dr Hockey: exported data for " + player.Name + " from all sessions.",
-	                    "Here are the stats that you requested! :)", "Hockey stats.csv", csv, "text/csv" );
+	                    "Here are the stats that you requested! :)", csvBytes, "Hockey stats.csv", "text/csv" );
 	            }
 	            catch (Exception e)
 	            {
 	                response = new GeneralResult(false, "Kunde inte skicka mail, serverfel. Felmeddelande: " + e.Message);
 	                return Json(response);
                 }
-
-	            //if (System.IO.File.Exists(path))
-	            //{
-	            //    System.IO.File.Delete(path);
-	            //}
 
 	            if (sendMail.Message.Contains("failed") || sendMail.Message.Contains("missing"))
 	            {
