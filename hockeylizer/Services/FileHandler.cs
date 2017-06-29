@@ -11,7 +11,7 @@ namespace hockeylizer.Services
     public static class BlobCredentials
     {
         public static readonly string AccountName = "hockeydata";
-        public static readonly string Key = "0KDxpIRz6u5M6VechBj8YOAGnDlG9dz11X/CyzmEE5tBesbiaa8+oEJZjpu3AUA5aQdyi3RK1Q264DgNYk3Tvw==";
+        public static readonly string Key = "hlmNR03sKg8ju2kl4Lf9UMSxnCFBB9HR2r6K82phDHr0r0/sB3EwAANNw9ceWp/hi2ugNk2edoUmSNWZcP5SsA==";
     }
 
     public static class FileHandler
