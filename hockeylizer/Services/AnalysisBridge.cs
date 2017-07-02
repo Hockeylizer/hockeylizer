@@ -44,7 +44,7 @@ namespace hockeylizer.Services
             }
             if (res == IntPtr.Zero)
             {
-                throw new System.ArgumentException();
+                throw new System.ArgumentException("Server Internal error: Pointer 'res' in DecodeFrames was 0.");
             }
             FrameCollection[] decodedFrames = new FrameCollection[decodeIntervals.Length];
             flatIndex = 0;
